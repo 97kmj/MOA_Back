@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class FundingImage {
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer imageId;
+	private Long imageId;
 	
 	@ManyToOne
 	@JoinColumn(name="funding_id" )

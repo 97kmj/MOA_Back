@@ -1,5 +1,7 @@
 package com.moa.entity;
 
+import java.sql.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -26,5 +28,7 @@ public class FAQ {
 
     @Column(length = 1000)
     private String answer;
+    
+    private Date registDate;
 
 }

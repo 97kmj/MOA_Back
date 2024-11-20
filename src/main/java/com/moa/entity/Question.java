@@ -26,7 +26,7 @@ public class Question {
     private Long questionId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "username")
     private User user;
 
     private String title;

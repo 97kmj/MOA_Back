@@ -20,10 +20,10 @@ import lombok.NoArgsConstructor;
 public class LikeArtist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer likeArtistId;
+    private Long likeArtistId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "username", nullable = false)
     private User user;
 
     @ManyToOne
