@@ -53,9 +53,8 @@ public class User {
     private Role role;
 
 	private Timestamp createAt;
-	
-	
-	
+
+
 	// Enums
     public enum ApprovalStatus { PENDING, APPROVED, NORMAL }
     public enum Role { USER, ARTIST, ADMIN }
