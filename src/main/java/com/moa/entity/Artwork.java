@@ -26,57 +26,59 @@ import lombok.NoArgsConstructor;
 public class Artwork {
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long artworkId;
-	 @ManyToOne
-	    @JoinColumn(name = "artist_id", nullable = false)
-	    private User artist;
+	@ManyToOne
+	@JoinColumn(name = "artist_id", nullable = false)
+    private User artist;
 
-	    @Column(nullable = false)
-	    private String title;
+    @Column(nullable = false)
+    private String title;
 
-	    @Lob
-	    private String description;
+    @Lob
+    private String description;
 
-	    @ManyToOne
-	    @JoinColumn(name = "category_id")
-	    private Category category;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-	    @ManyToOne
-	    @JoinColumn(name = "type_id")
-	    private Type type;
+    @ManyToOne
+    @JoinColumn(name = "type_id")
+    private Type type;
 
-	    @ManyToOne
-	    @JoinColumn(name = "subject_id")
-	    private Subject subject;
+    @ManyToOne
+    @JoinColumn(name = "subject_id")
+    private Subject subject;
 
-	    private Boolean isStandardCanvas;
+    private Boolean isStandardCanvas;
 
-	    @Enumerated(EnumType.STRING)
-	    private CanvasType canvasType;
+    @Enumerated(EnumType.STRING)
+    private CanvasType canvasType;
 
-	    @ManyToOne
-	    @JoinColumn(name = "canvas_id", nullable = false) // 외래 키 설정
-	    private Canvas canvas;
+    @ManyToOne
+    @JoinColumn(name = "canvas_id", nullable = false) // 외래 키 설정
+    private Canvas canvas;
 
-	    private String width;
-	    private String length;
-	    private String height;
-	    private String imageUrl;
+    private String width;
+    private String length;
+    private String height;
+    private String imageUrl;
 
-	    @Column(nullable = false)
-	    private Long price;
+    @Column(nullable = false)
+    private Long price;
 
-	    @Column(nullable = false)
-	    private Integer stock;
+    @Column(nullable = false)
+    private Integer stock;
 
-	    private Boolean termsAccepted;
-	    private Integer likeCount;
+    private Boolean termsAccepted;
+    private Integer likeCount;
 
-	    @Enumerated(EnumType.STRING)
-	    private SaleStatus saleStatus;
+    @Enumerated(EnumType.STRING)
+    private SaleStatus saleStatus;
+    
+    private Boolean adminCheck;
 
-	    public enum CanvasType { F, P, M, S }
-	    
-	    public enum SaleStatus { AVAILABLE, SOLD_OUT, NOT_SALE, DELETE }
+    public enum CanvasType { F, P, M, S }
+    
+    public enum SaleStatus { AVAILABLE, SOLD_OUT, NOT_SALE, DELETE }
 
 	
 }

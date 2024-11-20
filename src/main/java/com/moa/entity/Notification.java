@@ -30,7 +30,7 @@ public class Notification {
 	private Long notificationId;
 	
 	@ManyToOne
-	@JoinColumn(name = "user_id", nullable = false)
+	@JoinColumn(name = "username", nullable = false)
 	private User user;
 	
 	@Lob
