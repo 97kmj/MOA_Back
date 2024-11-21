@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.moa.entity.Canvas;
+import com.moa.entity.Category;
+import com.moa.entity.Subject;
+import com.moa.entity.Type;
 import com.moa.shop.dto.ArtworkDto;
 import com.moa.shop.service.ShopService;
 import com.moa.user.service.util.PageInfo;
@@ -22,6 +26,27 @@ public class ShopController {
 	
 	@Autowired
 	private ShopService shopService;
+	
+	@GetMapping("shop/artworkAdd")
+	public ResponseEntity<Map<String,Object>> artworkAdd(){
+		try {
+			List<Category> categoryList = shopService.categoryList();
+			List<Type> typeList = shopService.typeList();
+			List<Subject> subjectList = shopService.subjectList();
+			List<Canvas> canvasList = shopService.canvasType();
+			Map<String,Object> listInfo = new HashMap<>();
+			listInfo.put("categoryList", categoryList);
+			listInfo.put("typeList", typeList);
+			listInfo.put("subjectList", subjectList);
+			listInfo.put("canvasList", canvasList);
+			return new ResponseEntity<Map<String,Object>>(listInfo, HttpStatus.OK); 
+		}catch(Exception e){
+			e.printStackTrace();
+			return new ResponseEntity<Map<String,Object>>(HttpStatus.BAD_REQUEST);
+		}
+
+	}
+	
 	
 	@PostMapping("/shop/artworkAdd")
 	public ResponseEntity<Long> artworkAdd(ArtworkDto artworkDto,

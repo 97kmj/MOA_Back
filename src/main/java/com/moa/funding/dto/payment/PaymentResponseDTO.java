@@ -1,5 +1,7 @@
 package com.moa.funding.dto.payment;
 
+import java.util.List;
+
 import com.moa.funding.dto.funding.FundingContributionDTO;
 import com.moa.funding.dto.funding.FundingOrderDTO;
 
@@ -10,6 +12,6 @@ import lombok.Getter;
 @Builder
 public class PaymentResponseDTO {
 	private FundingOrderDTO fundingOrder;
-	private FundingContributionDTO fundingContribution;
+	private List<FundingContributionDTO> fundingContribution;
 	private boolean isPaymentVerified;
 }
