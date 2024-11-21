@@ -27,18 +27,16 @@ public class User {
 	@Column(nullable = false)
 	private String name;
 	private String nickname;
-	@Column(nullable = false, unique = true)
+//	@Column(nullable = false, unique = true)
 	private String email;
 	private String phone;
 	private String postcode;
 	private String address;
 	private String detailAddress;
 	private String extraAddress;
-	private String googleId;
-	private String kakaoId;
-	private String naverId;
-	private String socialProvider;
-	
+	private String provider;
+	private String providerId;
+
 	private String portfolioUrl;
 	@Lob
 	private String artistNote;
