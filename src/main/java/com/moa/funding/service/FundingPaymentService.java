@@ -1,11 +1,11 @@
 package com.moa.funding.service;
 
-import com.moa.funding.dto.FundingOrderDTO;
-import com.moa.funding.dto.PaymentRequest;
+import com.moa.funding.dto.payment.PaymentRequest;
+import com.moa.funding.dto.payment.PaymentResponseDTO;
 
 public interface FundingPaymentService {
-	FundingOrderDTO processPayment(String impUid, PaymentRequest paymentRequest);
+	PaymentResponseDTO processPayment(String impUid, PaymentRequest paymentRequest);
 
-	void updateFundingCurrentAmount(Long fundingId, Long amount);
+	void updateFundingCurrentAmount(PaymentRequest paymentRequest);
 }
 

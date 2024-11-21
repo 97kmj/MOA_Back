@@ -2,11 +2,8 @@ package com.moa.funding.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
 
-import java.math.BigDecimal;
-import java.util.Optional;
-
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,170 +11,130 @@ import org.junit.jupiter.api.Test;
 import com.moa.entity.Funding;
 import com.moa.entity.FundingContribution;
 import com.moa.entity.FundingOrder;
-import com.moa.funding.dto.FundingOrderDTO;
-import com.moa.funding.dto.PaymentRequest;
+import com.moa.entity.Reward;
+import com.moa.entity.User;
+import com.moa.funding.dto.payment.PaymentRequest;
+import com.moa.funding.dto.payment.PaymentResponseDTO;
 import com.moa.funding.service.fundingImplements.FundingPaymentServiceImpl;
+import com.moa.funding.util.MockHelper;
 import com.moa.repository.FundingContributionRepository;
 import com.moa.repository.FundingOrderRepository;
 import com.moa.repository.FundingRepository;
+import com.moa.repository.RewardRepository;
+import com.moa.repository.UserRepository;
 
 class FundingPaymentServiceTest {
 
 	private IamPortService iamportService;
 	private FundingOrderRepository fundingOrderRepository;
 	private FundingContributionRepository fundingContributionRepository;
-	private FundingPaymentService paymentService;
 	private FundingRepository fundingRepository;
+	private UserRepository userRepository;
+	private RewardRepository rewardRepository;
+
+	private FundingPaymentService paymentService;
 
 	@BeforeEach
 	void setUp() {
+		iamportService = mock(IamPortService.class);
 		fundingRepository = mock(FundingRepository.class);
 		fundingOrderRepository = mock(FundingOrderRepository.class);
 		fundingContributionRepository = mock(FundingContributionRepository.class);
-		iamportService = mock(IamPortService.class);
+		userRepository = mock(UserRepository.class);
+		rewardRepository = mock(RewardRepository.class);
 
 		paymentService = new FundingPaymentServiceImpl(
-			iamportService, fundingOrderRepository, fundingContributionRepository, fundingRepository,null
+			iamportService,
+			fundingOrderRepository,
+			fundingContributionRepository,
+			fundingRepository,
+			userRepository,
+			rewardRepository
 		);
 	}
 
-
-
+	@AfterEach
+	void tearDown() {
+		reset(fundingRepository, userRepository, rewardRepository,
+			fundingOrderRepository, fundingContributionRepository, iamportService);
+	}
 
 	@Test
 	void testPaymentVerificationFails() {
 		// Mock 결제 검증 실패
+		// iamportService의 verifyPayment 메서드가 false를 반환하도록 설정
 		when(iamportService.verifyPayment(50000L, "test_imp_uid")).thenReturn(false);
 
-		PaymentRequest paymentRequest = new PaymentRequest();
-		paymentRequest.setTotalAmount(50000L);
+		// MockHelper를 사용하여 PaymentRequest 객체 생성
+		PaymentRequest paymentRequest = MockHelper.createMockPaymentRequest(50000L, "user1", 1L, 1L);
 
+		// 결제 검증이 실패한 경우 RuntimeException이 발생해야 함
 		RuntimeException exception = assertThrows(RuntimeException.class, () ->
 			paymentService.processPayment("test_imp_uid", paymentRequest)
 		);
 
+		// 예외 메시지가 "결제 검증 실패"와 동일한지 검증
 		assertEquals("결제 검증 실패", exception.getMessage());
+
+		// 결제 검증 실패 시 관련 데이터(fundingOrder, fundingContribution, funding)가 저장되지 않았는지 검증
 		verify(fundingOrderRepository, never()).save(any());
 		verify(fundingContributionRepository, never()).save(any());
-	}
-
-	@Test
-	void testPaymentVerificationSuccessAndDataSave() {
-		// Given
-		Funding mockFunding = Funding.builder()
-			.fundingId(1L)
-			.currentAmount(10000L) // 초기 금액 설정
-			.build();
-
-		FundingOrder mockOrder = FundingOrder.builder()
-			.fundingOrderId(1L)
-			.totalAmount(50000L)
-			.paymentType("CARD")
-			.build();
-
-		FundingContribution mockContribution = FundingContribution.builder()
-			.contributionId(1L)
-			.fundingOrder(mockOrder)
-			.funding(mockFunding)
-			.rewardPrice(new BigDecimal(50000))
-			.rewardQuantity(1L)
-			.build();
-
-		// Mock 설정
-		when(iamportService.verifyPayment(50000L, "test_imp_uid")).thenReturn(true);
-		when(fundingRepository.findById(1L)).thenReturn(Optional.of(mockFunding));
-		when(fundingOrderRepository.save(any(FundingOrder.class))).thenReturn(mockOrder);
-		when(fundingContributionRepository.save(any(FundingContribution.class))).thenReturn(mockContribution);
-
-		PaymentRequest paymentRequest = new PaymentRequest();
-		paymentRequest.setTotalAmount(50000L);
-		paymentRequest.setPaymentType("CARD");
-		paymentRequest.setFundingId(1L);
-
-		// When
-		FundingOrderDTO result = paymentService.processPayment("test_imp_uid", paymentRequest);
-
-		// Then
-		assertNotNull(result, "결과 DTO는 null이 아니어야 합니다.");
-		assertEquals(1L, result.getFundingOrderId()); // ID 검증
-		assertEquals(50000L, result.getTotalAmount()); // 총 금액 검증
-		assertEquals("CARD", result.getPaymentType()); // 결제 타입 검증
-
-		// currentAmount 업데이트 확인
-		assertEquals(60000L, mockFunding.getCurrentAmount(), "currentAmount 업데이트가 예상대로 이루어져야 합니다.");
-
-		// 저장 메서드 호출 검증
-		verify(fundingRepository, times(1)).findById(1L);
-		verify(fundingRepository, times(1)).save(any(Funding.class));
-		verify(fundingOrderRepository, times(1)).save(any(FundingOrder.class));
-		verify(fundingContributionRepository, times(1)).save(any(FundingContribution.class));
+		verify(fundingRepository, never()).save(any());
 	}
 
 	@Test
 	@DisplayName("펀딩 결제 성공 시 현재 금액 업데이트 테스트")
-	void testCurrentAmountUpdate() {
-		//given
-		Funding mockFunding = Funding.builder()
-			.fundingId(1L)
-			.currentAmount(10000L).build();
+	void testUpdateFundingCurrentAmount() {
+		// Given
+		// MockHelper를 사용하여 Funding 객체를 생성하고 초기화
+		Funding mockFunding = MockHelper.createMockFunding(1L, 10000L, fundingRepository);
 
-		when(fundingRepository.findById(1L)).thenReturn(Optional.of(mockFunding));
-		//when
-		paymentService.updateFundingCurrentAmount(1L, 5000L); // 5000 추가
+		// MockHelper를 사용하여 PaymentRequest 객체 생성
+		PaymentRequest paymentRequest = MockHelper.createMockPaymentRequest(5000L, "user1", 1L, null);
+
+		// When
+		// 펀딩 금액 업데이트 메서드 호출
+		paymentService.updateFundingCurrentAmount(paymentRequest);
+
 		// Then
+		// 펀딩의 현재 금액(currentAmount)이 15000L로 업데이트되었는지 확인
 		assertEquals(15000L, mockFunding.getCurrentAmount(), "currentAmount가 예상 값과 일치해야 합니다.");
+
+		// FundingRepository의 save 메서드가 호출되었는지 확인하며, 저장된 데이터가 예상 값인지 검증
 		verify(fundingRepository).save(argThat(funding -> funding.getCurrentAmount() == 15000L));
 	}
 
 	@Test
-	@DisplayName("펀딩 결제시 펀딩 주문 및 기부 내역 저장 테스트")
-	void testSaveFundingOrderAndContribution() {
-	//Given
-		FundingOrder order = FundingOrder.builder()
-			.totalAmount(50000L)
-			.paymentType("CARD")
-			.build();
+	@DisplayName("결제 성공 시 펀딩 주문 및 후원 저장 테스트")
+	void testProcessPaymentSuccess() {
+		// Given
+		// MockHelper를 사용하여 PaymentRequest 객체 생성
+		PaymentRequest paymentRequest = MockHelper.createMockPaymentRequest(50000L, "user1", 1L, 1L);
 
-		Funding funding = new Funding();
-		funding.setFundingId(1L);
-		funding.setCurrentAmount(10000L);
+		// MockHelper를 사용하여 User, Funding, Reward, FundingOrder, FundingContribution 객체 생성
+		User mockUser = MockHelper.createMockUser("user1", userRepository);
+		Funding mockFunding = MockHelper.createMockFunding(1L, 10000L, fundingRepository);
+		Reward mockReward = MockHelper.createMockReward(1L, rewardRepository);
+		FundingOrder mockOrder = MockHelper.createMockFundingOrder(mockUser, fundingOrderRepository);
+		FundingContribution mockContribution = MockHelper.createMockFundingContribution(fundingContributionRepository);
 
-		FundingContribution contribution = FundingContribution.builder()
-			.fundingOrder(order)
-			.funding(funding)
-			.rewardPrice(new BigDecimal(50000))
-			.rewardQuantity(1L)
-			.build();
-
-
-		when(fundingRepository.findById(1L)).thenReturn(Optional.of(funding));// 펀딩 조회후
-		when(fundingOrderRepository.save(any(FundingOrder.class))).thenReturn(order); // 펀딩 주문 저장
-		when(fundingContributionRepository.save(any(FundingContribution.class))).thenReturn(contribution); // 기부 내역 저장
-		when(iamportService.verifyPayment(anyLong(), anyString())).thenReturn(true);
-
-		PaymentRequest mockRequest = mockPaymentRequest();
+		// Mock 결제 검증 성공: iamportService의 verifyPayment 메서드가 true를 반환하도록 설정
+		when(iamportService.verifyPayment(50000L, "imp_123456")).thenReturn(true);
 
 		// When
-		FundingOrderDTO result = paymentService.processPayment("imp_uid", mockRequest);
+		// 결제 처리 메서드 호출
+		PaymentResponseDTO responseDTO = paymentService.processPayment("imp_123456", paymentRequest);
 
 		// Then
-		assertNotNull(result, "결과 DTO는 null이 아니어야 합니다.");
-		verify(fundingOrderRepository).save(any(FundingOrder.class));
-		verify(fundingContributionRepository).save(any(FundingContribution.class));
-		assertEquals(15000L, funding.getCurrentAmount()); // currentAmount 업데이트 확인
+		// 반환된 PaymentResponseDTO가 null이 아닌지 확인
+		assertNotNull(responseDTO, "응답 DTO가 null이 아니어야 합니다.");
 
-
+		// 관련 데이터(user, fundingOrder, fundingContribution)가 저장되었는지 검증
+		verify(userRepository).findByUsername("user1");
+		verify(fundingOrderRepository).save(any());
+		verify(fundingContributionRepository).save(any());
 	}
 
-	private PaymentRequest mockPaymentRequest() {
-		PaymentRequest paymentRequest = new PaymentRequest();
-		paymentRequest.setTotalAmount(5000L); // 총 결제 금액
-		paymentRequest.setPaymentType("CARD"); // 결제 유형
-		paymentRequest.setFundingId(1L); // 결제 대상 펀딩 ID
-		return paymentRequest;
-	}
-
-	}
-
+}
 
 

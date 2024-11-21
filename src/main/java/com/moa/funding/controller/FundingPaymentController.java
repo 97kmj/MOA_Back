@@ -6,11 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.moa.funding.dto.FundingOrderDTO;
-import com.moa.funding.dto.PaymentRequest;
+import com.moa.funding.dto.payment.PaymentRequest;
+import com.moa.funding.dto.payment.PaymentResponseDTO;
 import com.moa.funding.service.FundingPaymentService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +27,10 @@ public class FundingPaymentController {
 	}
 
 	@PostMapping("payment")
-	public ResponseEntity<FundingOrderDTO> processPayment(
-		@RequestBody PaymentRequest paymentRequest) {
-
-		log.info("impUid: {}, paymentRequest: {}",paymentRequest.getImpUid() , paymentRequest);
+	public ResponseEntity<PaymentResponseDTO> processPayment(@RequestBody PaymentRequest paymentRequest) {
+		log.info("impUid: {}, paymentRequest: {}", paymentRequest.getImpUid(), paymentRequest);
 		try {
-			FundingOrderDTO order = fundingPaymentService.processPayment(paymentRequest.getImpUid(), paymentRequest);
+			PaymentResponseDTO order = fundingPaymentService.processPayment(paymentRequest.getImpUid(), paymentRequest);
 			return ResponseEntity.ok(order);
 		} catch (RuntimeException e) {
 			log.error("결제 처리 중 오류 발생: {}", e.getMessage(), e);

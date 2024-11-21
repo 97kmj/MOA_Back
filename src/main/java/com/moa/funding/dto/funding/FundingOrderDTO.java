@@ -1,4 +1,6 @@
-package com.moa.funding.dto;
+package com.moa.funding.dto.funding;
+
+import java.sql.Timestamp;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -12,4 +14,6 @@ public class FundingOrderDTO {
 	private String address;
 	private String phoneNumber;
 	private String name;
+	private String userName; // 추가: 사용자 이름
+	private Timestamp paymentDate; // 추가: 결제 일자
 }
