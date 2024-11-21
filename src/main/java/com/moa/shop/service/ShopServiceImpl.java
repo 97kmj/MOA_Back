@@ -20,10 +20,12 @@ import com.moa.repository.TypeRepository;
 import com.moa.shop.dto.ArtworkDto;
 import com.moa.user.service.util.PageInfo;
 
+
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+
 public class ShopServiceImpl implements ShopService {
 
 	private final ArtworkRepository artworkRepository;
