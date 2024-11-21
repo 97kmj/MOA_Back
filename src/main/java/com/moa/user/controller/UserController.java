@@ -4,6 +4,8 @@ import com.moa.config.auth.PrincipalDetails;
 import com.moa.config.jwt.JwtToken;
 import com.moa.entity.User;
 import com.moa.repository.UserRepository;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +30,38 @@ public class UserController {
         this.jwtToken = jwtToken;
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
+        String username = loginRequest.get("username");
+        String password = loginRequest.get("password");
+
+        // 사용자 검증
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        if (!optionalUser.isPresent()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
+        }
+
+        User user = optionalUser.get();
+
+        // 비밀번호 확인
+        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
+        }
+
+        // JWT 토큰 생성
+        String accessToken = jwtToken.makeAccessToken(username);
+        String refreshToken = jwtToken.makeRefreshToken(username);
+
+        // 응답 데이터 생성
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("access_token", accessToken);
+        tokens.put("refresh_token", refreshToken);
+
+        return ResponseEntity.ok(tokens);
+    }
+
+
+
     // 현재 로그인한 사용자 정보 가져오기
     @GetMapping("/profile")
     public ResponseEntity<User> getUserProfile(Authentication authentication) {
@@ -39,16 +73,21 @@ public class UserController {
     // 회원가입
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
-        // 비밀번호 암호화
-        String rawPassword = user.getPassword();
-        user.setPassword(bCryptPasswordEncoder.encode(rawPassword));
+        try {
+            // 비밀번호 암호화
+            String rawPassword = user.getPassword();
+            user.setPassword(bCryptPasswordEncoder.encode(rawPassword));
 
-        // 기본 권한 설정
-        user.setRole(User.Role.USER);
+            // 기본 권한 설정
+            user.setRole(User.Role.USER);
 
-        // 저장
-        userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully.");
+            // 저장
+            userRepository.save(user);
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred: " + e.getMessage());
+        }
     }
 
     // 아티스트 승격
