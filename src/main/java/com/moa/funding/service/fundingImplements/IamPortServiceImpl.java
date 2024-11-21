@@ -2,12 +2,12 @@ package com.moa.funding.service.fundingImplements;
 
 import java.math.BigDecimal;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.moa.funding.service.IamPortService;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -16,12 +16,12 @@ public class IamPortServiceImpl implements IamPortService {
 
 	private final IamportClient iamportClient;
 
-	// 생성자에서 API 키와 Secret을 설정
-	public IamPortServiceImpl() {
-		String apiKey = "7361065381668827"; // 아임포트 관리자 콘솔에서 제공된 API Key
-		String apiSecret = "pyknx2AnQz3so0G0XVbfiMLmThNGaV9YbXLoaJeUxCKWEc9kQrL8W23NqibYzM28faPFYsNaX0xmZFbi"; // 아임포트 관리자 콘솔에서 제공된 API Secret
+	public IamPortServiceImpl(
+		@Value("${iamport.api-key}") String apiKey,
+		@Value("${iamport.api-secret}") String apiSecret) {
 		this.iamportClient = new IamportClient(apiKey, apiSecret);
 	}
+
 
 	@Override
 	public boolean verifyPayment(Long amount, String impUid) {
