@@ -1,5 +1,5 @@
 package com.moa.user.dto;
 
-public class Sample {
+public class sample {
 
 }
