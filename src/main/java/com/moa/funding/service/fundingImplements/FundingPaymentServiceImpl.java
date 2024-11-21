@@ -1,5 +1,8 @@
 package com.moa.funding.service.fundingImplements;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +14,7 @@ import com.moa.entity.Reward;
 import com.moa.entity.User;
 import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.dto.payment.PaymentResponseDTO;
+import com.moa.funding.dto.payment.RewardRequest;
 import com.moa.funding.mapper.FundingMapper;
 import com.moa.funding.service.FundingPaymentService;
 import com.moa.funding.service.IamPortService;
@@ -47,12 +51,12 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		FundingOrder savedOrder = createAndSaveFundingOrder(paymentRequest, user);
 
 		// Step 4: 펀딩 조회 및 후원 생성 및 저장
-		FundingContribution contribution = createAndSaveFundingContribution(paymentRequest, savedOrder);
+		List<FundingContribution> contributions = createAndSaveFundingContribution(paymentRequest, savedOrder);
 
 		// Step 5: 펀딩의 currentAmount 업데이트
 		updateFundingCurrentAmount(paymentRequest);
 
-		return FundingMapper.toPaymentResponseDTO(savedOrder, contribution);
+		return FundingMapper.toPaymentResponseDTO(savedOrder, contributions);
 	}
 
 	@NotNull
@@ -62,16 +66,31 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	}
 
 	@NotNull
-	private FundingContribution createAndSaveFundingContribution(PaymentRequest paymentRequest,
+	private List<FundingContribution> createAndSaveFundingContribution(PaymentRequest paymentRequest,
 		FundingOrder savedOrder) {
+
+		//Step1: 펀딩 조회
 		Funding funding = getFunding(paymentRequest);
+		List<FundingContribution> contributions = new ArrayList<>();
 
-		Reward reward = getReward(paymentRequest);
+		//Step2: 각 리워드별 후원 생성 및 저장
+		for (RewardRequest rewardRequest : paymentRequest.getRewardList()) {
+			Reward reward = getReward(rewardRequest);
 
-		FundingContribution contribution = FundingMapper.toFundingContribution(paymentRequest, savedOrder, funding,
-			reward);
-		fundingContributionRepository.save(contribution);
-		return contribution;
+			//Step3: 후원 생성 및 저장
+			FundingContribution contribution = FundingMapper.toFundingContribution(rewardRequest, savedOrder, funding,
+				reward);
+			fundingContributionRepository.save(contribution);
+			contributions.add(contribution);
+		}
+
+
+		return contributions;
+	}
+
+	private Reward getReward(RewardRequest rewardRequest) {
+		return rewardRepository.findById(rewardRequest.getRewardId())
+			.orElseThrow(() -> new IllegalArgumentException("리워드가 존재하지 않습니다."));
 	}
 
 	@Override
@@ -86,12 +105,6 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		return fundingRepository.findById(paymentRequest.getFundingId())
 			.orElseThrow(() -> new IllegalArgumentException("펀딩이 존재하지 않습니다."));
 	}
-
-	private Reward getReward(PaymentRequest paymentRequest) {
-		return rewardRepository.findById(paymentRequest.getRewardId())
-			.orElseThrow(() -> new IllegalArgumentException("리워드가 존재하지 않습니다."));
-	}
-
 
 	private User getUser(PaymentRequest paymentRequest) {
 		return userRepository.findByUsername(paymentRequest.getUserName())
