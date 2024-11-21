@@ -1,5 +1,6 @@
 package com.moa.config;
 
+
 import com.moa.config.jwt.JwtAuthenticationFilter;
 import com.moa.config.jwt.JwtAuthorizationFilter;
 import com.moa.config.jwt.JwtToken;
@@ -86,4 +87,5 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 }
