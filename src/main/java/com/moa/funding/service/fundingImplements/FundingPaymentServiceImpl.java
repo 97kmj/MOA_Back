@@ -3,7 +3,7 @@ package com.moa.funding.service.fundingImplements;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,7 +69,9 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		return fundingOrderRepository.save(order);
 	}
 
+
 	private List<FundingContribution> createAndSaveFundingContribution(PaymentRequest paymentRequest,
+
 		FundingOrder savedOrder) {
 
 		//Step1: 펀딩 조회

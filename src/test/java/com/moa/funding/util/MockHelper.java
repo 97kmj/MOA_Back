@@ -34,6 +34,7 @@ public class MockHelper {
 	}
 
 
+
 	public static RewardRequest createMockRewardRequest(Long rewardId, BigDecimal rewardPrice, Long rewardQuantity) {
 		return RewardRequest.builder()
 			.rewardId(rewardId)
