@@ -13,7 +13,7 @@ import com.moa.repository.NoticeRepository;
 import com.moa.repository.QuestionRepository;
 import com.moa.repository.UserRepository;
 import com.moa.user.dto.FAQDto;
-import com.moa.user.dto.QuestionDto;
+import com.moa.user.dto.RequestQuestionDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,12 +41,13 @@ public class NoticeAndFAQServiceImpl implements NoticeAndFAQService {
 		return faqList;
 	}
 	@Override
-	public void sendQuestion(QuestionDto questionDto) throws Exception {
+	public void sendQuestion(RequestQuestionDto questionDto) throws Exception {
 		Question question = Question.builder()
 									.title(questionDto.getTitle())
 									.content(questionDto.getContent())
+									.user(userRepository.findById(questionDto.getUsername()).get())
+									.answerStatus(false)
 									.build();
-		question.setUser(userRepository.findById(questionDto.getUsername()).get());
 		questionRepository.save(question);
 	}
 	

@@ -1,6 +1,6 @@
 package com.moa.funding.service.fundingImplements;
 
-import org.jetbrains.annotations.NotNull;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,13 +55,13 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		return FundingMapper.toPaymentResponseDTO(savedOrder, contribution);
 	}
 
-	@NotNull
+	
 	private FundingOrder createAndSaveFundingOrder(PaymentRequest paymentRequest, User user) {
 		FundingOrder order = FundingMapper.toFundingOrder(paymentRequest, user);
 		return fundingOrderRepository.save(order);
 	}
 
-	@NotNull
+
 	private FundingContribution createAndSaveFundingContribution(PaymentRequest paymentRequest,
 		FundingOrder savedOrder) {
 		Funding funding = getFunding(paymentRequest);

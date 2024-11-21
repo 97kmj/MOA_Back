@@ -67,7 +67,7 @@ public class SecurityConfig {
 
             // 인증이 필요하지 않은 경로 설정
             .antMatchers("/api/user/register").permitAll() // 회원가입 경로는 인증 불필요
-
+            
             .antMatchers("/user/**").authenticated() // 로그인 필요
             .antMatchers("/admin/**").hasRole("ADMIN")
             .antMatchers("/artist/**").hasRole("ARTIST")
