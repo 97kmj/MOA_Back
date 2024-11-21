@@ -14,13 +14,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class QuestionDto {
+public class RequestQuestionDto {
 	
-	private Long questionId;
 	private String username;
 	private String title;
 	private String content;
-	private Date questionAt;
-	private Boolean answerStatus;
+	
 	
 }

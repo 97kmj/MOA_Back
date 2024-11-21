@@ -1,6 +1,7 @@
 package com.moa.entity;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,7 +37,13 @@ public class Question {
     @Lob
     private String content;
 
-    private Date questionAt;
+    @CreationTimestamp
+    private Timestamp questionAt;
     private Boolean answerStatus;
+    
+    private String answerTitle;
+    @Lob
+    private String answerContent;
+    private Date answerAt;
 	
 }

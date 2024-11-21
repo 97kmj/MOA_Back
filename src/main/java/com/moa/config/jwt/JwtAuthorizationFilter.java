@@ -35,6 +35,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String path = request.getServletPath();
         // 등록 및 로그인 관련 경로는 필터를 적용하지 않음
         return path.equals("/api/user/register") || path.equals("/api/user/login") || path.startsWith("/oauth2/");
+
     }
 
 

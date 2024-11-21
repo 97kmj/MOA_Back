@@ -9,9 +9,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.moa.admin.dto.NoticeDto;
+import com.moa.admin.dto.QuestionDto;
 import com.moa.admin.dto.RegistNoticeDto;
 import com.moa.entity.Notice;
 import com.moa.repository.NoticeRepository;
+import com.moa.repository.QuestionRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,7 +22,8 @@ import lombok.RequiredArgsConstructor;
 public class AdminServiceImpl implements AdminService {
 
 	private final NoticeRepository noticeRepository;
-	
+	private final QuestionRepository questionRepository;
+	//admin notice 
 	@Override
 	public List<NoticeDto> allNoticeList() throws Exception {
 		List<NoticeDto> noticeList = null;
@@ -49,5 +52,21 @@ public class AdminServiceImpl implements AdminService {
 	public void deleteNotice(Long noticeId) throws Exception {
 		noticeRepository.deleteById(noticeId);
 	}
+	
+	//admin QnA
+	@Override
+	public List<QuestionDto> notAnswerQuestionList() throws Exception {	
+		return questionRepository.findByAnswerStatus(false).stream().map(q->QuestionDto.fromEntity(q)).collect(Collectors.toList());
+	}
+	@Override
+	public List<QuestionDto> answeredQuestionList() throws Exception {
+		return questionRepository.findByAnswerStatus(true).stream().map(q->QuestionDto.fromEntity(q)).collect(Collectors.toList());
+	}
+	
+	
+	
+	
+	
+	
 	
 }
