@@ -3,6 +3,7 @@ package com.moa.shop.service;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.moa.entity.Artwork;
@@ -10,6 +11,7 @@ import com.moa.repository.ArtworkRepository;
 import com.moa.shop.dto.ArtworkDto;
 import com.moa.user.service.util.PageInfo;
 
+@Service
 public class ShopServiceImpl implements ShopService {
 
 	@Autowired
