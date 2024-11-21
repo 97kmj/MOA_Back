@@ -138,10 +138,17 @@ class FundingPaymentServiceTest {
 	void testProcessPaymentWithoutRewards() {
 		// Given
 		PaymentRequest paymentRequest = MockHelper.createMockPaymentRequest(
-			50000L, "user1", 1L, List.of()
+			50000L, "user1", 1L, List.of() // 빈 리스트 전달
 		);
 
+		// Mock: 결제 검증 성공 설정
 		when(iamportService.verifyPayment(50000L, "imp_123456")).thenReturn(true);
+
+		// Mock: 사용자 존재 설정
+		MockHelper.createMockUser("user1", userRepository);
+
+		// Mock: 펀딩 존재 설정
+		MockHelper.createMockFunding(1L, 10000L, fundingRepository);
 
 		// When & Then
 		RuntimeException exception = assertThrows(RuntimeException.class, () ->
@@ -149,6 +156,8 @@ class FundingPaymentServiceTest {
 		);
 
 		assertEquals("리워드 정보가 존재하지 않습니다.", exception.getMessage());
+
+		// 검증: 펀딩 주문 및 후원 저장이 호출되지 않았는지 확인
 		verify(fundingOrderRepository, never()).save(any());
 		verify(fundingContributionRepository, never()).save(any());
 	}

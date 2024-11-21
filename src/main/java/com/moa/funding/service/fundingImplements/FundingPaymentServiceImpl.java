@@ -45,6 +45,11 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		if (!isVerified) {
 			throw new RuntimeException("결제 검증 실패");
 		}
+
+		if (paymentRequest.getRewardList() == null || paymentRequest.getRewardList().isEmpty()) {
+			throw new RuntimeException("리워드 정보가 존재하지 않습니다.");
+		}
+
 		// Step 2: 사용자 조회
 		User user = getUser(paymentRequest);
 		// Step 3: 펀딩 주문 생성 및 저장
@@ -59,13 +64,11 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		return FundingMapper.toPaymentResponseDTO(savedOrder, contributions);
 	}
 
-	@NotNull
 	private FundingOrder createAndSaveFundingOrder(PaymentRequest paymentRequest, User user) {
 		FundingOrder order = FundingMapper.toFundingOrder(paymentRequest, user);
 		return fundingOrderRepository.save(order);
 	}
 
-	@NotNull
 	private List<FundingContribution> createAndSaveFundingContribution(PaymentRequest paymentRequest,
 		FundingOrder savedOrder) {
 
