@@ -17,14 +17,14 @@ import com.moa.repository.UserRepository;
 
 public class MockHelper {
 
-	public static PaymentRequest createMockPaymentRequest(Long totalAmount, String username, Long fundingId, Long rewardId) {
-		PaymentRequest paymentRequest = new PaymentRequest();
-		paymentRequest.setTotalAmount(totalAmount);
-		paymentRequest.setUserName(username);
-		paymentRequest.setFundingId(fundingId);
-		paymentRequest.setRewardId(rewardId);
-		return paymentRequest;
-	}
+//	public static PaymentRequest createMockPaymentRequest(Long totalAmount, String username, Long fundingId, Long rewardId) {
+//		PaymentRequest paymentRequest = new PaymentRequest();
+//		paymentRequest.setTotalAmount(totalAmount);
+//		paymentRequest.setUserName(username);
+//		paymentRequest.setFundingId(fundingId);
+//		paymentRequest.setRewardId(rewardId);
+//		return paymentRequest;
+//	}
 
 	public static User createMockUser(String username, UserRepository userRepository) {
 		User user = new User();
