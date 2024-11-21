@@ -18,6 +18,7 @@ import com.moa.funding.dto.payment.RewardRequest;
 import com.moa.funding.mapper.FundingMapper;
 import com.moa.funding.service.FundingPaymentService;
 import com.moa.funding.service.IamPortService;
+import com.moa.funding.service.RewardService;
 import com.moa.repository.FundingContributionRepository;
 import com.moa.repository.FundingOrderRepository;
 import com.moa.repository.FundingRepository;
@@ -35,6 +36,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	private final FundingRepository fundingRepository;
 	private final UserRepository userRepository; // 주입 필요
 	private final RewardRepository rewardRepository; // 주입 필요
+	private final RewardService rewardService; // 주입 필요
 
 	@Override
 	@Transactional
@@ -45,11 +47,9 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		if (!isVerified) {
 			throw new RuntimeException("결제 검증 실패");
 		}
-
 		if (paymentRequest.getRewardList() == null || paymentRequest.getRewardList().isEmpty()) {
 			throw new RuntimeException("리워드 정보가 존재하지 않습니다.");
 		}
-
 		// Step 2: 사용자 조회
 		User user = getUser(paymentRequest);
 		// Step 3: 펀딩 주문 생성 및 저장
@@ -78,22 +78,22 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 		//Step2: 각 리워드별 후원 생성 및 저장
 		for (RewardRequest rewardRequest : paymentRequest.getRewardList()) {
-			Reward reward = getReward(rewardRequest);
+			Reward reward = rewardService.getReward(rewardRequest);
 
-			//Step3: 후원 생성 및 저장
+			// Step 3.1: 재고 검증
+			rewardService.validateRewardStock(rewardRequest);
+
+			// Step 3.2: 재고 감소
+			rewardService.reduceRewardStock(rewardRequest);
+
+			// Step 3.3: 후원 생성 및 저장
 			FundingContribution contribution = FundingMapper.toFundingContribution(rewardRequest, savedOrder, funding,
 				reward);
 			fundingContributionRepository.save(contribution);
 			contributions.add(contribution);
 		}
 
-
 		return contributions;
-	}
-
-	private Reward getReward(RewardRequest rewardRequest) {
-		return rewardRepository.findById(rewardRequest.getRewardId())
-			.orElseThrow(() -> new IllegalArgumentException("리워드가 존재하지 않습니다."));
 	}
 
 	@Override
@@ -103,6 +103,8 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		funding.setCurrentAmount(funding.getCurrentAmount() + paymentRequest.getTotalAmount());
 		fundingRepository.save(funding);
 	}
+
+
 
 	private Funding getFunding(PaymentRequest paymentRequest) {
 		return fundingRepository.findById(paymentRequest.getFundingId())

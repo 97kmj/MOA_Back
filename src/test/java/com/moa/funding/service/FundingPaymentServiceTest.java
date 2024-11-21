@@ -37,6 +37,7 @@ class FundingPaymentServiceTest {
 	private RewardRepository rewardRepository;
 
 	private FundingPaymentService paymentService;
+	private RewardService rewardService;
 
 	@BeforeEach
 	void setUp() {
@@ -46,6 +47,7 @@ class FundingPaymentServiceTest {
 		fundingContributionRepository = mock(FundingContributionRepository.class);
 		userRepository = mock(UserRepository.class);
 		rewardRepository = mock(RewardRepository.class);
+		rewardService = mock(RewardService.class);
 
 		paymentService = new FundingPaymentServiceImpl(
 			iamportService,
@@ -53,7 +55,9 @@ class FundingPaymentServiceTest {
 			fundingContributionRepository,
 			fundingRepository,
 			userRepository,
-			rewardRepository
+			rewardRepository,
+			rewardService
+
 		);
 	}
 
@@ -161,6 +165,8 @@ class FundingPaymentServiceTest {
 		verify(fundingOrderRepository, never()).save(any());
 		verify(fundingContributionRepository, never()).save(any());
 	}
+
+
 
 }
 
