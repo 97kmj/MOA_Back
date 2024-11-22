@@ -76,7 +76,9 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		return fundingOrderRepository.save(order);
 	}
 
+
 	private void createAndSaveFundingContribution(PaymentRequest paymentRequest,FundingOrder savedOrder) {
+
 		//Step1: 펀딩 조회
 		Funding funding = getFunding(paymentRequest);
 

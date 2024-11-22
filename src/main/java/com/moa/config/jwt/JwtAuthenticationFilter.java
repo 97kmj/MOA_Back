@@ -19,11 +19,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final JwtToken jwtToken;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtToken jwtToken) {
-        super(authenticationManager);
         this.jwtToken = jwtToken;
+        // 수동으로 AuthenticationManager 설정
+        setAuthenticationManager(authenticationManager);
     }
-
-
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,

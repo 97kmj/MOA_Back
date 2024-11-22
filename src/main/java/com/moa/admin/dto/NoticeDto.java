@@ -36,6 +36,5 @@ public class NoticeDto {
 				.content(notice.getContent())
 				.title(notice.getTitle()).build();
 		return noticeDto;
-		
 	}
 }
