@@ -8,4 +8,5 @@ import com.moa.entity.Question;
 
 public interface QuestionRepository extends JpaRepository<Question, Long> {
 	List<Question> findByAnswerStatus(Boolean status);
+	List<Question> findByAnswerStatusOrderByQuestionAtDesc(Boolean status);
 }

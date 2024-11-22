@@ -25,6 +25,19 @@ public class QuestionDto {
 	private String answerContent;
 	private Date answerAt;
 	
+	
+	public static Question toEntity(QuestionDto questionDto) {
+		return Question.builder()
+						.questionId(questionDto.getQuestionId())
+						.title(questionDto.getTitle())
+						.content(questionDto.getContent())
+						.questionAt(questionDto.getQuestionAt())
+						.answerTitle(questionDto.getAnswerTitle())
+						.answerContent(questionDto.getAnswerContent())
+						.answerAt(questionDto.getAnswerAt())
+						.build();					
+	}
+	
 	public static QuestionDto fromEntity(Question question) {
 		return QuestionDto.builder()
 						.questionId(question.getQuestionId())
