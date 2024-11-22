@@ -1,9 +1,12 @@
 package com.moa.admin.controller;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,11 +26,13 @@ public class AdminQnAController {
 	
 	// admin qna 로드 시 
 	@GetMapping("/adminQnA") 
-	public ResponseEntity<Map<String,Object>> getAllQuestionList() {
+	public ResponseEntity<Map<String,Object>> getAllQuestionList( 
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 		try {
 			Map<String,Object> param = new HashMap<>();
 			List<QuestionDto> notAnswerQuestions = adminService.notAnswerQuestionList();
-			List<QuestionDto> answeredQuestions = adminService.answeredQuestionList();
+			List<QuestionDto> answeredQuestions = adminService.answeredQuestionList(Date.valueOf(startDate),Date.valueOf(endDate));
 			param.put("notAnswerQuestions", notAnswerQuestions);
 			param.put("answeredQuestions", answeredQuestions);
 			return new ResponseEntity<Map<String,Object>>(param,HttpStatus.OK);
@@ -40,7 +45,7 @@ public class AdminQnAController {
 	@PostMapping("/writeAnswer")
 	public ResponseEntity<String> writeAnswer(@RequestParam QuestionDto questionDto) {
 		try {
-			
+			adminService.writeAnswer(questionDto);
 			return new ResponseEntity<String>(String.valueOf(true),HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

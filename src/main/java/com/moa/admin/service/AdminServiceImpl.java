@@ -1,5 +1,6 @@
 package com.moa.admin.service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.moa.admin.dto.NoticeDto;
 import com.moa.admin.dto.QuestionDto;
 import com.moa.admin.dto.RegistNoticeDto;
+import com.moa.admin.repository.AdminQnARepository;
 import com.moa.entity.Notice;
 import com.moa.repository.NoticeRepository;
 import com.moa.repository.QuestionRepository;
@@ -23,6 +25,7 @@ public class AdminServiceImpl implements AdminService {
 
 	private final NoticeRepository noticeRepository;
 	private final QuestionRepository questionRepository;
+	private final AdminQnARepository adminQnARepository;
 	//admin notice 
 	@Override
 	public List<NoticeDto> allNoticeList() throws Exception {
@@ -56,13 +59,18 @@ public class AdminServiceImpl implements AdminService {
 	//admin QnA
 	@Override
 	public List<QuestionDto> notAnswerQuestionList() throws Exception {	
-		return questionRepository.findByAnswerStatus(false).stream().map(q->QuestionDto.fromEntity(q)).collect(Collectors.toList());
+		return questionRepository.findByAnswerStatusOrderByQuestionAtDesc(false).stream().map(q->QuestionDto.fromEntity(q)).collect(Collectors.toList());
 	}
 	@Override
-	public List<QuestionDto> answeredQuestionList() throws Exception {
-		return questionRepository.findByAnswerStatus(true).stream().map(q->QuestionDto.fromEntity(q)).collect(Collectors.toList());
+	public List<QuestionDto> answeredQuestionList(Date startDate,Date endDate) throws Exception {
+		return adminQnARepository.findAnsweredQuestionByDate(startDate, endDate).stream().map(q->QuestionDto.fromEntity(q)).collect(Collectors.toList());
 	}
 	
+	//writeAnswer
+	@Override
+	public void writeAnswer(QuestionDto questionDto) throws Exception {
+		questionRepository.save(QuestionDto.toEntity(questionDto));
+	}
 	
 	
 	
