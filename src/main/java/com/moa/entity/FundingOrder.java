@@ -2,6 +2,7 @@ package com.moa.entity;
 
 import java.sql.Timestamp;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -39,8 +40,16 @@ public class FundingOrder {
 	private String address;
 	private String phoneNumber;
 	private String name;
+
+	@Column(nullable = false, unique = true)
+	private String impUid; // 아임포트 결제 고유 ID (중복 방지)
+
+	@Enumerated(EnumType.STRING)
+	private PaymentStatus paymentStatus; // 결제 상태 (PENDING, PAI
+
 	
 	public enum RefundStatus { NOT_REFUNDED, REFUNDED }
-	
+
+	public enum PaymentStatus { PENDING, PAID, FAILED, CANCELED }
 	
 }

@@ -24,6 +24,8 @@ public class PaymentRequest {
 	private String address;
 	private String phoneNumber;
 	private String name;
+	private String merchantUid;
+	private BigDecimal amount;
 
 
 

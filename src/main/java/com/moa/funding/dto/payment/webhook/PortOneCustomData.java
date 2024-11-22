@@ -1,30 +1,26 @@
-package com.moa.funding.dto.payment;
+package com.moa.funding.dto.payment.webhook;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.moa.funding.dto.payment.RewardRequest;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
-@Builder
-@ToString
 @Setter
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RewardRequest {
-	private Long rewardId;
-	private BigDecimal rewardPrice;
-	private Long rewardQuantity;
+public class PortOneCustomData {
+	private Long fundingId; // 펀딩 ID
+	private List<RewardRequest> rewardList; // 리워드 정보 리스트
 
-	public RewardRequest() {
+	public PortOneCustomData() {
 	}
 }
+
+

@@ -15,21 +15,12 @@ public class RewardServiceImpl implements RewardService {
 	private final RewardRepository rewardRepository;
 
 	@Override
-	public void validateRewardStock(RewardRequest rewardRequest) {
-		Reward reward = getReward(rewardRequest);
-
-		if (reward.getStock() < rewardRequest.getRewardQuantity()) {
-			throw new RuntimeException("리워드 재고가 부족합니다.");
-		}
-	}
-
-	@Override
 	public void reduceRewardStock(RewardRequest rewardRequest) {
+		// Reward 조회
 		Reward reward = getReward(rewardRequest);
-
-		if (reward.getStock() < rewardRequest.getRewardQuantity()) {
-			throw new RuntimeException("리워드 재고가 부족합니다.");
-		}
+		// 재고 검증
+		validateRewardStock(reward, rewardRequest.getRewardQuantity());
+		// 재고 감소
 		reward.setStock(reward.getStock() - rewardRequest.getRewardQuantity().intValue());
 		rewardRepository.save(reward);
 	}
@@ -40,4 +31,17 @@ public class RewardServiceImpl implements RewardService {
 			.orElseThrow(() -> new IllegalArgumentException("리워드가 존재하지 않습니다."));
 	}
 
+	@Override
+	public void validateRewardStock(RewardRequest rewardRequest) {
+		// Reward 조회
+		Reward reward = getReward(rewardRequest);
+		// 재고 검증
+		validateRewardStock(reward, rewardRequest.getRewardQuantity());
+	}
+
+	private void validateRewardStock(Reward reward, Long requestedQuantity) {
+		if (reward.getStock() < requestedQuantity) {
+			throw new RuntimeException("리워드 재고가 부족합니다.");
+		}
+	}
 }
