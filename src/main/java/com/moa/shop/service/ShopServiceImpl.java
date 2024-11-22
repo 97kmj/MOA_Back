@@ -1,23 +1,22 @@
 package com.moa.shop.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.moa.entity.Artwork;
-import com.moa.entity.Artwork.CanvasType;
-import com.moa.entity.Canvas;
-import com.moa.entity.Category;
-import com.moa.entity.Subject;
-import com.moa.entity.Type;
 import com.moa.repository.ArtworkRepository;
 import com.moa.repository.CanvasRepository;
 import com.moa.repository.CategoryRepository;
 import com.moa.repository.SubjectRepository;
 import com.moa.repository.TypeRepository;
 import com.moa.shop.dto.ArtworkDto;
+import com.moa.shop.dto.CanvasDto;
+import com.moa.shop.dto.CategoryDto;
+import com.moa.shop.dto.SubjectDto;
+import com.moa.shop.dto.TypeDto;
 import com.moa.user.service.util.PageInfo;
 
 import lombok.RequiredArgsConstructor;
@@ -56,27 +55,31 @@ public class ShopServiceImpl implements ShopService {
 	}
 
 	@Override
-	public List<Category> categoryList() throws Exception {
-		List<Category> categoryList = categoryRepository.findAll();
+	public List<CategoryDto> categoryList() throws Exception {
+		List<CategoryDto> categoryList = categoryRepository.findAll().stream().map(c->
+		CategoryDto.fromEntity(c)).collect(Collectors.toList());
 		return categoryList;
 	}
 
 	@Override
-	public List<Type> typeList() throws Exception {
-		List<Type> typeList = typeRepository.findAll();
+	public List<TypeDto> typeList(Integer categoryId) throws Exception {
+		List<TypeDto> typeList = typeRepository.findByCategory_CategoryId(categoryId).stream().map(c->
+		TypeDto.fromEntity(c)).collect(Collectors.toList());
 		return typeList;
 	}
 
 	@Override
-	public List<Subject> subjectList() throws Exception {
-		List<Subject> subjectList = subjectRepository.findAll();
+	public List<SubjectDto> subjectList(Integer categoryId) throws Exception {
+		List<SubjectDto> subjectList = subjectRepository.findByCategory_CategoryId(categoryId).stream().map(c->
+		SubjectDto.fromEntity(c)).collect(Collectors.toList());
 		return subjectList;
 	}
 
 	@Override
-	public List<Canvas> canvasType() throws Exception {
-		List<Canvas> canvasType = canvasRepository.findAll();
-		return canvasType;
+	public List<CanvasDto> canvasList() throws Exception {
+		List<CanvasDto> canvasList = canvasRepository.findAll().stream().map(c->
+		CanvasDto.fromEntity(c)).collect(Collectors.toList());
+		return canvasList;
 	}
 
 }
