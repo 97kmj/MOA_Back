@@ -61,3 +61,7 @@ test-output/
 
 # 로그 파일
 *.log
+
+#테스트
+test-output
+/src/test/

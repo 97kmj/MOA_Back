@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moa.entity.Funding;
 import com.moa.entity.FundingContribution;
 import com.moa.entity.FundingOrder;
@@ -11,10 +12,16 @@ import com.moa.entity.Reward;
 import com.moa.entity.User;
 import com.moa.funding.dto.funding.FundingContributionDTO;
 import com.moa.funding.dto.funding.FundingOrderDTO;
+import com.moa.funding.dto.payment.webhook.PortOneCustomData;
+import com.moa.funding.dto.payment.webhook.PortOneWebhookRequest;
 import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.dto.payment.PaymentResponseDTO;
 import com.moa.funding.dto.payment.RewardRequest;
+import com.siot.IamportRestClient.response.Payment;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class FundingMapper {
 	private FundingMapper() {} // 인스턴스 생성 방지
 
@@ -74,6 +81,7 @@ public class FundingMapper {
 	// DTO -> Entity
 	public static FundingOrder toFundingOrder(PaymentRequest request, User user) {
 		return FundingOrder.builder()
+			.impUid(request.getImpUid())
 			.user(user)
 			.totalAmount(request.getTotalAmount())
 			.paymentType(request.getPaymentType())
@@ -100,6 +108,33 @@ public class FundingMapper {
 			.rewardQuantity(rewardRequest.getRewardQuantity())
 			.contributionDate(new Timestamp(System.currentTimeMillis()))
 			.build();
+	}
+
+	public static PaymentRequest toPaymentRequest(PortOneWebhookRequest request, Payment payment) {
+		String customDataJson = payment.getCustomData(); // String으로 가져오기
+		PortOneCustomData customData = parseCustomData(customDataJson); // JSON 파싱
+		log.info("Parsed custom_data: {}", customData);
+
+		return PaymentRequest.builder()
+			.impUid(request.getImpUid())
+			.totalAmount(payment.getAmount().longValue())
+			.paymentType(payment.getPayMethod())
+			.fundingId(customData.getFundingId())
+			.rewardList(customData.getRewardList()) // 리스트 통째로 사용
+			.userName(payment.getBuyerName())
+			.address(payment.getBuyerAddr())
+			.phoneNumber(payment.getBuyerTel())
+			.name(payment.getName())
+			.build();
+	}
+
+	private static PortOneCustomData parseCustomData(String customData) {
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			return objectMapper.readValue(customData, PortOneCustomData.class);
+		} catch (Exception e) {
+			throw new RuntimeException("Custom data 파싱 실패", e);
+		}
 	}
 
 }
