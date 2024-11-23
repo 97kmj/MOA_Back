@@ -15,17 +15,17 @@ public class FundingController {
 
 	@PostMapping
 	public ResponseEntity<Void> createFunding(
-		@RequestPart("fundingInfo") String fundingInfoJson,
-		@RequestPart("rewards") String rewardsJson,
-		@RequestPart("artworks") String artworksJson,
+		@RequestPart("fundingInfo") String fundingInfo,
+		@RequestPart("rewards") String rewards,
+		@RequestPart("artworks") String artwork,
 		@RequestPart("mainImage") MultipartFile mainImage,
 		@RequestPart("artworkImages") List<MultipartFile> artworkImages
 	) {
 		try {
 			// JSON 데이터 출력
-			System.out.println("Funding Info JSON: " + fundingInfoJson);
-			System.out.println("Rewards JSON: " + rewardsJson);
-			System.out.println("Artworks JSON: " + artworksJson);
+			System.out.println("Funding Info JSON: " + fundingInfo);
+			System.out.println("Rewards JSON: " + rewards);
+			System.out.println("Artworks JSON: " + artwork);
 
 			// 메인 이미지 출력
 			System.out.println("Main Image: " + mainImage.getOriginalFilename());
