@@ -35,9 +35,6 @@ public class FundingController {
 				System.out.println("Artwork Image: " + artworkImage.getOriginalFilename());
 			}
 
-			// 필요한 비즈니스 로직 실행
-			// 예: 서비스 계층에 데이터 전달 및 저장 로직
-
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {
 			e.printStackTrace();
