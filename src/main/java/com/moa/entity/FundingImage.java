@@ -24,7 +24,6 @@ public class FundingImage {
 	@ManyToOne
 	@JoinColumn(name="funding_id" )
 	private Funding funding;
-	
 	private String title;
 	private String introduction;
 	private String imageUrl;
