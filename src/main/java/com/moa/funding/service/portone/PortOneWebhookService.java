@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moa.funding.dto.payment.webhook.PortOneCustomData;
 import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.dto.payment.webhook.PortOneWebhookRequest;
-import com.moa.funding.mapper.FundingMapper;
+import com.moa.funding.mapper.FundingPaymentMapper;
 import com.moa.funding.service.FundingPaymentService;
 import com.siot.IamportRestClient.response.Payment;
 
@@ -33,7 +33,7 @@ public class PortOneWebhookService {
 			log.info("Parsed custom_data: {}", customData);
 
 			// Step 3: PaymentRequest 생성
-			PaymentRequest paymentRequest = FundingMapper.toPaymentRequest(request, payment);
+			PaymentRequest paymentRequest = FundingPaymentMapper.toPaymentRequest(request, payment);
 			log.info("PaymentRequest 생성: {}", paymentRequest);
 
 			// Step 4: 결제 처리 (DB 저장 포함)

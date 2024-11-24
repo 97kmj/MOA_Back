@@ -9,15 +9,25 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.moa.funding.dto.funding.ArtworkDTO;
+import com.moa.funding.dto.funding.FundingInfoDTO;
+import com.moa.funding.dto.funding.RewardDTO;
+import com.moa.funding.service.FundingCreationService;
+
+import lombok.RequiredArgsConstructor;
+
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/funding")
 public class FundingController {
+	private final FundingCreationService fundingService;
+
 
 	@PostMapping
 	public ResponseEntity<Void> createFunding(
-		@RequestPart("fundingInfo") String fundingInfo,
-		@RequestPart("rewards") String rewards,
-		@RequestPart("artworks") String artwork,
+		@RequestPart("fundingInfo")FundingInfoDTO fundingInfo,
+		@RequestPart("rewards") List<RewardDTO> rewards,
+		@RequestPart("artworks") List<ArtworkDTO> artwork,
 		@RequestPart("mainImage") MultipartFile mainImage,
 		@RequestPart("artworkImages") List<MultipartFile> artworkImages
 	) {
@@ -34,6 +44,8 @@ public class FundingController {
 			for (MultipartFile artworkImage : artworkImages) {
 				System.out.println("Artwork Image: " + artworkImage.getOriginalFilename());
 			}
+
+			fundingService.createFunding(fundingInfo, rewards, artwork, mainImage, artworkImages);
 
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {

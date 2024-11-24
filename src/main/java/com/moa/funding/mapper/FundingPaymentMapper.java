@@ -22,8 +22,8 @@ import com.siot.IamportRestClient.response.Payment;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class FundingMapper {
-	private FundingMapper() {} // 인스턴스 생성 방지
+public class FundingPaymentMapper {
+	private FundingPaymentMapper() {} // 인스턴스 생성 방지
 
 
 	// Entity -> DTO
@@ -74,7 +74,7 @@ public class FundingMapper {
 	// Entity -> DTO (리스트 FundingContribution)
 	public static List<FundingContributionDTO> toFundingContributionDTO(List<FundingContribution> contributions) {
 		return contributions.stream()
-			.map(FundingMapper::toFundingContributionDTO)
+			.map(FundingPaymentMapper::toFundingContributionDTO)
 			.collect(Collectors.toList()); // Collectors.toList()를 사용하여 리스트로 변환
 	}
 

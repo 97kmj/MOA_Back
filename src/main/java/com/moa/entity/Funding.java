@@ -1,7 +1,9 @@
 package com.moa.entity;
 
-import java.sql.Date;
+
+import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,12 +38,13 @@ public class Funding {
 	private String bankName;
 	
 	@Column(nullable = false)
-	private Long goalAmount;
+	private BigDecimal goalAmount;
 	@Column(nullable = false)
 	private String title;
 	@Lob
 	private String introduction;
 	private String fundingMainImage;
+	private String fundingMainImageUrl;
 	private Date noticeDate;
 	private Long currentAmount;
 	
@@ -55,9 +58,6 @@ public class Funding {
 
     @Enumerated(EnumType.STRING)
     private FundingStatus fundingStatus;
-
-	
-
 
     public enum ApprovalStatus { PENDING, APPROVED, REJECTED }
     public enum FundingStatus { STANDBY, ONGOING, SUCCESSFUL, FAILED, CANCELLED }

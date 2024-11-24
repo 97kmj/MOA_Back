@@ -10,7 +10,7 @@ import com.moa.entity.Reward;
 import com.moa.entity.User;
 import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.dto.payment.RewardRequest;
-import com.moa.funding.mapper.FundingMapper;
+import com.moa.funding.mapper.FundingPaymentMapper;
 import com.moa.funding.service.FundingPaymentService;
 import com.moa.funding.service.portone.PortOneService;
 import com.moa.funding.service.RewardService;
@@ -72,7 +72,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	}
 
 	private FundingOrder createAndSaveFundingOrder(PaymentRequest paymentRequest, User user) {
-		FundingOrder order = FundingMapper.toFundingOrder(paymentRequest, user);
+		FundingOrder order = FundingPaymentMapper.toFundingOrder(paymentRequest, user);
 		return fundingOrderRepository.save(order);
 	}
 
@@ -88,7 +88,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 			// Step 3.1: 재고 감소
 			rewardService.reduceRewardStock(rewardRequest);
 			// Step 3.2: 후원 생성 및 저장
-			FundingContribution contribution = FundingMapper.toFundingContribution(rewardRequest, savedOrder, funding,
+			FundingContribution contribution = FundingPaymentMapper.toFundingContribution(rewardRequest, savedOrder, funding,
 				reward);
 			fundingContributionRepository.save(contribution);
 		}
