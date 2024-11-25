@@ -79,13 +79,12 @@ public class ShopController {
 	
 	
 	
-	
+	// 작품등록
 	@PostMapping("/shop/artworkAdd")
-	public ResponseEntity<Long> artworkAdd(ArtworkDto artworkDto,
-		@RequestParam(name="file",required = false) MultipartFile[] file){
+	public ResponseEntity<Long> artworkAdd(ArtworkDto artworkDto){
 			try {
-				Long artworkNum = shopService.artworkAdd(artworkDto, file);
-				return new ResponseEntity<Long>(artworkNum, HttpStatus.OK);
+				Long artworkNum = shopService.artworkAdd(artworkDto);
+				return new ResponseEntity<Long>(artworkNum,HttpStatus.OK);
 			}catch (Exception e) {
 				e.printStackTrace();
 				return new ResponseEntity<Long>(HttpStatus.BAD_REQUEST);
