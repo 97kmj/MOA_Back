@@ -47,11 +47,11 @@ public class ShopServiceImpl implements ShopService {
 	}
 
 	@Override
-	public Long artworkAdd(ArtworkDto artworkDto, MultipartFile[] file) throws Exception {
-		Artwork artwork = artworkDto.toEntity();
-		artworkRepository.save(artwork);
+	public Long artworkAdd(ArtworkDto artworkDto) throws Exception {
+		artworkRepository.save(artworkDto);
 		
-		return artwork.getArtworkId();
+		return artworkDto.getArtworkId();
+	
 	}
 
 	@Override
