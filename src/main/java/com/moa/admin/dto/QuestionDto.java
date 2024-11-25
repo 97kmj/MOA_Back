@@ -2,8 +2,8 @@ package com.moa.admin.dto;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-
 import com.moa.entity.Question;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class QuestionDto {
+	
 	private Long questionId;
 	private String username;
 	private String title;
