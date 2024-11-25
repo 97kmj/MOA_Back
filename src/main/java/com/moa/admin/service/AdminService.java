@@ -3,6 +3,7 @@ package com.moa.admin.service;
 import java.sql.Date;
 import java.util.List;
 
+import com.moa.admin.dto.ArtistUserDto;
 import com.moa.admin.dto.NoticeDto;
 import com.moa.admin.dto.QuestionDto;
 import com.moa.admin.dto.RegistNoticeDto;
@@ -17,6 +18,9 @@ public interface AdminService {
 	List<QuestionDto> notAnswerQuestionList() throws Exception;
 	List<QuestionDto> answeredQuestionList(Date startDate, Date endDate) throws Exception;
 	void writeAnswer(QuestionDto questionDto) throws Exception;
+	
+	//관리자 작가 승인
+	List<ArtistUserDto> getApplyArtistList() throws Exception;
 
 	
 }
