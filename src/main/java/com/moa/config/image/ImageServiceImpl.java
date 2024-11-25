@@ -18,8 +18,10 @@ import org.springframework.web.multipart.MultipartFile;
 public class ImageServiceImpl implements ImageService {
 
 	private final RestTemplate restTemplate = new RestTemplate();
+
 	// private final String basePath = "http://16.171.159.198:8000"; //aws
 	private final String basePath = "http://192.168.0.248:8000"; //로컬
+
 
 
 	// 이미지 저장 로직

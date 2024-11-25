@@ -14,6 +14,7 @@ import com.moa.admin.dto.QuestionDto;
 import com.moa.admin.dto.RegistNoticeDto;
 import com.moa.admin.repository.AdminQnARepository;
 import com.moa.entity.Notice;
+import com.moa.entity.Question;
 import com.moa.repository.NoticeRepository;
 import com.moa.repository.QuestionRepository;
 
@@ -69,7 +70,12 @@ public class AdminServiceImpl implements AdminService {
 	//writeAnswer
 	@Override
 	public void writeAnswer(QuestionDto questionDto) throws Exception {
-		questionRepository.save(QuestionDto.toEntity(questionDto));
+		Question question = questionRepository.findById(questionDto.getQuestionId()).orElseThrow(()->new Exception("questionID 오류"));
+		question.setAnswerAt(questionDto.getAnswerAt());
+		question.setAnswerTitle(questionDto.getAnswerTitle());
+		question.setAnswerContent(questionDto.getAnswerContent());
+		question.setAnswerStatus(questionDto.getAnswerStatus());
+		questionRepository.save(question);
 	}
 	
 	

@@ -8,6 +8,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.PrePersist;
 
 import javax.persistence.PrePersist;
 import lombok.AllArgsConstructor;
@@ -50,15 +51,14 @@ public class User {
 	private Integer likeCount;
 	@Enumerated(EnumType.STRING)
     private Role role;
-
 	@Column(nullable = false, updatable = false)
 	private Timestamp createAt;
 	// 자동으로 생성 시간 설정
+
 	@PrePersist
 	protected void onCreate() {
 		this.createAt = new Timestamp(System.currentTimeMillis());
 	}
-
 
 	// Enums
     public enum ApprovalStatus { PENDING, APPROVED, NORMAL }
