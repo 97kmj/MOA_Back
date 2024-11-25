@@ -10,7 +10,7 @@ import com.moa.entity.Reward;
 import com.moa.entity.User;
 import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.dto.payment.RewardRequest;
-import com.moa.funding.mapper.FundingMapper;
+import com.moa.funding.mapper.FundingPaymentMapper;
 import com.moa.funding.service.FundingPaymentService;
 import com.moa.funding.service.portone.PortOneService;
 import com.moa.funding.service.RewardService;
@@ -38,7 +38,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	@Override
 	@Transactional
 	public void processFundingContribution(String impUid, PaymentRequest paymentRequest) {
-		log.info("결제된 펀딩 후원 처리   - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
+		log.debug("결제된 펀딩 후원 처리   - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
 		// Step 1: 검증 및 중복 결제 리워드 정보 확인
 		validatePayment(impUid, paymentRequest);
 
@@ -53,32 +53,31 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 		// Step 5: 펀딩의 currentAmount 업데이트
 		updateFundingCurrentAmount(paymentRequest);
-
 	}
 
 	private void validatePayment(String impUid, PaymentRequest paymentRequest) {
+		// Step 1: 중복 결제 확인
 		if (fundingOrderRepository.existsByImpUid(impUid)) {
 			throw new IllegalStateException("이미 처리된 결제입니다: impUid=" + impUid);
 		}
-
-		// Step 1: 결제 검증
+		// Step 2: iamport 결제 검증
 		boolean isVerified = iamportOneService.verifyPayment(paymentRequest.getTotalAmount(), impUid);
 		if (!isVerified) {
 			throw new RuntimeException("결제 검증 실패");
 		}
+		// Step 3: 리워드 정보 확인
 		if (paymentRequest.getRewardList() == null || paymentRequest.getRewardList().isEmpty()) {
 			throw new RuntimeException("리워드 정보가 존재하지 않습니다.");
 		}
 	}
 
 	private FundingOrder createAndSaveFundingOrder(PaymentRequest paymentRequest, User user) {
-		FundingOrder order = FundingMapper.toFundingOrder(paymentRequest, user);
+		FundingOrder order = FundingPaymentMapper.toFundingOrder(paymentRequest, user);
 		return fundingOrderRepository.save(order);
 	}
 
 
 	private void createAndSaveFundingContribution(PaymentRequest paymentRequest,FundingOrder savedOrder) {
-
 		//Step1: 펀딩 조회
 		Funding funding = getFunding(paymentRequest);
 
@@ -89,17 +88,16 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 			// Step 3.1: 재고 감소
 			rewardService.reduceRewardStock(rewardRequest);
 			// Step 3.2: 후원 생성 및 저장
-			FundingContribution contribution = FundingMapper.toFundingContribution(rewardRequest, savedOrder, funding,
+			FundingContribution contribution = FundingPaymentMapper.toFundingContribution(rewardRequest, savedOrder, funding,
 				reward);
 			fundingContributionRepository.save(contribution);
 		}
-
 	}
 
 	@Override
 	public void updateFundingCurrentAmount(PaymentRequest paymentRequest) {
 		Funding funding = getFunding(paymentRequest);
-
+		// Step 1: 펀딩의 currentAmount 업데이트
 		funding.setCurrentAmount(funding.getCurrentAmount() + paymentRequest.getTotalAmount());
 		fundingRepository.save(funding);
 	}

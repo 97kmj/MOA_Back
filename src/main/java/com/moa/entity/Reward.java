@@ -1,7 +1,11 @@
 package com.moa.entity;
 
+import java.math.BigDecimal;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -28,16 +32,24 @@ public class Reward {
 	private Funding funding;
 	
 	@Column(nullable=false)
-	private String rewardName;
+	private String rewardName; //name
 	
 	@Lob
-    private String rewardDescription;
+    private String rewardDescription; //description
 	@Column(nullable=false)
-	private Long rewardPrice;
+	private BigDecimal rewardPrice; //price
 	
-	private Integer stock;
-	private Boolean isLimit;
-	private Integer limitQuantity;
-	
-	
+	private Integer stock; //quantity
+	private Boolean isLimit; //isQuantityLimited
+	private Integer limitQuantity; //limitPerPerson
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private RewardType rewardType; //rewardType
+
+	public enum RewardType {
+		BASIC,  // 기본 리워드 (리워드 없는 후원)
+		CUSTOM  // 커스텀 리워드
+	}
+
 }
