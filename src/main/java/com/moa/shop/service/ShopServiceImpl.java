@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.moa.config.image.FolderConstants;
+import com.moa.config.image.ImageService;
 import com.moa.entity.Artwork;
 import com.moa.repository.ArtworkRepository;
 import com.moa.repository.CanvasRepository;
@@ -17,6 +19,7 @@ import com.moa.shop.dto.CanvasDto;
 import com.moa.shop.dto.CategoryDto;
 import com.moa.shop.dto.SubjectDto;
 import com.moa.shop.dto.TypeDto;
+import com.moa.shop.mapper.ArtworkAddMapper;
 import com.moa.user.service.util.PageInfo;
 
 import lombok.RequiredArgsConstructor;
@@ -30,7 +33,7 @@ public class ShopServiceImpl implements ShopService {
 	private final TypeRepository typeRepository;
 	private final SubjectRepository subjectRepository;
 	private final CanvasRepository canvasRepository;
-	
+	private final ImageService imageService;
 	
 	
 	
@@ -47,10 +50,20 @@ public class ShopServiceImpl implements ShopService {
 	}
 
 	@Override
-	public Long artworkAdd(ArtworkDto artworkDto) throws Exception {
-		artworkRepository.save(artworkDto);
+	public Long artworkAdd(ArtworkDto artworkDto, MultipartFile artworkImage) throws Exception {
+		String rootFolder = FolderConstants.ARTWORK_ROOT;
+		String fileType = FolderConstants.ARTWORK_IMAGE;
 		
-		return artworkDto.getArtworkId();
+		String ArtworkImgeUrl= null;
+		
+		if(artworkImage != null && !artworkImage.isEmpty()) {
+			ArtworkImgeUrl = imageService.saveImage(rootFolder, fileType, artworkImage);
+		}
+		
+		Artwork artwork = ArtworkAddMapper.toArtworkEntity(artworkDto, ArtworkImgeUrl);
+		
+		artworkRepository.save(artwork);
+		return artwork.getArtworkId();
 	
 	}
 

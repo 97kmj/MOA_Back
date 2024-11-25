@@ -10,4 +10,5 @@ public class FolderConstants {
 
 	public static final String USER_ROOT = "user";
 	public static final String USER_PROFILE = "userProfile";
+	public static final String USER_PORTFOLIO = "userPortfolio";
 }

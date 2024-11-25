@@ -15,8 +15,10 @@ import com.moa.funding.dto.funding.RewardDTO;
 import com.moa.funding.service.FundingCreationService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/api/funding")
 public class FundingController {
@@ -32,21 +34,13 @@ public class FundingController {
 		@RequestPart("artworkImages") List<MultipartFile> artworkImages
 	) {
 		try {
-			// JSON 데이터 출력
-			System.out.println("Funding Info JSON: " + fundingInfo);
-			System.out.println("Rewards JSON: " + rewards);
-			System.out.println("Artworks JSON: " + artwork);
-
-			// 메인 이미지 출력
-			System.out.println("Main Image: " + mainImage.getOriginalFilename());
-
-			// 작품 이미지 출력
-			for (MultipartFile artworkImage : artworkImages) {
-				System.out.println("Artwork Image: " + artworkImage.getOriginalFilename());
-			}
+			log.debug("fundingInfo: {}", fundingInfo);
+			log.debug("rewards: {}", rewards);
+			log.debug("artwork: {}", artwork);
+			log.debug("mainImage: {}", mainImage);
+			log.debug("artworkImages: {}", artworkImages);
 
 			fundingService.createFunding(fundingInfo, rewards, artwork, mainImage, artworkImages);
-
 			return ResponseEntity.ok().build();
 		} catch (Exception e) {
 			e.printStackTrace();
