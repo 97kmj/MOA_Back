@@ -34,10 +34,17 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getServletPath();
         // 등록 및 로그인 관련 경로는 필터를 적용하지 않음
-        return path.equals("/api/user/register") || path.equals("/api/user/login") || path.startsWith("/oauth2/") || path.equals("/adminQnA") || path.equals("/sendQuestion") || path.equals("/adminNotice");
-
+        return
+//            path.equals("/") ||
+//            path.equals("/main") ||
+            path.equals("/api/user/check-username") ||
+            path.equals("/api/user/register") ||
+            path.equals("/api/user/login") ||
+            path.startsWith("/oauth2/") ||
+            path.equals("/adminQnA") ||
+            path.equals("/sendQuestion") ||
+            path.equals("/adminNotice");
     }
-
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)

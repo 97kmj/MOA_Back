@@ -3,6 +3,7 @@ package com.moa.user.controller;
 import com.moa.config.auth.PrincipalDetails;
 import com.moa.config.jwt.JwtToken;
 import com.moa.entity.User;
+import com.moa.user.dto.RegisterRequest;
 import com.moa.repository.UserRepository;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,15 @@ public class UserController {
         this.jwtToken = jwtToken;
     }
 
+    // 아이디 중복 확인
+    @GetMapping("/check-username")
+    public ResponseEntity<Boolean> checkUsername(@RequestParam String username) {
+        boolean exists = userRepository.findByUsername(username).isPresent();
+        System.out.println("Username check: " + username + " exists: " + exists); // 디버깅용 로그
+        return ResponseEntity.ok(!exists); // true = 사용 가능, false = 중복
+    }
+
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
         String username = loginRequest.get("username");
@@ -53,14 +63,53 @@ public class UserController {
         String refreshToken = jwtToken.makeRefreshToken(username);
 
         // 응답 데이터 생성
-        Map<String, String> tokens = new HashMap<>();
-        tokens.put("access_token", accessToken);
-        tokens.put("refresh_token", refreshToken);
+        Map<String, Object> response = new HashMap<>();
+        response.put("access_token", accessToken);
+        response.put("refresh_token", refreshToken);
 
-        return ResponseEntity.ok(tokens);
+        // 사용자 정보 추가
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("username", user.getUsername());
+        userData.put("nickname", user.getNickname());
+        userData.put("name", user.getName());
+        userData.put("email", user.getEmail());
+        userData.put("role", user.getRole());
+        userData.put("phone", user.getPhone());
+        userData.put("address", user.getAddress());
+        response.put("user", userData);
+
+        return ResponseEntity.ok(response);
     }
 
+    // 회원가입
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody RegisterRequest request) {
+        try {
+            // 비밀번호 암호화
+            String rawPassword = request.getPassword();
+            String encodedPassword = bCryptPasswordEncoder.encode(rawPassword);
 
+            // User 엔티티 생성 및 저장
+            User user = new User();
+            user.setUsername(request.getUsername());
+            user.setPassword(encodedPassword);
+            user.setName(request.getName());
+            user.setEmail(request.getEmail());
+            user.setPhone(request.getPhone());
+            user.setPostcode(request.getPostcode());
+            user.setAddress(request.getAddress());
+            user.setDetailAddress(request.getDetailAddress());
+            user.setExtraAddress(request.getExtraAddress());
+            user.setRole(User.Role.USER);
+
+            userRepository.save(user);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred: " + e.getMessage());
+        }
+    }
 
     // 현재 로그인한 사용자 정보 가져오기
     @GetMapping("/profile")
@@ -68,26 +117,6 @@ public class UserController {
         PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
         User user = principalDetails.getUser();
         return ResponseEntity.ok(user);
-    }
-
-    // 회원가입
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
-        try {
-            // 비밀번호 암호화
-            String rawPassword = user.getPassword();
-            user.setPassword(bCryptPasswordEncoder.encode(rawPassword));
-
-            // 기본 권한 설정
-            user.setRole(User.Role.USER);
-
-            // 저장
-            userRepository.save(user);
-            return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error occurred: " + e.getMessage());
-        }
     }
 
     // 아티스트 승격
