@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.PrePersist;
 
+import javax.persistence.PrePersist;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -52,6 +53,8 @@ public class User {
     private Role role;
 	@Column(nullable = false, updatable = false)
 	private Timestamp createAt;
+	// 자동으로 생성 시간 설정
+
 	@PrePersist
 	protected void onCreate() {
 		this.createAt = new Timestamp(System.currentTimeMillis());

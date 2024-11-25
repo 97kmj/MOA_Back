@@ -12,7 +12,7 @@ public class TwilioSmsService {
 
     // Twilio 계정 정보
     private static final String ACCOUNT_SID = "AC7374f3c46223580dfbb16704b716c2fc";
-    private static final String AUTH_TOKEN = "0fcaa11b42889c0bca0a286013ed1344";
+    private static final String AUTH_TOKEN = "9b922714eaf5077e1bb022591d6e3c93";
     private static final String TWILIO_PHONE_NUMBER = "+19787234438";
 
     static {
