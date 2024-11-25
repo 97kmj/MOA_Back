@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.moa.config.image.FolderConstants;
 import com.moa.config.image.ImageService;
+import com.moa.config.image.ImageServiceImpl;
 import com.moa.entity.Funding;
 import com.moa.entity.FundingImage;
 import com.moa.entity.Reward;
