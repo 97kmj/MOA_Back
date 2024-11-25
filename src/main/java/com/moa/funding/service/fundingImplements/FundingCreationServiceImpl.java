@@ -44,7 +44,7 @@ public class FundingCreationServiceImpl implements FundingCreationService {
 		//Step1: Funding 생성 및 저장
 		Funding funding = createFunding(fundingInfoDTO, mainImage);
 
-		//Step2: Reward 생성 및 저장
+		//Step2: Reward 생성 및 저
 		createRewards(rewardDTOs, funding);
 
 		//Step3: Artwork 생성 및 저장
