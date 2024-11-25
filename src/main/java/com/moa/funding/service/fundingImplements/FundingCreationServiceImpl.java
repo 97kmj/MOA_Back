@@ -3,6 +3,7 @@ package com.moa.funding.service.fundingImplements;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
@@ -39,8 +40,6 @@ public class FundingCreationServiceImpl implements FundingCreationService {
 	public void createFunding(FundingInfoDTO fundingInfoDTO, List<RewardDTO> rewardDTOs, List<ArtworkDTO> artworkDTOs,
 		MultipartFile mainImage, List<MultipartFile> artworkImages) {
 
-
-
 		//Step1: Funding 생성 및 저장
 		Funding funding = createFunding(fundingInfoDTO, mainImage);
 
@@ -52,22 +51,31 @@ public class FundingCreationServiceImpl implements FundingCreationService {
 	}
 
 	private void createArtworks(List<ArtworkDTO> artworkDTOs, List<MultipartFile> artworkImages, Funding funding) {
-		List<FundingImage> fundingImages = new ArrayList<>();
+		validateInputs(artworkDTOs, artworkImages);
+      	String rootFolder = FolderConstants.FUNDING_ROOT;
+		String fileType = FolderConstants.FUNDING_ART_IMAGE;
 
-		for(int i = 0; i < artworkDTOs.size(); i++) {
-			ArtworkDTO artworkDTO = artworkDTOs.get(i);
-			MultipartFile artworkImage = artworkImages.get(i);
+		List<FundingImage> fundingImages = IntStream.range(0,artworkDTOs.size())
+				.mapToObj(i -> createSingleFundingImage(artworkDTOs.get(i), artworkImages.get(i), funding, rootFolder, fileType))
+				.collect(Collectors.toList());
 
-			FundingImage fundingImage = FundingCreationMapper.toFundingImageEntity(artworkImage, funding, artworkDTO);
-
-			fundingImage.setImageUrl("null");
-			fundingImages.add(fundingImage);
-		}
 		fundingImageRepository.saveAll(fundingImages);
-
 	}
 
-	@NotNull
+	// 단일 FundingImage 생성
+	private FundingImage createSingleFundingImage(ArtworkDTO artworkDTO, MultipartFile artworkImage, Funding funding,
+		String rootFolder, String fileType) {
+		String fundingArtImageUrl = null;
+
+		// 이미지 저장
+		if (artworkImage != null && !artworkImage.isEmpty()) {
+			fundingArtImageUrl = imageService.saveImage(rootFolder, fileType, artworkImage);
+		}
+		// FundingImage 생성
+		return FundingCreationMapper.toFundingImageEntity(artworkImage, funding, artworkDTO, fundingArtImageUrl);
+	}
+
+
 	private Funding createFunding(FundingInfoDTO fundingInfoDTO, MultipartFile mainImage) {
 		// String fileType = "mainImage";
 		String rootFolder = FolderConstants.FUNDING_ROOT; // "funding"
@@ -90,4 +98,12 @@ public class FundingCreationServiceImpl implements FundingCreationService {
 			.collect(Collectors.toList());
 		rewardRepository.saveAll(rewards);
 	}
+
+	private void validateInputs(List<ArtworkDTO> artworkDTOs, List<MultipartFile> artworkImages) {
+		if (artworkDTOs.size() != artworkImages.size()) {
+			throw new IllegalArgumentException("ArtworkDTOs and artworkImages size 가 다르다 .");
+		}
+	}
+
 }
+

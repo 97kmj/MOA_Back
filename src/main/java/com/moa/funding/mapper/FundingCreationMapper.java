@@ -47,12 +47,12 @@ public class FundingCreationMapper {
 			.build();
 	}
 
-	public static FundingImage toFundingImageEntity(MultipartFile image, Funding funding, ArtworkDTO artworkDTO) {
+	public static FundingImage toFundingImageEntity(MultipartFile image, Funding funding, ArtworkDTO artworkDTO, String fundingArtImageUrl) {
 		return FundingImage.builder()
 			.funding(funding)
 			.title(artworkDTO.getTitle())
 			.introduction(artworkDTO.getDescription())
-			.imageUrl(null)
+			.imageUrl(fundingArtImageUrl)
 			.build();
 	}
 }
