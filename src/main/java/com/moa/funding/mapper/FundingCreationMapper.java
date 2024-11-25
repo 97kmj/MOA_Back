@@ -17,7 +17,7 @@ public class FundingCreationMapper {
 
 	public static Funding toFundingEntity(FundingInfoDTO fundingInfoDTO,  String fundingMainImageUrl) {
 		return Funding.builder()
-			.user(null)
+			.user(fundingInfoDTO.getUser())
 			.fundingUserName("등록자 이름 ")
 			.accountNumber(fundingInfoDTO.getRegistrant().getAccount().getAccount())
 			.bankName(fundingInfoDTO.getRegistrant().getAccount().getBank())
