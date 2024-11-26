@@ -18,6 +18,7 @@ import com.moa.entity.Notice;
 import com.moa.entity.Question;
 import com.moa.entity.User;
 import com.moa.entity.User.ApprovalStatus;
+import com.moa.entity.User.Role;
 import com.moa.repository.NoticeRepository;
 import com.moa.repository.QuestionRepository;
 import com.moa.repository.UserRepository;
@@ -90,6 +91,22 @@ public class AdminServiceImpl implements AdminService {
 	public List<ArtistUserDto> getApplyArtistList() throws Exception {
 		List<ArtistUserDto> applyArtistList = userRepository.findByArtistApprovalStatus(ApprovalStatus.PENDING).stream().map((u)->ArtistUserDto.fromEntity(u)).collect(Collectors.toList());
 		return applyArtistList;
+	}
+	
+	@Override
+	public void approveArtist(String username) throws Exception {
+		User user = userRepository.findById(username).orElseThrow(()->new Exception("username오류"));
+		user.setArtistApprovalStatus(ApprovalStatus.APPROVED);
+		user.setRole(Role.ARTIST);
+		userRepository.save(user);
+		
+	}
+	
+	@Override
+	public void rejectArtist(String username) throws Exception {
+		User user = userRepository.findById(username).orElseThrow(()->new Exception("username오류"));
+		user.setArtistApprovalStatus(ApprovalStatus.NORMAL);
+		userRepository.save(user);	
 	}
 	
 	
