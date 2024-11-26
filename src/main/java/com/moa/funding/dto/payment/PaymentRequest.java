@@ -20,12 +20,9 @@ public class PaymentRequest {
 	private Long fundingId;
 	private Long rewardId;
 	private List<RewardRequest> rewardList;
-	private BigDecimal rewardPrice;
-	private Long rewardQuantity;
-	// private String userName;
-	private String userName;
-	private String address;
-	private String phoneNumber;
+	private String userName; // 사용자 정보
+	private String address; // 배송지 정보
+	private String phoneNumber; // 배송지 정보
 	private String name; // 배송지 정보
 	private String merchantUid;
 	private BigDecimal amount;

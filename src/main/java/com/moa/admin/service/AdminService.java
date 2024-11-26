@@ -19,8 +19,10 @@ public interface AdminService {
 	List<QuestionDto> answeredQuestionList(Date startDate, Date endDate) throws Exception;
 	void writeAnswer(QuestionDto questionDto) throws Exception;
 	
-	//관리자 작가 승인
+	//관리자 작가
 	List<ArtistUserDto> getApplyArtistList() throws Exception;
+	void approveArtist(String username) throws Exception;
+	void rejectArtist(String username) throws Exception;
 
 	
 }

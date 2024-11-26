@@ -94,6 +94,22 @@ public class FundingPaymentMapper {
 	}
 
 
+	// public static FundingContribution toFundingContribution(
+	// 	RewardRequest rewardRequest,
+	// 	FundingOrder order,
+	// 	Funding funding,
+	// 	Reward reward
+	// ) {
+	// 	return FundingContribution.builder()
+	// 		.fundingOrder(order)
+	// 		.funding(funding)
+	// 		.reward(reward)
+	// 		.rewardPrice(rewardRequest.getRewardPrice())
+	// 		.rewardQuantity(rewardRequest.getRewardQuantity())
+	// 		.contributionDate(new Timestamp(System.currentTimeMillis()))
+	// 		.build();
+	// }
+
 	public static FundingContribution toFundingContribution(
 		RewardRequest rewardRequest,
 		FundingOrder order,
@@ -104,11 +120,12 @@ public class FundingPaymentMapper {
 			.fundingOrder(order)
 			.funding(funding)
 			.reward(reward)
-			.rewardPrice(rewardRequest.getRewardPrice())
-			.rewardQuantity(rewardRequest.getRewardQuantity())
+			.rewardPrice(rewardRequest.getRewardPrice()) // RewardRequest에서 가져옴
+			.rewardQuantity(rewardRequest.getRewardQuantity()) // RewardRequest에서 가져옴
 			.contributionDate(new Timestamp(System.currentTimeMillis()))
 			.build();
 	}
+
 
 	public static PaymentRequest toPaymentRequest(PortOneWebhookRequest request, Payment payment) {
 		String customDataJson = payment.getCustomData(); // String으로 가져오기

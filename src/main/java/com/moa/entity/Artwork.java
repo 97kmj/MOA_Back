@@ -1,7 +1,5 @@
 package com.moa.entity;
 
-
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -79,8 +77,6 @@ public class Artwork {
     public enum CanvasType { F, P, M, S }
     
     public enum SaleStatus { AVAILABLE, SOLD_OUT, NOT_SALE, DELETE }
-
-
 
 	
 }

@@ -13,7 +13,6 @@ public class CorsConfig {
 	public CorsFilter corsFilter() {
 		// CORS 설정 소스 생성
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
 		// CORS 설정
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true); // 쿠키를 포함한 인증 정보 허용
