@@ -13,8 +13,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
-import com.moa.shop.dto.ArtworkDto.ArtworkDtoBuilder;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
