@@ -53,15 +53,20 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws IOException, ServletException {
         String uri = request.getRequestURI();
+        logger.debug("Request URI: " + uri);
 
         // 인증이 필요 없는 경로는 필터를 통과시킴
         if (!requiresAuthentication(uri)) {
+            logger.debug("No authentication required for this URI.");
             chain.doFilter(request, response);
             return;
         }
 
         String authorizationHeader = request.getHeader(JwtProperties.HEADER_STRING);
+        logger.debug("Authorization Header: " + authorizationHeader);
+
         if (authorizationHeader == null || !authorizationHeader.startsWith(JwtProperties.TOKEN_PREFIX)) {
+            logger.debug("Authorization header is missing or invalid.");
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인 필요");
             return;
         }
@@ -69,6 +74,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         try {
             String accessToken = authorizationHeader.replace(JwtProperties.TOKEN_PREFIX, "");
             String username = validateToken(accessToken);
+            logger.debug("Token valid. Username: " + username);
 
             // 사용자 정보 조회 및 SecurityContext 설정
             User user = userRepository.findByUsername(username)
@@ -83,16 +89,21 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private boolean requiresAuthentication(String uri) {
-        return uri.contains("/user") || uri.contains("/admin") || uri.contains("/artist");
+        return uri.startsWith("/api/like/") || uri.contains("/user") || uri.contains("/admin") || uri.contains("/artist");
     }
 
 
 
     private String validateToken(String token) {
-        return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET))
-            .build()
-            .verify(token)
-            .getSubject(); // username 반환
+        try {
+            return JWT.require(Algorithm.HMAC512(JwtProperties.SECRET))
+                .build()
+                .verify(token)
+                .getSubject(); // username 반환
+        } catch (Exception e) {
+            logger.error("Token validation error: " + e.getMessage());
+            throw new RuntimeException("Invalid JWT token");
+        }
     }
 
     private void setAuthentication(User user) {
