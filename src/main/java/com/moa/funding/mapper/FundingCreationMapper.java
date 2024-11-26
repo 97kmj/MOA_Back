@@ -18,7 +18,7 @@ public class FundingCreationMapper {
 	public static Funding toFundingEntity(FundingInfoDTO fundingInfoDTO,  String fundingMainImageUrl) {
 		return Funding.builder()
 			.user(fundingInfoDTO.getUser())
-			.fundingUserName("등록자 이름 ")
+			.fundingUserName(fundingInfoDTO.getUser().getUsername())
 			.accountNumber(fundingInfoDTO.getRegistrant().getAccount().getAccount())
 			.bankName(fundingInfoDTO.getRegistrant().getAccount().getBank())
 			.goalAmount(fundingInfoDTO.getGoalAmount())
@@ -26,7 +26,6 @@ public class FundingCreationMapper {
 			.introduction(fundingInfoDTO.getDescription())
 			.startDate(fundingInfoDTO.getSchedule().getStartDate())
 			.endDate(fundingInfoDTO.getSchedule().getEndDate())
-			// .fundingMainImage(mainImage.getOriginalFilename())
 			.fundingMainImageUrl(fundingMainImageUrl)
 			.applicationDate(new Timestamp(System.currentTimeMillis()))
 			.approvalStatus(Funding.ApprovalStatus.PENDING)
