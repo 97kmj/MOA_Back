@@ -9,11 +9,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.moa.config.image.FolderConstants;
 import com.moa.config.image.ImageService;
 import com.moa.entity.Artwork;
+import com.moa.entity.Artwork.CanvasType;
+import com.moa.entity.Artwork.SaleStatus;
 import com.moa.repository.ArtworkRepository;
 import com.moa.repository.CanvasRepository;
 import com.moa.repository.CategoryRepository;
 import com.moa.repository.SubjectRepository;
 import com.moa.repository.TypeRepository;
+import com.moa.repository.UserRepository;
 import com.moa.shop.dto.ArtworkDto;
 import com.moa.shop.dto.CanvasDto;
 import com.moa.shop.dto.CategoryDto;
@@ -35,6 +38,7 @@ public class ShopServiceImpl implements ShopService {
 	private final CanvasRepository canvasRepository;
 	private final ImageService imageService;
 	private final ArtworkAddMapper artworkAddMapper;
+	private final UserRepository userRepository;
 	
 	
 	
@@ -61,9 +65,27 @@ public class ShopServiceImpl implements ShopService {
 			ArtworkImgeUrl = imageService.saveImage(rootFolder, fileType, artworkImage);
 		}
 		
-		Artwork artwork = artworkAddMapper.toArtworkEntity(artworkDto, ArtworkImgeUrl);
-		
-		artworkRepository.save(artwork);
+		Artwork artwork = Artwork.builder()
+						.adminCheck(false)
+						.canvasType(CanvasType.valueOf(artworkDto.getCanvasType()))
+						.description(artworkDto.getDescription()) 
+						.height(artworkDto.getHeight())
+						.imageUrl(ArtworkImgeUrl)
+						.isStandardCanvas(artworkDto.getIsStandardCanvas())
+						.length(artworkDto.getLength())
+						.price(artworkDto.getPrice())
+						.saleStatus(SaleStatus.valueOf(artworkDto.getSaleStatus()))
+						.stock(artworkDto.getStock())
+						.termsAccepted(true)
+						.title(artworkDto.getTitle())
+						.width(artworkDto.getWidth() )
+						.artist(userRepository.findByUsername(artworkDto.getArtistId()).orElseThrow(()->new Exception("artistId오류")))
+						.canvas(canvasRepository.findById(artworkDto.getCanvasId()).orElseThrow(()->new Exception("CanvasId오류")))
+						.category(categoryRepository.findById(artworkDto.getCategoryId()).orElseThrow(()->new Exception("CategoryId오류")))
+						.subject(subjectRepository.findById(artworkDto.getSubjectId()).orElseThrow(()->new Exception("SubjectId오류")))
+						.type(typeRepository.findById(artworkDto.getTypeId()).orElseThrow(()->new Exception("TypeId오류")))
+						.build();
+			artworkRepository.save(artwork);
 		return artwork.getArtworkId();
 	
 	}
