@@ -20,8 +20,8 @@ public class PaymentRequest {
 	private Long fundingId;
 	private Long rewardId;
 	private List<RewardRequest> rewardList;
-	private BigDecimal rewardPrice;
-	private Long rewardQuantity;
+	// private BigDecimal rewardPrice;
+	// private Long rewardQuantity;
 	// private String userName;
 	private String userName;
 	private String address;
