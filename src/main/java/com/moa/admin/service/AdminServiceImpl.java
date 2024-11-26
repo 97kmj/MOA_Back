@@ -9,14 +9,18 @@ import javax.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.moa.admin.dto.ArtistUserDto;
 import com.moa.admin.dto.NoticeDto;
 import com.moa.admin.dto.QuestionDto;
 import com.moa.admin.dto.RegistNoticeDto;
 import com.moa.admin.repository.AdminQnARepository;
 import com.moa.entity.Notice;
 import com.moa.entity.Question;
+import com.moa.entity.User;
+import com.moa.entity.User.ApprovalStatus;
 import com.moa.repository.NoticeRepository;
 import com.moa.repository.QuestionRepository;
+import com.moa.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +31,7 @@ public class AdminServiceImpl implements AdminService {
 	private final NoticeRepository noticeRepository;
 	private final QuestionRepository questionRepository;
 	private final AdminQnARepository adminQnARepository;
+	private final UserRepository userRepository;
 	//admin notice 
 	@Override
 	public List<NoticeDto> allNoticeList() throws Exception {
@@ -78,6 +83,14 @@ public class AdminServiceImpl implements AdminService {
 		questionRepository.save(question);
 	}
 	
+	
+	
+	//관리자 작가 신청목록 불러오기 
+	@Override
+	public List<ArtistUserDto> getApplyArtistList() throws Exception {
+		List<ArtistUserDto> applyArtistList = userRepository.findByArtistApprovalStatus(ApprovalStatus.PENDING).stream().map((u)->ArtistUserDto.fromEntity(u)).collect(Collectors.toList());
+		return applyArtistList;
+	}
 	
 	
 	
