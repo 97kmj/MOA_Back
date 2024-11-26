@@ -58,6 +58,9 @@ public class User {
 	@PrePersist
 	protected void onCreate() {
 		this.createAt = new Timestamp(System.currentTimeMillis());
+		if (this.artistApprovalStatus == null) {
+			this.artistApprovalStatus = ApprovalStatus.NORMAL; // 기본값 설정
+		}
 	}
 
 	// Enums
