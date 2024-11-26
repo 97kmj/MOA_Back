@@ -7,6 +7,7 @@ import com.moa.config.jwt.JwtToken;
 import com.moa.oauth.OAuth2SuccessHandler;
 import com.moa.oauth.PrincipalOAuth2UserService;
 import com.moa.repository.UserRepository;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +17,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.filter.CorsFilter;
 
@@ -55,6 +57,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthenticationManager authenticationManager = authenticationManager(http.getSharedObject(AuthenticationConfiguration.class));
 
+        //추가
+        http.exceptionHandling()
+            .authenticationEntryPoint(authenticationEntryPoint());
+
+
         http.csrf().disable()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
@@ -64,12 +71,15 @@ public class SecurityConfig {
             .addFilter(new JwtAuthenticationFilter(authenticationManager, jwtToken))
             .addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository, jwtToken))
             .authorizeRequests()
+
+
             // 인증이 필요하지 않은 경로 설정
 
             // main 이나 / 넣어야할수도
-            .antMatchers("/api/user/check-username","/api/user/register", "/api/user/login", "/api/user/refresh-token", "/oauth2/**").permitAll()
+            .antMatchers("/api/user/check-username","/api/user/register", "/api/user/login", "/api/user/refresh-token", "/oauth2/**","/api/user/**").permitAll()
 
             .antMatchers("/user/**").authenticated() // 로그인 필요
+            .antMatchers("/api/like/**").authenticated()
             .antMatchers("/admin/**").hasRole("ADMIN")
             .antMatchers("/artist/**").hasRole("ARTIST")
             .anyRequest().permitAll()
@@ -88,5 +98,12 @@ public class SecurityConfig {
 
         return http.build();
     }
-
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> {
+            response.setContentType("application/json;charset=UTF-8");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"로그인이 필요합니다.\"}");
+        };
+    }
 }
