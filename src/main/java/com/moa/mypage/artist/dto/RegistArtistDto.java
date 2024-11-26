@@ -1,16 +1,16 @@
 package com.moa.mypage.artist.dto;
 
-import org.springframework.web.multipart.MultipartFile;
-
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Getter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class RegistArtistDto {
 	private String username;
-	private MultipartFile portfolio;
-	private MultipartFile profileImage;
 	private String artistNote;
 	private String artistCareer;
 }
