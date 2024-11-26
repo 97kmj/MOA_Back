@@ -24,7 +24,7 @@ public class Canvas {
     private Long canvasId;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private CanvasNum canvasNum;
 
     public enum CanvasNum {
@@ -51,6 +51,7 @@ public class Canvas {
         TWO_HUNDRED("200호"),
         THREE_HUNDRED("300호"),
         FIVE_HUNDRED("500호");
+
 
         private final String value;
 

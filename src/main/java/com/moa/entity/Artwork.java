@@ -13,6 +13,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
+import com.moa.shop.dto.ArtworkDto.ArtworkDtoBuilder;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -79,6 +81,8 @@ public class Artwork {
     public enum CanvasType { F, P, M, S }
     
     public enum SaleStatus { AVAILABLE, SOLD_OUT, NOT_SALE, DELETE }
+
+
 
 	
 }

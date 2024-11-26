@@ -34,6 +34,7 @@ public class ShopServiceImpl implements ShopService {
 	private final SubjectRepository subjectRepository;
 	private final CanvasRepository canvasRepository;
 	private final ImageService imageService;
+	private final ArtworkAddMapper artworkAddMapper;
 	
 	
 	
@@ -60,7 +61,7 @@ public class ShopServiceImpl implements ShopService {
 			ArtworkImgeUrl = imageService.saveImage(rootFolder, fileType, artworkImage);
 		}
 		
-		Artwork artwork = ArtworkAddMapper.toArtworkEntity(artworkDto, ArtworkImgeUrl);
+		Artwork artwork = artworkAddMapper.toArtworkEntity(artworkDto, ArtworkImgeUrl);
 		
 		artworkRepository.save(artwork);
 		return artwork.getArtworkId();
