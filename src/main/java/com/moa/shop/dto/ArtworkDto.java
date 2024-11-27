@@ -48,3 +48,4 @@ public class ArtworkDto {
 	private Integer typeId;	
 
 }
+

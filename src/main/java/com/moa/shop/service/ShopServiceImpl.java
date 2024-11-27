@@ -3,6 +3,7 @@ package com.moa.shop.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,7 +23,7 @@ import com.moa.shop.dto.CanvasDto;
 import com.moa.shop.dto.CategoryDto;
 import com.moa.shop.dto.SubjectDto;
 import com.moa.shop.dto.TypeDto;
-import com.moa.shop.mapper.ArtworkAddMapper;
+import com.moa.shop.repository.ArtworkDslRepository;
 import com.moa.user.service.util.PageInfo;
 
 import lombok.RequiredArgsConstructor;
@@ -37,15 +38,24 @@ public class ShopServiceImpl implements ShopService {
 	private final SubjectRepository subjectRepository;
 	private final CanvasRepository canvasRepository;
 	private final ImageService imageService;
-	private final ArtworkAddMapper artworkAddMapper;
 	private final UserRepository userRepository;
-	
+	private final ArtworkDslRepository artworkDslRepository;
 	
 	
 	@Override
-	public List<ArtworkDto> artworkList(PageInfo page, String category, String type, String subject, String saletype)throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public List<ArtworkDto> artworkList(Integer page, String category, String type, String subject, String saleStatus, String keyword, Integer size)throws Exception {
+		//페이징처리
+		PageRequest pageRequest = PageRequest.of(page, size);
+		List<ArtworkDto> artworkList = null;
+		//필터링
+//        if (subject != null || type != null || category != null || keyword != null) {
+//        	artworkList = artworkDslRepository.searchArtworkListByPaging(subject, type, category, keyword, saleStatus, pageRequest)
+//        			.stream().map(a->a.toDto()).collect(Collectors.toList());
+//        } else {//전체검색
+//        	artworkList = artworkDslRepository.findArtworkListByPaging(pageRequest)
+//        			.stream().map(a->a.toDto()).collect(Collectors.toList());
+//        }
+        return artworkList;
 	}
 
 	@Override
@@ -72,8 +82,8 @@ public class ShopServiceImpl implements ShopService {
 						.height(artworkDto.getHeight())
 						.imageUrl(ArtworkImgeUrl)
 						.isStandardCanvas(artworkDto.getIsStandardCanvas())
-						.length(artworkDto.getLength())
-						.price(artworkDto.getPrice())
+						.length(artworkDto.getLength()) 
+						.price(artworkDto.getPrice() == null? artworkDto.getPrice() : 0 )
 						.saleStatus(SaleStatus.valueOf(artworkDto.getSaleStatus()))
 						.stock(artworkDto.getStock())
 						.termsAccepted(true)

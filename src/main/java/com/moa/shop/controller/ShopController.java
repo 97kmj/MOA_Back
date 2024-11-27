@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moa.entity.Artwork;
 import com.moa.shop.dto.ArtworkDto;
 import com.moa.shop.dto.CanvasDto;
 import com.moa.shop.dto.CategoryDto;
@@ -78,48 +79,39 @@ public class ShopController {
         } 
     }
 	
-	
-	
-	
 	// 작품등록
 	@PostMapping("/shop/artworkAdd")
-	public ResponseEntity<Long> artworkAdd(@RequestPart("artworkDto") String artworkDto,
+	public ResponseEntity<Long> artworkAdd(@RequestPart("artworkDto") ArtworkDto artworkDto,
 			@RequestPart("artworkImage")MultipartFile artworkImage){
 			try {
-				ObjectMapper objectMapper = new ObjectMapper();
-				ArtworkDto artworkInfo = objectMapper.readValue(artworkDto, ArtworkDto.class);
+				
 				
 				System.out.println("artwork :" + artworkDto);
 				System.out.println("artworkImage :" + artworkImage);
 				
-				Long artworkNum = shopService.artworkAdd(artworkInfo,artworkImage);
+				Long artworkNum = shopService.artworkAdd(artworkDto,artworkImage);
 				return new ResponseEntity<Long>(artworkNum,HttpStatus.OK);
 			}catch (Exception e) {
 				e.printStackTrace();
 				return new ResponseEntity<Long>(HttpStatus.BAD_REQUEST);
 			}
 		}
-	
-	
-	
-	@GetMapping("/shop/saleList")
-	public ResponseEntity<Map<String,Object>>saleList(@RequestParam(value="page", required = false, defaultValue = "1")Integer page,
+
+	@GetMapping("/shop/saleList") 
+	public ResponseEntity<List<ArtworkDto>>saleList(
+			@RequestParam(value="page", required = false, defaultValue = "1")Integer page,
 			@RequestParam(value = "category", required = false)String category,
 			@RequestParam(value = "type", required = false)String type,
 			@RequestParam(value = "subject", required = false)String subject,
 			@RequestParam(value = "keyword", required = false)String keyword,
-			@RequestParam(value = "saletype", required = false)String saletype){
+			@RequestParam(value = "saleStatus", required = false)String saleStatus,
+			@RequestParam(value ="size", required = false, defaultValue = "0") int size){
 		try {
-			PageInfo pageInfo = new PageInfo();
-			pageInfo.setCurPage(page);
-			List<ArtworkDto> artworkList = shopService.artworkList(pageInfo, category, type, subject, saletype);
-			Map<String, Object> listInfo = new HashMap<>();
-			listInfo.put("artworkList", artworkList);
-			listInfo.put("pageInfo", pageInfo);
-			return new ResponseEntity<Map<String,Object>>(listInfo, HttpStatus.OK);
+			List<ArtworkDto> artworkList = shopService.artworkList(page, category, keyword, type, subject, saleStatus,size);
+			return new ResponseEntity<List<ArtworkDto>>(artworkList, HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Map<String,Object>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<List<ArtworkDto>>(HttpStatus.BAD_REQUEST);
 		}
 		
 	}
