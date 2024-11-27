@@ -76,8 +76,7 @@ public class SecurityConfig {
             // 인증이 필요하지 않은 경로 설정
 
             // main 이나 / 넣어야할수도
-            .antMatchers("/api/user/check-username","/api/user/register", "/api/user/login", "/api/user/refresh-token", "/oauth2/**","/api/user/**").permitAll()
-
+            .antMatchers("/api/user/check-username","/api/user/register", "/api/user/login", "/api/user/refresh-token", "/oauth2/**","/api/user/**","/api/mypage/**").permitAll()
             .antMatchers("/user/**").authenticated() // 로그인 필요
             .antMatchers("/api/like/**").authenticated()
             .antMatchers("/admin/**").hasRole("ADMIN")

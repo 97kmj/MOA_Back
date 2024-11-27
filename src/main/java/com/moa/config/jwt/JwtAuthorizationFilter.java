@@ -46,7 +46,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             path.equals("/adminNotice")  ||
             path.equals("/writeAnswer")  ||
             path.equals("/artistSubmit") ||
-            path.equals("/adminApplyArtists");
+            path.equals("/adminApplyArtists") ||
+            path.equals("/artistInfo");
     }
 
     @Override

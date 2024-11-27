@@ -24,11 +24,5 @@ public class Category {
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer categoryId;
 	private String categoryName;
-	
-//    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Type> types = new ArrayList<>();
-//
-//    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Subject> subjects = new ArrayList<>();
 
 }

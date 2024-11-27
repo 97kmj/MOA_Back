@@ -7,13 +7,17 @@ import java.util.Date;
 
 import com.moa.entity.User;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Getter
 @Builder
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class FundingInfoDTO {
 	private String title;
 	private User user;
@@ -27,6 +31,8 @@ public class FundingInfoDTO {
 	@Getter
 	@Builder
 	@ToString
+	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class Schedule {
 		private Date startDate;
 		private Date endDate;
@@ -36,6 +42,8 @@ public class FundingInfoDTO {
 	@Getter
 	@Builder
 	@ToString
+	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class Registrant {
 		private String name;
 		private Account account;
@@ -44,6 +52,8 @@ public class FundingInfoDTO {
 		@Getter
 		@Builder
 		@ToString
+		@NoArgsConstructor
+		@AllArgsConstructor
 		public static class Account {
 			private String bank;
 			private String account;

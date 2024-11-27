@@ -9,6 +9,7 @@ import com.moa.config.image.FolderConstants;
 import com.moa.config.image.ImageService;
 import com.moa.entity.User;
 import com.moa.entity.User.ApprovalStatus;
+import com.moa.mypage.artist.dto.EditArtistDto;
 import com.moa.mypage.artist.dto.RegistArtistDto;
 import com.moa.repository.UserRepository;
 
@@ -46,11 +47,29 @@ public class MyPageArtistServiceImpl implements MyPageArtistService {
 		
 		userRepository.save(user);
 	}
+	
+	@Override
+	public EditArtistDto getArtistInfo(String username) throws Exception {
+		User user = userRepository.findById(username).orElseThrow(()->new Exception("username 오류"));
+		return EditArtistDto.fromEntity(user);
+	}
 
 	@Override
-	public void modifyArtistInfo() throws Exception {
-		// TODO Auto-generated method stub
-
+	public void modifyArtistInfo(EditArtistDto editArtistDto, MultipartFile profileImage) throws Exception {
+		String rootFolder = FolderConstants.USER_ROOT; // "user"
+		String profileImageType = FolderConstants.USER_PROFILE; // "profileImage"
+		
+		User user = userRepository.findById(editArtistDto.getUsername()).orElseThrow(()->new Exception("username 오류"));
+		user.setArtistCareer(editArtistDto.getArtistCareer());
+		user.setArtistNote(editArtistDto.getArtistNote());
+		
+		String profileImageUrl = null;
+		//프로필 이미지를 변경했을 경우만 변경
+		if (profileImage!= null && !profileImage.isEmpty()) {
+			profileImageUrl = imageService.saveImage(rootFolder,profileImageType, profileImage);
+			user.setProfileImage(profileImageUrl);
+		}
+		userRepository.save(user);
 	}
 
 }
