@@ -93,5 +93,7 @@ public class Artwork {
     
     public enum SaleStatus { AVAILABLE, SOLD_OUT, NOT_SALE, DELETE }
 
+
+
 	
 }

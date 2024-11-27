@@ -28,6 +28,18 @@ public class FundingController {
 	private final FundingService fundingService;
 
 
+	@GetMapping
+	public ResponseEntity<List<FundingDetailDTO>> getFundingList() {
+		try {
+			List<FundingDetailDTO> fundingList = fundingService.getFundingList();
+			return ResponseEntity.ok(fundingList);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.badRequest().build();
+		}
+	}
+
+
 	@PostMapping
 	public ResponseEntity<Void> createFunding(
 		@RequestPart("fundingInfo")FundingInfoDTO fundingInfo,
@@ -51,6 +63,9 @@ public class FundingController {
 		}
 	}
 
+
+
+
 	@GetMapping("/{fundingId}")
 	public ResponseEntity<FundingDetailDTO> getFundingDetail(@PathVariable Long fundingId) {
 		try {
@@ -62,5 +77,6 @@ public class FundingController {
 			return ResponseEntity.badRequest().build();
 		}
 	}
+
 
 }

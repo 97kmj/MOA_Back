@@ -41,7 +41,7 @@ public class FundingDetailMapper {
 			.title(fundingEntity.getTitle())
 			.fundingMainImageUrl(fundingEntity.getFundingMainImageUrl())
 			.fundingUserName(fundingEntity.getUser().getUsername())
-			.totalAmount(fundingEntity.getCurrentAmount() != null ? BigDecimal.valueOf(fundingEntity.getCurrentAmount()) : BigDecimal.ZERO)
+			.totalAmount(fundingEntity.getCurrentAmount() != null ? (fundingEntity.getCurrentAmount()) : BigDecimal.ZERO)
 			.goalAmount(fundingEntity.getGoalAmount())
 			.startDate(fundingEntity.getStartDate())
 			.endDate(fundingEntity.getEndDate())

@@ -1,5 +1,7 @@
 package com.moa.funding.service.fundingImplements;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -98,7 +100,9 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	public void updateFundingCurrentAmount(PaymentRequest paymentRequest) {
 		Funding funding = getFunding(paymentRequest);
 		// Step 1: 펀딩의 currentAmount 업데이트
-		funding.setCurrentAmount(funding.getCurrentAmount() + paymentRequest.getTotalAmount());
+		funding.setCurrentAmount(
+			funding.getCurrentAmount().add(BigDecimal.valueOf(paymentRequest.getTotalAmount()))
+		);
 		fundingRepository.save(funding);
 	}
 

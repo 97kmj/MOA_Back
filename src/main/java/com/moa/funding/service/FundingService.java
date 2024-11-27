@@ -16,4 +16,5 @@ public interface FundingService {
 
 		FundingDetailDTO getFundingDetail(Long fundingId);
 
+	List<FundingDetailDTO> getFundingList();
 }
