@@ -24,12 +24,14 @@ public class NoticeAndFAQServiceImpl implements NoticeAndFAQService {
 	private final FAQRepository faqRepository;
 	private final QuestionRepository questionRepository;
 	private final UserRepository userRepository;
+	
 	@Override
 	public List<NoticeDto> getNotices(int page, int size) throws Exception {
 		List<NoticeDto> noticeList = null;
 		noticeList = noticeRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size)).stream().map(notice->NoticeDto.fromEntity(notice)).collect(Collectors.toList());
 		return noticeList;
 	}
+	
 	@Override
 	public Integer getNoticeCount() throws Exception {
 		return (int)noticeRepository.count();
@@ -40,6 +42,8 @@ public class NoticeAndFAQServiceImpl implements NoticeAndFAQService {
 		List<FAQDto> faqList = faqRepository.findAll().stream().map(f->FAQDto.fromEntity(f)).collect(Collectors.toList());
 		return faqList;
 	}
+	
+	
 	@Override
 	public void sendQuestion(RequestQuestionDto questionDto) throws Exception {
 		Question question = Question.builder()

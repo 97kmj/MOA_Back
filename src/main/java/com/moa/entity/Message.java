@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -41,10 +43,12 @@ public class Message {
     @Column(nullable = false)
     private String content;
 
+    @CreationTimestamp
     private Timestamp createAt;
+    
     private Boolean readStatus;
     private String reply;
     private Boolean replyReadState;
-    private Date replyAt;
+    private Timestamp replyAt;
 
 }
