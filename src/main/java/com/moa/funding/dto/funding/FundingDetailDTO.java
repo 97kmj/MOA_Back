@@ -1,6 +1,7 @@
 package com.moa.funding.dto.funding;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -22,8 +23,8 @@ public class FundingDetailDTO {
 	private String fundingUserName;
 	private BigDecimal totalAmount;
 	private BigDecimal goalAmount;
-	private Date startDate;
-	private Date endDate;
+	private Instant startDate;
+	private Instant endDate;
 	private String introduction;
 	private List<RewardDTO> rewards;
 	private List<ImageDTO> images;
