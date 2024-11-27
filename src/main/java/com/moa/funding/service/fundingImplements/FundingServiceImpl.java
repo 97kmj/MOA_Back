@@ -42,31 +42,37 @@ public class FundingServiceImpl implements FundingService {
 		return fundingRepositoryCustom.findFundingDetailById(fundingId);
 	}
 
+	@Override
+	public List<FundingDetailDTO> getFundingList() {
+		return List.of();
+	}
 
 	@Override
 	public void createFunding(FundingInfoDTO fundingInfoDTO, List<RewardDTO> rewardDTOs, List<ArtworkDTO> artworkDTOs,
 		MultipartFile mainImage, List<MultipartFile> artworkImages) {
+		log.info("펀딩 생성 시작 - Title: {}", fundingInfoDTO.getTitle());
 
 		//Step1: Funding 생성 및 저장
 		Funding funding = createFunding(fundingInfoDTO, mainImage);
+		log.info("펀딩 저장 완료 - ID: {}", funding.getFundingId());
 
 		//Step2: Reward 생성 및 저장
 		createRewards(rewardDTOs, funding);
+		log.info("리워드 저장 완료 - 펀딩 ID: {}", funding.getFundingId());
 
 		//Step3: Artwork 생성 및 저장
 		createArtworks(artworkDTOs, artworkImages, funding);
+		log.info("아트워크 저장 완료 - 펀딩 ID: {}", funding.getFundingId());
 	}
 
-
 	private Funding createFunding(FundingInfoDTO fundingInfoDTO, MultipartFile mainImage) {
-		// String fileType = "mainImage";
 		String rootFolder = FolderConstants.FUNDING_ROOT; // "funding"
 		String fileType = FolderConstants.FUNDING_MAIN_IMAGE; // "mainImage"
 
 		String fundingMainImageUrl = null;
 		// 이미지 파일 저장 및 정보 설정
 		if (mainImage != null && !mainImage.isEmpty()) {
-		fundingMainImageUrl = imageService.saveImage(rootFolder,fileType, mainImage);
+			fundingMainImageUrl = imageService.saveImage(rootFolder, fileType, mainImage);
 		}
 
 		Funding funding = FundingCreationMapper.toFundingEntity(fundingInfoDTO, fundingMainImageUrl);
@@ -86,8 +92,9 @@ public class FundingServiceImpl implements FundingService {
 		String rootFolder = FolderConstants.FUNDING_ROOT;
 		String fileType = FolderConstants.FUNDING_ART_IMAGE;
 
-		List<FundingImage> fundingImages = IntStream.range(0,artworkDTOs.size())
-			.mapToObj(i -> createSingleFundingImage(artworkDTOs.get(i), artworkImages.get(i), funding, rootFolder, fileType))
+		List<FundingImage> fundingImages = IntStream.range(0, artworkDTOs.size())
+			.mapToObj(
+				i -> createSingleFundingImage(artworkDTOs.get(i), artworkImages.get(i), funding, rootFolder, fileType))
 			.collect(Collectors.toList());
 
 		fundingImageRepository.saveAll(fundingImages);
@@ -111,8 +118,6 @@ public class FundingServiceImpl implements FundingService {
 			throw new IllegalArgumentException("ArtworkDTOs and artworkImages size 가 다르다 .");
 		}
 	}
-
-
 
 }
 

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
 @RequestMapping("/api/user")
 public class UserController {

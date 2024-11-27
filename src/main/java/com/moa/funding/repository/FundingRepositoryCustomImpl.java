@@ -32,58 +32,20 @@ public class FundingRepositoryCustomImpl implements FundingRepositoryCustom {
 
 	@Override
 	public FundingDetailDTO findFundingDetailById(Long fundingId) {
-		// 1. 조인된 데이터를 조회
-		List<Tuple> joinedData = fetchJoinedFundingData(fundingId);
 
-		// 2. Funding 엔티티 추출
-		Funding fundingEntity = getFundingFromJoinedData(joinedData);
+		// 1. 펀딩 데이터 가져오기
+		Funding funding = getFunding(fundingId);
 
-		// 3. RewardDTO 리스트 추출
-		List<RewardDTO> rewardDTOList = getRewardDTOListFromJoinedData(joinedData);
+		// 2. 리워드 데이터 가져오기
+		List<RewardDTO> rewardDTOList = getRewardDTOs(fundingId);
 
-		// 4. ImageDTO 리스트 추출
-		List<ImageDTO> imageDTOList = getImageDTOListFromJoinedData(joinedData);
+		// 3. 작품 이미지 데이터 가져오기
+		List<ImageDTO> imageDTOList = getImageDTOs(fundingId);
 
-		// 5. DTO 생성
-		return FundingDetailMapper.toFundingDetailDTO(fundingEntity, rewardDTOList, imageDTOList);
+
+		// 4. DTO 생성 및 반환
+		return FundingDetailMapper.toFundingDetailDTO(funding, rewardDTOList, imageDTOList);
 	}
-
-	// 1. 조인된 데이터를 조회하는 메서드
-	private List<Tuple> fetchJoinedFundingData(Long fundingId) {
-		return queryFactory
-			.select(funding, reward, fundingImage)
-			.from(funding)
-			.leftJoin(reward).on(reward.funding.fundingId.eq(funding.fundingId))
-			.leftJoin(fundingImage).on(fundingImage.funding.fundingId.eq(funding.fundingId))
-			.where(funding.fundingId.eq(fundingId))
-			.fetch();
-	}
-
-	// 2. Funding 엔티티 추출
-	private Funding getFundingFromJoinedData(List<Tuple> joinedData) {
-		return joinedData.get(0).get(funding); // 첫 번째 Tuple에서 Funding 엔티티 추출
-	}
-
-	// 3. RewardDTO 리스트 추출
-	private List<RewardDTO> getRewardDTOListFromJoinedData(List<Tuple> joinedData) {
-		return joinedData.stream()
-			.map(tuple -> tuple.get(reward)) // Reward 엔티티 추출
-			.filter(Objects::nonNull) // Null 값 제거
-			.distinct() // 중복 제거
-			.map(FundingDetailMapper::toRewardDTO) // DTO로 변환
-			.collect(Collectors.toList());
-	}
-
-	// 4. ImageDTO 리스트 추출
-	private List<ImageDTO> getImageDTOListFromJoinedData(List<Tuple> joinedData) {
-		return joinedData.stream()
-			.map(tuple -> tuple.get(fundingImage)) // FundingImage 엔티티 추출
-			.filter(Objects::nonNull) // Null 값 제거
-			.distinct() // 중복 제거
-			.map(FundingDetailMapper::toImageDTO) // DTO로 변환
-			.collect(Collectors.toList());
-	}
-
 
 	@NotNull
 	private Funding getFunding(Long fundingId) {
@@ -118,6 +80,67 @@ public class FundingRepositoryCustomImpl implements FundingRepositoryCustom {
 			.fetch()
 			.stream()
 			.map(FundingDetailMapper::toImageDTO)
+			.collect(Collectors.toList());
+	}
+
+
+
+	// 조인으로 하는 메서드 나중에 테스트 해보기
+	// @Override
+	// public FundingDetailDTO findFundingDetailById(Long fundingId) {
+	// 	// 1. 조인된 데이터를 조회
+	// 	List<Tuple> joinedData = selectJoinedFundingData(fundingId);
+	//
+	// 	// 2. Funding 엔티티 추출
+	// 	Funding fundingEntity = getFundingFromJoinedData(joinedData);
+	//
+	// 	// 3. RewardDTO 리스트 추출
+	// 	List<RewardDTO> rewardDTOList = getRewardDTOListFromJoinedData(joinedData);
+	//
+	// 	// 4. ImageDTO 리스트 추출
+	// 	List<ImageDTO> imageDTOList = getImageDTOListFromJoinedData(joinedData);
+	//
+	// 	// 5. DTO 생성
+	// 	return FundingDetailMapper.toFundingDetailDTO(fundingEntity, rewardDTOList, imageDTOList);
+	//
+	//
+	// }
+
+
+
+	// 1. 조인된 데이터를 조회하는 메서드
+	private List<Tuple> selectJoinedFundingData(Long fundingId) {
+		return queryFactory
+			.select(funding, reward, fundingImage)
+			.from(funding)
+			.leftJoin(reward).on(reward.funding.fundingId.eq(funding.fundingId))
+			.leftJoin(fundingImage).on(fundingImage.funding.fundingId.eq(funding.fundingId))
+			.where(funding.fundingId.eq(fundingId))
+			.fetch();
+	}
+
+	// 2. Funding 엔티티 추출
+	private Funding getFundingFromJoinedData(List<Tuple> joinedData) {
+		return joinedData.get(0).get(funding); // 첫 번째 Tuple에서 Funding 엔티티 추출
+	}
+
+	// 3. RewardDTO 리스트 추출
+	private List<RewardDTO> getRewardDTOListFromJoinedData(List<Tuple> joinedData) {
+		return joinedData.stream()
+			.map(tuple -> tuple.get(reward)) // Reward 엔티티 추출
+			.filter(Objects::nonNull) // Null 값 제거
+			.distinct() // 중복 제거
+			.map(FundingDetailMapper::toRewardDTO) // DTO로 변환
+			.collect(Collectors.toList());
+	}
+
+	// 4. ImageDTO 리스트 추출
+	private List<ImageDTO> getImageDTOListFromJoinedData(List<Tuple> joinedData) {
+		return joinedData.stream()
+			.map(tuple -> tuple.get(fundingImage)) // FundingImage 엔티티 추출
+			.filter(Objects::nonNull) // Null 값 제거
+			.distinct() // 중복 제거
+			.map(FundingDetailMapper::toImageDTO) // DTO로 변환
 			.collect(Collectors.toList());
 	}
 
