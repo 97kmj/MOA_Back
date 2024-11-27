@@ -8,6 +8,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import com.moa.entity.Artwork.CanvasType;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +28,14 @@ public class Canvas {
     @Enumerated(EnumType.STRING)
     @Column
     private CanvasNum canvasNum;
-
+    
+    @Enumerated(EnumType.STRING)
+    private CanvasType canvasType;
+    
+    private String width;
+    private String height;
+    
+    public enum CanvasType { F, P, M, S }
     public enum CanvasNum {
         ONE("1호"),
         TWO("2호"),

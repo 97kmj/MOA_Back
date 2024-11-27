@@ -15,10 +15,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class RequestQuestionDto {
-	
 	private String username;
 	private String title;
 	private String content;
-	
-	
 }

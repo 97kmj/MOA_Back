@@ -30,7 +30,6 @@ public class ArtworkAddMapper {
 	public Artwork toArtworkEntity(ArtworkDto artworkDto, String ArtworkImgeUrl) throws Exception {
 
 		return Artwork.builder()
-			
 			.adminCheck(false)
 			.canvasType(CanvasType.valueOf(artworkDto.getCanvasType()))
 			.description(artworkDto.getDescription()!= null ? artworkDto.getDescription() : "") 
