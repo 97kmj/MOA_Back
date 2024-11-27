@@ -10,10 +10,13 @@ import com.moa.entity.QQuestion;
 import com.moa.entity.Question;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import lombok.RequiredArgsConstructor;
+
 @Repository
+@RequiredArgsConstructor
 public class AdminQnARepository {
-	@Autowired
-	JPAQueryFactory jpaQueryFactory;
+	
+	private final JPAQueryFactory jpaQueryFactory;
 	
 	public List<Question> findAnsweredQuestionByDate(Date startDate, Date endDate) {
 		QQuestion question = QQuestion.question;
