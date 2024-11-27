@@ -15,6 +15,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+
+import com.moa.entity.User.ApprovalStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,7 +49,7 @@ public class Funding {
 	private String fundingMainImage;
 	private String fundingMainImageUrl;
 	private Date noticeDate;
-	private Long currentAmount;
+	private BigDecimal currentAmount;
 	
 	@Column(nullable = false,updatable = false)
 	private Timestamp applicationDate;
@@ -61,6 +64,11 @@ public class Funding {
 
     public enum ApprovalStatus { PENDING, APPROVED, REJECTED }
     public enum FundingStatus { STANDBY, ONGOING, SUCCESSFUL, FAILED, CANCELLED }
+    
+    @PrePersist
+	protected void onCreate() {
+		this.currentAmount = BigDecimal.ZERO;
+	}
 
 	
 	

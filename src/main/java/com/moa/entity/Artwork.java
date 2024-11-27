@@ -1,5 +1,7 @@
 package com.moa.entity;
 
+import java.sql.Timestamp;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,6 +12,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+
+import com.moa.entity.User.ApprovalStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,6 +65,9 @@ public class Artwork {
     private String height;
     private String imageUrl;
 
+    @Column(nullable = false, updatable = false)
+	private Timestamp createAt;
+    
     @Column(nullable = false)
     private Long price;
 
@@ -73,6 +81,13 @@ public class Artwork {
     private SaleStatus saleStatus;
     
     private Boolean adminCheck;
+    
+    @PrePersist
+	protected void onCreate() {
+    	this.createAt = new Timestamp(System.currentTimeMillis());
+		this.likeCount = 0;
+	}
+    
 
     public enum CanvasType { F, P, M, S }
     

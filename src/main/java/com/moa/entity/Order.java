@@ -11,7 +11,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+
+import com.moa.entity.User.ApprovalStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,6 +39,7 @@ public class Order {
     @Column(nullable = false)
     private Long totalAmount;
 
+    
     private Timestamp paymentDate;
     private String paymentType;
 
@@ -48,6 +52,11 @@ public class Order {
     private String address;
     private String phoneNumber;
     private String name;
+    
+    @PrePersist
+	protected void onCreate() {
+		this.paymentDate = new Timestamp(System.currentTimeMillis());
+	}
 
     public enum OrderStatus { PENDING, COMPLETED }
     public enum ShippingStatus { NOT_SHIPPED, SHIPPING, DELIVERED }

@@ -61,6 +61,7 @@ public class User {
 		if (this.artistApprovalStatus == null) {
 			this.artistApprovalStatus = ApprovalStatus.NORMAL; // 기본값 설정
 		}
+		this.likeCount = 0;
 	}
 
 	// Enums
