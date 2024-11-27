@@ -51,7 +51,7 @@ public class MockHelper {
 		return user;
 	}
 
-	public static Funding createMockFunding(Long fundingId, Long currentAmount, FundingRepository fundingRepository) {
+	public static Funding createMockFunding(Long fundingId, BigDecimal currentAmount, FundingRepository fundingRepository) {
 		Funding funding = Funding.builder()
 			.fundingId(fundingId)
 			.currentAmount(currentAmount)

@@ -94,7 +94,7 @@ class FundingPaymentServiceTest {
 	@DisplayName("펀딩 결제 성공 시 현재 금액 업데이트 테스트")
 	void testUpdateFundingCurrentAmount() {
 		// Given
-		Funding mockFunding = MockHelper.createMockFunding(1L, 10000L, fundingRepository);
+		Funding mockFunding = MockHelper.createMockFunding(1L, BigDecimal.valueOf(10000L), fundingRepository);
 
 		PaymentRequest paymentRequest = MockHelper.createMockPaymentRequest(
 			5000L, "user1", 1L, List.of(MockHelper.createMockRewardRequest(1L, BigDecimal.valueOf(5000), 1L))
@@ -104,8 +104,10 @@ class FundingPaymentServiceTest {
 		paymentService.updateFundingCurrentAmount(paymentRequest);
 
 		// Then
-		assertEquals(15000L, mockFunding.getCurrentAmount(), "currentAmount가 예상 값과 일치해야 합니다.");
-		verify(fundingRepository).save(argThat(funding -> funding.getCurrentAmount() == 15000L));
+		assertEquals(BigDecimal.valueOf(15000), mockFunding.getCurrentAmount(), "currentAmount가 예상 값과 일치해야 합니다.");
+		verify(fundingRepository).save(argThat(funding ->
+			funding.getCurrentAmount().compareTo(BigDecimal.valueOf(15000)) == 0
+		));
 	}
 
 	@Test
@@ -123,7 +125,7 @@ class FundingPaymentServiceTest {
 
 		// Mock 데이터를 통해 사용자, 펀딩, 리워드 객체를 생성하고 Mock 리포지토리에 등록
 		User mockUser = MockHelper.createMockUser("user1", userRepository); // 사용자 데이터
-		Funding mockFunding = MockHelper.createMockFunding(1L, 10000L, fundingRepository); // 펀딩 데이터
+		Funding mockFunding = MockHelper.createMockFunding(1L, BigDecimal.valueOf(10000L), fundingRepository); // 펀딩 데이터
 		Reward mockReward1 = MockHelper.createMockReward(1L, rewardRepository); // 리워드 1 데이터
 		Reward mockReward2 = MockHelper.createMockReward(2L, rewardRepository); // 리워드 2 데이터
 
@@ -182,7 +184,7 @@ class FundingPaymentServiceTest {
 		MockHelper.createMockUser("user1", userRepository);
 
 		// Mock: 펀딩 존재 설정
-		MockHelper.createMockFunding(1L, 10000L, fundingRepository);
+		MockHelper.createMockFunding(1L, BigDecimal.valueOf(10000L), fundingRepository);
 
 		// When & Then
 		RuntimeException exception = assertThrows(RuntimeException.class, () ->

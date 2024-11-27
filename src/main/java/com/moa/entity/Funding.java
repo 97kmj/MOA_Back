@@ -46,7 +46,7 @@ public class Funding {
 	private String fundingMainImage;
 	private String fundingMainImageUrl;
 	private Date noticeDate;
-	private Long currentAmount;
+	private BigDecimal currentAmount;
 	
 	@Column(nullable = false,updatable = false)
 	private Timestamp applicationDate;
