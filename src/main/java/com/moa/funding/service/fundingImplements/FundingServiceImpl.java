@@ -68,6 +68,14 @@ public class FundingServiceImpl implements FundingService {
 		log.info("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 완료 " );
 	}
 
+	@Scheduled(cron = "0 0 0 * * *") // 매일 0시 0분 0초에 실행
+	@Transactional
+	public void scheduleUpdateToFailed() {
+		log.info("scheduleUpdateToFailed 스케줄링 실행 - FAILED 상태 변경 시작 " );
+		fundingRepositoryCustom.updateFundingToFailed();
+		log.info("scheduleUpdateToFailed 스케줄링 실행 - FAILED 상태 변경 완료 " );
+	}
+
 	@Override
 	public void createFunding(FundingInfoDTO fundingInfoDTO, List<RewardDTO> rewardDTOs, List<ArtworkDTO> artworkDTOs,
 		MultipartFile mainImage, List<MultipartFile> artworkImages) {

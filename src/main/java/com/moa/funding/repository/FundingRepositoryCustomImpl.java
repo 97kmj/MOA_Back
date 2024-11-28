@@ -216,7 +216,7 @@ public class FundingRepositoryCustomImpl implements FundingRepositoryCustom {
 			)
 			.execute();
 
-		log.info("updatedCount: {}", updatedCount);
+		log.info("updateFundingToOnGoing updatedCount: {}", updatedCount);
 	}
 
 	@Override
@@ -235,8 +235,28 @@ public class FundingRepositoryCustomImpl implements FundingRepositoryCustom {
 			)
 				.execute();
 
-		log.info("updateCount: {}", updateCount);
+		log.info("updateFundingToSuccessful updateCount: {}", updateCount);
 	}
+
+	@Override
+	@Transactional
+	public void updateFundingToFailed(){
+	QFunding funding = QFunding.funding;
+
+	Instant today = Instant.now();
+
+		long updatedCount = queryFactory.update(funding)
+			.set(funding.fundingStatus, Funding.FundingStatus.FAILED)
+			.where(funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)
+				.and(funding.fundingStatus.eq(Funding.FundingStatus.ONGOING))
+				.and(funding.endDate.before(today)) //endDate 날짜 < 오늘
+				.and(funding.currentAmount.lt(funding.goalAmount)) // 현재금액 < 목표금액 :현재 금액이 목표금액보다 작은 경우
+			)
+			.execute();
+
+		log.info("updateFundingToFailed updatedCount: {}", updatedCount);
+	}
+
 
 	private BooleanExpression getFilterCondition(String filterType) {
 		QFunding funding = QFunding.funding;

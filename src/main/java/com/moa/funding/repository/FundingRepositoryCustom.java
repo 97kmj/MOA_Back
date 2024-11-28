@@ -1,5 +1,7 @@
 package com.moa.funding.repository;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import com.moa.funding.dto.funding.FundingDetailDTO;
 import com.moa.funding.dto.funding.FundingResponse;
 
@@ -11,4 +13,5 @@ public interface FundingRepositoryCustom {
     void updateFundingToOnGoing();
 	void updateFundingToSuccessful();
 
+	void updateFundingToFailed();
 }
