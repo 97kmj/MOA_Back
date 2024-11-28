@@ -76,6 +76,7 @@ public class UserController {
         userData.put("nickname", user.getNickname());
         userData.put("name", user.getName());
         userData.put("email", user.getEmail());
+        userData.put("artistApprovalStatus",user.getArtistApprovalStatus());
         userData.put("role", user.getRole());
         userData.put("phone", user.getPhone());
         userData.put("address", user.getAddress());
@@ -103,14 +104,7 @@ public class UserController {
             user.setAddress(request.getAddress());
             user.setDetailAddress(request.getDetailAddress());
             user.setExtraAddress(request.getExtraAddress());
-            // artistApprovalStatus Enum 처리
-            ApprovalStatus approvalStatus = request.getArtistApprovalStatus() != null
-                ? request.getArtistApprovalStatus() // 요청에서 Enum 값 가져오기
-                : ApprovalStatus.NORMAL; // 기본값 설정
-
-            user.setArtistApprovalStatus(approvalStatus);
-
-
+            user.setArtistApprovalStatus(User.ApprovalStatus.NORMAL);
             user.setRole(User.Role.USER);
 
             userRepository.save(user);
