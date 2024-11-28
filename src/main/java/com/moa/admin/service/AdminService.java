@@ -8,7 +8,9 @@ import com.moa.admin.dto.FrameDto;
 import com.moa.admin.dto.FundingApplyDto;
 import com.moa.admin.dto.NoticeDto;
 import com.moa.admin.dto.QuestionDto;
+import com.moa.admin.dto.RegistFrameDto;
 import com.moa.admin.dto.RegistNoticeDto;
+import com.moa.shop.dto.CanvasDto;
 
 public interface AdminService {
 	//관리자 공지사항
@@ -33,4 +35,6 @@ public interface AdminService {
 	
 	//관리자 프레임상품
 	List<FrameDto> getFrameList() throws Exception;
+	List<CanvasDto> getCanvasList(String canvasType) throws Exception;
+	void registFrame(RegistFrameDto registFrameDto) throws Exception;
 }
