@@ -64,7 +64,7 @@ public class ArtworkDto {
 	public Artwork toArtworkEntity() throws Exception {
 		return Artwork.builder()
 			.adminCheck(false)
-			.canvasType(CanvasType.valueOf(canvasType))
+			.canvasType(canvasType != null ? CanvasType.valueOf(canvasType) : null)
 			.description(description != null ? description : "") 
 			.height(height!= null ? height: "")
 			.imageUrl(imageUrl)
@@ -77,7 +77,7 @@ public class ArtworkDto {
 			.title(title)
 			.width(width!=null ? width : "" )
 			.artist(User.builder().username(artistId).build())
-			.canvas(Canvas.builder().canvasId(canvasId).build())
+			.canvas(canvasId != null ? Canvas.builder().canvasId(canvasId).build() : null)
 			.category(Category.builder().categoryId(categoryId).build())
 			.subject(Subject.builder().subjectId(subjectId).build())
 			.type(Type.builder().typeId(typeId).build())

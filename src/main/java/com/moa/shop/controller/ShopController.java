@@ -100,12 +100,12 @@ public class ShopController {
 
 	@GetMapping("/shop/saleList") 
 	public ResponseEntity<List<ArtworkDto>>saleList(
-			@RequestParam(value="page", required = false, defaultValue = "1")Integer page,
-			@RequestParam(value = "category", required = false)String category,
-			@RequestParam(value = "type", required = false)String type,
-			@RequestParam(value = "subject", required = false)String subject,
+			@RequestParam(value = "categoryName", required = false)String category,
+			@RequestParam(value = "typeId", required = false)String type,
+			@RequestParam(value = "subjectId", required = false)String subject,
 			@RequestParam(value = "keyword", required = false)String keyword,
 			@RequestParam(value = "saleStatus", required = false)String saleStatus,
+			@RequestParam(value="page", required = false, defaultValue = "1")Integer page,
 			@RequestParam(value ="size", required = false, defaultValue = "0") int size){
 		try {
 			System.out.println(page+ "page1");
@@ -117,7 +117,7 @@ public class ShopController {
 			System.out.println(size +"size");
 			
 			List<ArtworkDto> artworkList = shopService.artworkList(page, category, keyword, type, subject, saleStatus,size);
-
+			System.out.println(artworkList);
 			return new ResponseEntity<List<ArtworkDto>>(artworkList, HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();

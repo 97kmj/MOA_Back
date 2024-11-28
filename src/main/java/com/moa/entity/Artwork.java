@@ -58,7 +58,7 @@ public class Artwork {
     private CanvasType canvasType;
 
     @ManyToOne
-    @JoinColumn(name = "canvas_id", nullable = false) // 외래 키 설정
+    @JoinColumn(name = "canvas_id") // 외래 키 설정
     private Canvas canvas;
 
     private String width;
