@@ -7,4 +7,8 @@ public interface FundingRepositoryCustom {
 	FundingDetailDTO findFundingDetailById(Long fundingId);
 
 	FundingResponse findFundingList(String filterType, String sortOption, int page);
+
+    void updateFundingToOnGoing();
+	void updateFundingToSuccessful();
+
 }
