@@ -13,6 +13,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByProviderAndProviderId(String provider, String providerId);
 
     Optional<User> findByUsername(String username);
+
     
     //승인 여부로 유저리스트 
     List<User> findByArtistApprovalStatus(ApprovalStatus status);
