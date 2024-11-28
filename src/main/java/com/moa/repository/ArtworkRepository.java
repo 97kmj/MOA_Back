@@ -24,6 +24,7 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 	Pageable pageable
 );
 
+
 @Query("SELECT a FROM Artwork a " +
 		"WHERE (:subject IS NULL OR a.subject.subjectName = :subject) " +
 		"AND (:type IS NULL OR a.type.typeName = :type) " +
@@ -38,5 +39,6 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 		@Param("status") String status,
 		Pageable pageable
 	);
+
 
 }

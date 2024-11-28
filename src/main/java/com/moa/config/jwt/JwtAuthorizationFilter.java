@@ -40,14 +40,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             path.equals("/api/user/check-username") ||
             path.equals("/api/user/register") ||
             path.equals("/api/user/login") ||
-            path.startsWith("/oauth2/") ||
-            path.equals("/adminQnA") ||
-            path.equals("/sendQuestion") ||
-            path.equals("/adminNotice")  ||
-            path.equals("/writeAnswer")  ||
-            path.equals("/artistSubmit") ||
-            path.equals("/adminApplyArtists") ||
-            path.equals("/artistInfo");
+            path.startsWith("/oauth2/");
     }
 
     @Override
@@ -90,7 +83,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private boolean requiresAuthentication(String uri) {
-        return uri.startsWith("/api/like/") || uri.contains("/user") || uri.contains("/admin") || uri.contains("/artist");
+        return uri.startsWith("/api/like/") || uri.contains("/user") || uri.contains("/admin");
     }
 
 

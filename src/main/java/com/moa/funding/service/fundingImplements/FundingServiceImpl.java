@@ -15,10 +15,10 @@ import com.moa.entity.Reward;
 import com.moa.funding.dto.funding.ArtworkDTO;
 import com.moa.funding.dto.funding.FundingDetailDTO;
 import com.moa.funding.dto.funding.FundingInfoDTO;
+import com.moa.funding.dto.funding.FundingResponse;
 import com.moa.funding.dto.funding.RewardDTO;
-import com.moa.funding.mapper.FundingCreationMapper;
+import com.moa.funding.mapper.FundingMapper;
 import com.moa.funding.repository.FundingRepositoryCustom;
-import com.moa.funding.repository.FundingRepositoryCustomImpl;
 import com.moa.funding.service.FundingService;
 import com.moa.repository.FundingImageRepository;
 import com.moa.repository.FundingRepository;
@@ -43,8 +43,9 @@ public class FundingServiceImpl implements FundingService {
 	}
 
 	@Override
-	public List<FundingDetailDTO> getFundingList() {
-		return List.of();
+	public FundingResponse getFundingList(String filterType, String sortOption, int page) {
+		return fundingRepositoryCustom.findFundingList(filterType, sortOption, page);
+
 	}
 
 	@Override
@@ -75,14 +76,14 @@ public class FundingServiceImpl implements FundingService {
 			fundingMainImageUrl = imageService.saveImage(rootFolder, fileType, mainImage);
 		}
 
-		Funding funding = FundingCreationMapper.toFundingEntity(fundingInfoDTO, fundingMainImageUrl);
+		Funding funding = FundingMapper.toFundingEntity(fundingInfoDTO, fundingMainImageUrl);
 		fundingRepository.save(funding);
 		return funding;
 	}
 
 	private void createRewards(List<RewardDTO> rewardDTOs, Funding funding) {
 		List<Reward> rewards = rewardDTOs.stream()
-			.map(rewardDTO -> FundingCreationMapper.toRewardEntity(rewardDTO, funding))
+			.map(rewardDTO -> FundingMapper.toRewardEntity(rewardDTO, funding))
 			.collect(Collectors.toList());
 		rewardRepository.saveAll(rewards);
 	}
@@ -110,7 +111,7 @@ public class FundingServiceImpl implements FundingService {
 			fundingArtImageUrl = imageService.saveImage(rootFolder, fileType, artworkImage);
 		}
 		// FundingImage 생성
-		return FundingCreationMapper.toFundingImageEntity(artworkImage, funding, artworkDTO, fundingArtImageUrl);
+		return FundingMapper.toFundingImageEntity(artworkImage, funding, artworkDTO, fundingArtImageUrl);
 	}
 
 	private void validateInputs(List<ArtworkDTO> artworkDTOs, List<MultipartFile> artworkImages) {

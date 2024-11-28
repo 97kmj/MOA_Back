@@ -3,6 +3,8 @@ package com.moa.funding.dto.funding;
 
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Date;
 
 import com.moa.entity.User;
@@ -21,7 +23,6 @@ import lombok.ToString;
 public class FundingInfoDTO {
 	private String title;
 	private User user;
-	private String fundingUserName;
 	private String description;
 	private BigDecimal goalAmount;
 	private Schedule schedule;
@@ -34,8 +35,8 @@ public class FundingInfoDTO {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class Schedule {
-		private Date startDate;
-		private Date endDate;
+		private LocalDate startDate;
+		private LocalDate endDate;
 	}
 
 
@@ -45,7 +46,7 @@ public class FundingInfoDTO {
 	@NoArgsConstructor
 	@AllArgsConstructor
 	public static class Registrant {
-		private String name;
+		private String name; // fundingUserName
 		private Account account;
 
 

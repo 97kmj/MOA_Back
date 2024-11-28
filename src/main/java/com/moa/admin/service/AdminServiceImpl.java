@@ -1,6 +1,7 @@
 package com.moa.admin.service;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,17 +11,26 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.moa.admin.dto.ArtistUserDto;
+import com.moa.admin.dto.FrameDto;
+import com.moa.admin.dto.FundingApplyDto;
+import com.moa.admin.dto.FundingRewardDto;
 import com.moa.admin.dto.NoticeDto;
 import com.moa.admin.dto.QuestionDto;
 import com.moa.admin.dto.RegistNoticeDto;
+import com.moa.admin.repository.AdminFundingRepository;
 import com.moa.admin.repository.AdminQnARepository;
+import com.moa.entity.FrameOption;
+import com.moa.entity.Funding;
 import com.moa.entity.Notice;
 import com.moa.entity.Question;
 import com.moa.entity.User;
 import com.moa.entity.User.ApprovalStatus;
 import com.moa.entity.User.Role;
+import com.moa.repository.FrameOptionRepository;
+import com.moa.repository.FundingRepository;
 import com.moa.repository.NoticeRepository;
 import com.moa.repository.QuestionRepository;
+import com.moa.repository.RewardRepository;
 import com.moa.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -33,6 +43,10 @@ public class AdminServiceImpl implements AdminService {
 	private final QuestionRepository questionRepository;
 	private final AdminQnARepository adminQnARepository;
 	private final UserRepository userRepository;
+	private final FundingRepository fundingRepository;
+	private final AdminFundingRepository adminFundingRepository;
+	private final RewardRepository rewardRepository;
+	private final FrameOptionRepository frameOptionRepository;
 	//admin notice 
 	@Override
 	public List<NoticeDto> allNoticeList() throws Exception {
@@ -109,6 +123,43 @@ public class AdminServiceImpl implements AdminService {
 		userRepository.save(user);	
 	}
 	
+	//관리자 펀딩 신청 리스트 불러오기
+	@Override
+	public List<FundingApplyDto> getApplyFundingList() throws Exception {
+		List<Funding> pendingList = fundingRepository.findByApprovalStatus(Funding.ApprovalStatus.PENDING); //승인대기중인 리스트
+		List<FundingApplyDto> applyFundingList = new ArrayList<>();
+				
+		for(Funding funding : pendingList) {
+			Long fundingId = funding.getFundingId();
+			FundingApplyDto fundingApplyDto = FundingApplyDto.fromFunding(funding);
+			List<FundingRewardDto> rewardList = rewardRepository.findByFunding(funding).stream().map(r->FundingRewardDto.fromReward(r)).collect(Collectors.toList());
+			fundingApplyDto.setRewardList(rewardList);
+			fundingApplyDto.setImageUrlList(adminFundingRepository.getFundingImageUrlByFundingId(fundingId));
+			applyFundingList.add(fundingApplyDto);
+		}
+		return applyFundingList;
+	}
+	
+	//펀딩 승인
+	@Override
+	public void approveFunding(Long fundingId) throws Exception {
+		Funding funding = fundingRepository.findById(fundingId).orElseThrow(()->new Exception("fundingId 오류"));
+		funding.setApprovalStatus(Funding.ApprovalStatus.APPROVED);
+		fundingRepository.save(funding);
+	}
+	//펀딩 반려
+	@Override
+	public void rejectFunding(Long fundingId) throws Exception {
+		Funding funding = fundingRepository.findById(fundingId).orElseThrow(()->new Exception("fundingId 오류"));
+		funding.setApprovalStatus(Funding.ApprovalStatus.REJECTED);
+		fundingRepository.save(funding);		
+	}
+	
+	@Override
+	public List<FrameDto> getFrameList() throws Exception {
+		return frameOptionRepository.findAll().stream().map(f->FrameDto.fromEntity(f)).collect(Collectors.toList());
+		
+	}
 	
 	
 	

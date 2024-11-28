@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -52,12 +54,31 @@ public class LikeService {
         }
     }
 
-    // 사용자가 좋아요한 작품 목록 가져오기
-    public List<Artwork> getLikedArtworks(String username) {
+    // 사용자가 특정 작품을 좋아요했는지 확인
+    public boolean isLikedByUser(String username, Long artworkId) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        return likeArtworkRepository.findByUser(user).stream()
-            .map(LikeArtwork::getArtwork)
-            .collect(Collectors.toList());
+        Artwork artwork = artworkRepository.findById(artworkId)
+            .orElseThrow(() -> new IllegalArgumentException("작품을 찾을 수 없습니다."));
+
+        return likeArtworkRepository.findByUserAndArtwork(user, artwork).isPresent();
+    }
+
+    // 사용자가 좋아요한 작품 목록 가져오기 (필터 및 페이징 적용)
+    public List<Artwork> getLikedArtworks(String username, String subject, String type,
+        String category, String search, int page, int size) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 페이징 처리
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        // 필터링 조건 적용
+        if (subject != null || type != null || category != null || search != null) {
+            return likeArtworkRepository.findLikedArtworksWithFilters(user, subject, type, category, search, pageRequest)
+                .getContent();
+        } else {
+            return likeArtworkRepository.findByUser(user, pageRequest).getContent();
+        }
     }
 }
