@@ -8,7 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.moa.entity.Artwork.CanvasType;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

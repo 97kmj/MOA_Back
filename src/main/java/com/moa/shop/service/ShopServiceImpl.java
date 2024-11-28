@@ -1,5 +1,6 @@
 package com.moa.shop.service;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.moa.config.image.FolderConstants;
 import com.moa.config.image.ImageService;
 import com.moa.entity.Artwork;
+import com.moa.entity.Artwork.SaleStatus;
 import com.moa.entity.Canvas;
 import com.moa.entity.User;
 import com.moa.repository.ArtworkRepository;
@@ -42,17 +44,6 @@ public class ShopServiceImpl implements ShopService {
 	private final UserRepository userRepository;
 	private final ArtworkDslRepository artworkDslRepository;
 	
-	@Override
-	public List<ArtworkDto> artworkList(PageInfo page, String category, String type, String subject, String saletype)throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<ArtworkDto> artworkListByArtist(PageInfo page, String keyword) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public Long artworkAdd(ArtworkDto artworkDto, MultipartFile artworkImage) throws Exception {
@@ -112,29 +103,47 @@ public class ShopServiceImpl implements ShopService {
 	}
 
 	@Override
-	public List<ArtworkDto> artworkList(Integer page, String category, String keyword, String type, String subject, String saleStatus,
+	public List<ArtworkDto> artworkList(Integer page, String category, String keyword, String type, String subject, SaleStatus saleStatus,
 			Integer size) throws Exception {
 		System.out.println("if 들어가기전");
 		 	page = (page != null && page > 0) ? page - 1 : 0;
 		    size = (size != null && size > 0) ? size : 8;  // 기본 페이지 크기 설정
 			PageRequest pageRequest = PageRequest.of(page, size);
-			if ((subject != null && !subject.isEmpty()) || (type != null && !type.isEmpty()) || (category != null && !category.isEmpty()) || (keyword != null && !keyword.isEmpty())|| (saleStatus !=null && !saleStatus.isEmpty())) {
+			if ((subject != null && !subject.isEmpty()) || (type != null && !type.isEmpty()) || (category != null && !category.isEmpty()) || (keyword != null && !keyword.isEmpty())|| (saleStatus !=null)) {
 				System.out.println("if 들어간후");
 				List<ArtworkDto> ListArtworkDto = artworkRepository.findBySearches(subject, type, category, keyword, saleStatus, pageRequest)
 						.stream().map(a->ArtworkDto.toArtworkDto(a)).collect(Collectors.toList());
 				return ListArtworkDto;
 			 } else {
 				 System.out.println("else");
-		            List<ArtworkDto> ListArtworkDto = artworkRepository.findAll(pageRequest)
+		         List<ArtworkDto> ListArtworkDto = artworkRepository.findBySaleStatus(pageRequest)
 		            		.stream().map(a->ArtworkDto.toArtworkDto(a)).collect(Collectors.toList());
 		            return  ListArtworkDto;
 		       }
 			
 			
-//			List<ArtworkDto> ListArtworkDto = artworkDslRepository.searchArtworkListByPaging(category, type, subject, saleStatus, keyword, pageRequest)
-//					.stream().map(a->ArtworkDto.toArtworkDto(a)).collect(Collectors.toList());
+
 		
-		
+	}
+
+	@Override
+	public List<ArtworkDto> artworkList(Integer page, String category, String type, String subject, String saleStatus,
+			String keyword, Integer size) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<ArtworkDto> artworkListByArtist(PageInfo page, String keyword) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<ArtworkDto> artworkList(PageInfo page, String category, String type, String subject, String saletype)
+			throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

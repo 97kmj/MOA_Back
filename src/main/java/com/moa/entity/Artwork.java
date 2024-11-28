@@ -54,8 +54,6 @@ public class Artwork {
     private Boolean isStandardCanvas;
     
     
-    @Enumerated(EnumType.STRING)
-    private CanvasType canvasType;
 
     @ManyToOne
     @JoinColumn(name = "canvas_id") // 외래 키 설정
@@ -90,8 +88,7 @@ public class Artwork {
 	}
     
 
-    public enum CanvasType { F, P, M, S }
-    
+      
     public enum SaleStatus { AVAILABLE, SOLD_OUT, NOT_SALE, DELETE }
 
 
