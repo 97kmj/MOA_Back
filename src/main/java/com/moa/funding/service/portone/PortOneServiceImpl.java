@@ -1,5 +1,6 @@
 package com.moa.funding.service.portone;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.moa.entity.FundingOrder;
 import com.siot.IamportRestClient.IamportClient;
+import com.siot.IamportRestClient.exception.IamportResponseException;
+import com.siot.IamportRestClient.request.CancelData;
 import com.siot.IamportRestClient.response.IamportResponse;
 import com.siot.IamportRestClient.response.Payment;
 import lombok.extern.slf4j.Slf4j;
@@ -109,6 +113,21 @@ public class PortOneServiceImpl implements PortOneService {
 		} catch (Exception e) {
 			log.error("결제 사전 등록 중 오류 발생: {}", e.getMessage(), e);
 			throw new RuntimeException("결제 사전 등록 중 오류 발생: " + e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public void refundOrder(FundingOrder order) {
+		try {
+			iamportClient.cancelPaymentByImpUid(
+				new CancelData(order.getImpUid(), true, BigDecimal.valueOf(order.getTotalAmount()))
+			);
+
+			log.info("환불 성공: orderId={}, impUid={}, amount={}",
+				order.getFundingOrderId(), order.getImpUid(), order.getTotalAmount());
+		} catch (IamportResponseException | IOException e) {
+			log.error("환불 실패: orderId={}, error={}", order.getFundingOrderId(), e.getMessage());
+			throw new RuntimeException("환불 처리 중 오류 발생: " + e.getMessage(), e);
 		}
 	}
 

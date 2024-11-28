@@ -37,6 +37,10 @@ public class FundingOrder {
 	@Enumerated(EnumType.STRING)
     private RefundStatus refundStatus;
 
+	@ManyToOne
+	@JoinColumn(name = "funding_id", nullable = false)
+	private Funding funding;
+
 	private String address;
 	private String phoneNumber;
 	private String name;

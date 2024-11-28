@@ -20,7 +20,8 @@ import com.moa.funding.dto.funding.FundingInfoDTO;
 import com.moa.funding.dto.funding.FundingResponse;
 import com.moa.funding.dto.funding.RewardDTO;
 import com.moa.funding.mapper.FundingMapper;
-import com.moa.funding.repository.FundingRepositoryCustom;
+import com.moa.funding.repository.FundingSelectRepositoryCustom;
+import com.moa.funding.repository.FundingStatusRepositoryCustom;
 import com.moa.funding.service.FundingService;
 import com.moa.repository.FundingImageRepository;
 import com.moa.repository.FundingRepository;
@@ -37,16 +38,17 @@ public class FundingServiceImpl implements FundingService {
 	private final RewardRepository rewardRepository;
 	private final FundingImageRepository fundingImageRepository;
 	private final ImageService imageService;
-	private final FundingRepositoryCustom fundingRepositoryCustom;
+	private final FundingSelectRepositoryCustom fundingSelectRepositoryCustom;
+	private  final FundingStatusRepositoryCustom fundingStatusRepositoryCustom;
 
 	@Override
 	public FundingDetailDTO getFundingDetail(Long fundingId) {
-		return fundingRepositoryCustom.findFundingDetailById(fundingId);
+		return fundingSelectRepositoryCustom.findFundingDetailById(fundingId);
 	}
 
 	@Override
 	public FundingResponse getFundingList(String filterType, String sortOption, int page) {
-		return fundingRepositoryCustom.findFundingList(filterType, sortOption, page);
+		return fundingSelectRepositoryCustom.findFundingList(filterType, sortOption, page);
 
 	}
 
@@ -55,7 +57,7 @@ public class FundingServiceImpl implements FundingService {
 	@Transactional
 	public void scheduleUpdateToOngoing() {
 	   log.info("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 시작 " );
-	   fundingRepositoryCustom.updateFundingToOnGoing();
+		fundingStatusRepositoryCustom.updateFundingToOnGoing();
 	   log.info("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 완료 " );
 	}
 
@@ -64,7 +66,7 @@ public class FundingServiceImpl implements FundingService {
 	@Transactional
 	public void scheduleUpdateToSuccessful() {
 	    log.info("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 시작 " );
-		fundingRepositoryCustom.updateFundingToSuccessful();
+		fundingStatusRepositoryCustom.updateFundingToSuccessful();
 		log.info("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 완료 " );
 	}
 
@@ -72,9 +74,10 @@ public class FundingServiceImpl implements FundingService {
 	@Transactional
 	public void scheduleUpdateToFailed() {
 		log.info("scheduleUpdateToFailed 스케줄링 실행 - FAILED 상태 변경 시작 " );
-		fundingRepositoryCustom.updateFundingToFailed();
+		fundingStatusRepositoryCustom.updateFundingToFailed();
 		log.info("scheduleUpdateToFailed 스케줄링 실행 - FAILED 상태 변경 완료 " );
 	}
+
 
 	@Override
 	public void createFunding(FundingInfoDTO fundingInfoDTO, List<RewardDTO> rewardDTOs, List<ArtworkDTO> artworkDTOs,
