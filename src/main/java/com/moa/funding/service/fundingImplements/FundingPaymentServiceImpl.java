@@ -74,7 +74,9 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	}
 
 	private FundingOrder createAndSaveFundingOrder(PaymentRequest paymentRequest, User user) {
-		FundingOrder order = FundingPaymentMapper.toFundingOrder(paymentRequest, user);
+		Funding funding = getFunding(paymentRequest);
+
+		FundingOrder order = FundingPaymentMapper.toFundingOrder(paymentRequest, user, funding);
 		return fundingOrderRepository.save(order);
 	}
 

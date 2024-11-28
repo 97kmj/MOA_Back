@@ -79,10 +79,11 @@ public class FundingPaymentMapper {
 	}
 
 	// DTO -> Entity
-	public static FundingOrder toFundingOrder(PaymentRequest request, User user) {
+	public static FundingOrder toFundingOrder(PaymentRequest request, User user, Funding funding) {
 		return FundingOrder.builder()
 			.impUid(request.getImpUid())
 			.user(user)
+			.funding(funding)
 			.totalAmount(request.getTotalAmount())
 			.paymentType(request.getPaymentType())
 			.address(request.getAddress())
@@ -90,6 +91,7 @@ public class FundingPaymentMapper {
 			.name(request.getName())
 			.paymentDate(new Timestamp(System.currentTimeMillis())) // 현재 시간
 			.refundStatus(FundingOrder.RefundStatus.NOT_REFUNDED) // 기본값 설정
+
 			.build();
 	}
 

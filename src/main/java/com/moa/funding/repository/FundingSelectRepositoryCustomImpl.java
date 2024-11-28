@@ -37,12 +37,11 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Repository
-public class FundingRepositoryCustomImpl implements FundingRepositoryCustom {
-
+public class FundingSelectRepositoryCustomImpl implements FundingSelectRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
-	public FundingRepositoryCustomImpl(EntityManager em) {
-		this.queryFactory = new JPAQueryFactory(em);
+	public FundingSelectRepositoryCustomImpl(JPAQueryFactory queryFactory) {
+		this.queryFactory = queryFactory;
 	}
 
 	@Override
@@ -192,71 +191,6 @@ public class FundingRepositoryCustomImpl implements FundingRepositoryCustom {
 			.isLastPage(isLastPage)
 			.build();
 	}
-
-	@Override
-	@Transactional
-	public void updateFundingToOnGoing() {
-		QFunding funding = QFunding.funding;
-
-		//오늘 날짜를 구함
-		LocalDate today = LocalDate.now();
-		//오늘 자정을 구함 2024-11-28 00:00 (한국) = 2024-11-27 15:00 (UTC)
-		Instant startOfToday = today.atStartOfDay(ZoneId.systemDefault()).toInstant();
-
-		//오늘에서 하루를 더해서 내일 자정을 구함 그리고 -1초를 해서 오늘의 마지막 시간 23:59:59를 구했당~
-		Instant endOfToday = today.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
-
-		long updatedCount = queryFactory.update(funding)
-			.set(funding.fundingStatus, Funding.FundingStatus.ONGOING)
-			.where(funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)
-				.and(funding.fundingStatus.eq(Funding.FundingStatus.STANDBY))
-					.and(funding.startDate.between(startOfToday, endOfToday))
-				// .and(funding.startDate.goe(startOfToday)) // startDate >= 오늘 자정
-				// .and(funding.startDate.lt(endOfToday))    // startDate < 내일 자정
-			)
-			.execute();
-
-		log.info("updateFundingToOnGoing updatedCount: {}", updatedCount);
-	}
-
-	@Override
-	@Transactional
-	public void updateFundingToSuccessful() {
-		QFunding funding = QFunding.funding;
-
-		Instant today = Instant.now();
-
-		long updateCount = queryFactory.update(funding)
-			.set(funding.fundingStatus, Funding.FundingStatus.SUCCESSFUL)
-			.where (funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)
-				.and(funding.fundingStatus.eq(Funding.FundingStatus.ONGOING)
-				.and(funding.currentAmount.goe(funding.goalAmount)))
-				.and(funding.endDate.goe(today)) //endDate 날짜 >= 오늘  오늘보다 크거나 같은 경우
-			)
-				.execute();
-
-		log.info("updateFundingToSuccessful updateCount: {}", updateCount);
-	}
-
-	@Override
-	@Transactional
-	public void updateFundingToFailed(){
-	QFunding funding = QFunding.funding;
-
-	Instant today = Instant.now();
-
-		long updatedCount = queryFactory.update(funding)
-			.set(funding.fundingStatus, Funding.FundingStatus.FAILED)
-			.where(funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)
-				.and(funding.fundingStatus.eq(Funding.FundingStatus.ONGOING))
-				.and(funding.endDate.before(today)) //endDate 날짜 < 오늘
-				.and(funding.currentAmount.lt(funding.goalAmount)) // 현재금액 < 목표금액 :현재 금액이 목표금액보다 작은 경우
-			)
-			.execute();
-
-		log.info("updateFundingToFailed updatedCount: {}", updatedCount);
-	}
-
 
 	private BooleanExpression getFilterCondition(String filterType) {
 		QFunding funding = QFunding.funding;
