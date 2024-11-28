@@ -103,8 +103,8 @@ public class ShopController {
 			@RequestParam(value = "categoryName", required = false)String category,
 			@RequestParam(value = "typeId", required = false)String type,
 			@RequestParam(value = "subjectId", required = false)String subject,
-			@RequestParam(value = "keyword", required = false)String keyword,
-			@RequestParam(value = "saleStatus", required = false)String saleStatus,
+			@RequestParam(value = "searchKeyword", required = false)String keyword,
+			@RequestParam(value = "saleStatus", required = false) Artwork.SaleStatus saleStatus,
 			@RequestParam(value="page", required = false, defaultValue = "1")Integer page,
 			@RequestParam(value ="size", required = false, defaultValue = "0") int size){
 		try {

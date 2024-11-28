@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.moa.entity.Artwork;
+import com.moa.entity.Artwork.SaleStatus;
 import com.moa.shop.dto.ArtworkDto;
 import com.moa.shop.dto.CanvasDto;
 import com.moa.shop.dto.CategoryDto;
@@ -25,4 +26,6 @@ public interface ShopService {
 	List<TypeDto> typeList(Integer categoryId) throws Exception;
 	List<SubjectDto> subjectList(Integer categoryId) throws Exception;
 	List<ArtworkDto> artworkList(PageInfo page, String category, String type, String subject, String saletype)throws Exception;
+	List<ArtworkDto> artworkList(Integer page, String category, String keyword, String type, String subject,
+			SaleStatus saleStatus, Integer size) throws Exception;
 }

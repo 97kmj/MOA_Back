@@ -7,23 +7,9 @@ import com.moa.entity.Category;
 import com.moa.entity.Subject;
 import com.moa.entity.Type;
 import com.moa.entity.User;
-import com.moa.entity.Artwork.CanvasType;
 import com.moa.entity.Artwork.SaleStatus;
 
-//import org.springframework.beans.factory.annotation.Autowired;
-//
-//import com.moa.entity.Artwork;
-//import com.moa.entity.Artwork.CanvasType;
-//import com.moa.entity.Artwork.SaleStatus;
-//import com.moa.entity.Canvas;
-//import com.moa.entity.Category;
-//import com.moa.entity.Subject;
-//import com.moa.entity.Type;
-//import com.moa.repository.CanvasRepository;
-//import com.moa.repository.CategoryRepository;
-//import com.moa.repository.SubjectRepository;
-//import com.moa.repository.TypeRepository;
-//import com.moa.repository.UserRepository;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -64,7 +50,7 @@ public class ArtworkDto {
 	public Artwork toArtworkEntity() throws Exception {
 		return Artwork.builder()
 			.adminCheck(false)
-			.canvasType(canvasType != null ? CanvasType.valueOf(canvasType) : null)
+		
 			.description(description != null ? description : "") 
 			.height(height!= null ? height: "")
 			.imageUrl(imageUrl)
@@ -119,7 +105,7 @@ public class ArtworkDto {
 	    return ArtworkDto.builder()
 	            .artworkId(artwork.getArtworkId())
 	            .adminCheck(artwork.getAdminCheck() != null ? artwork.getAdminCheck() : false) // null일 경우 false로 설정
-	            .canvasType(artwork.getCanvasType() != null ? artwork.getCanvasType().toString() : "") // null이면 빈 문자열
+	            .canvasType(artwork.getCanvas() != null && artwork.getCanvas().getCanvasType() != null? artwork.getCanvas().getCanvasType().toString(): "") // null이면 빈 문자열
 	            .description(artwork.getDescription() != null ? artwork.getDescription() : "") // null이면 빈 문자열
 	            .height(artwork.getHeight() != null ? artwork.getHeight() : "") // null이면 빈 문자열
 	            .imageUrl(artwork.getImageUrl() != null ? artwork.getImageUrl() : "") // null이면 빈 문자열
