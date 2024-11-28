@@ -15,10 +15,10 @@ public class CategoryDto {
 	private Integer categoryId;
 	private String categoryName;
 	
-	public static Category toEntity(CategoryDto categoryDto) {
+	public Category toEntity() {
 		Category category = Category.builder()
-				.categoryId(categoryDto.getCategoryId())
-				.categoryName(categoryDto.getCategoryName())
+				.categoryId(categoryId)
+				.categoryName(categoryName)
 				.build();
 		return category;
 	}

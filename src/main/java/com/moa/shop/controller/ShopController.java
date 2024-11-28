@@ -44,10 +44,12 @@ public class ShopController {
 		}
 	}
 	
-	@GetMapping("shop/artworkAdd/canvas")
-	public ResponseEntity<List<CanvasDto>> CanvasList(){
+	@GetMapping("/shop/artworkAdd/canvas/{canvasType}")
+	public ResponseEntity<List<CanvasDto>> CanvasList(@PathVariable("canvasType") String canvasType){
 		try {
-			List<CanvasDto> canvasList = shopService.canvasList();
+			
+			canvasType = canvasType.toUpperCase();
+			List<CanvasDto> canvasList = shopService.canvasList(canvasType);
 			return new ResponseEntity<List<CanvasDto>>(canvasList, HttpStatus.OK); 
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -85,7 +87,6 @@ public class ShopController {
 			@RequestPart("artworkImage")MultipartFile artworkImage){
 			try {
 				
-				
 				System.out.println("artwork :" + artworkDto);
 				System.out.println("artworkImage :" + artworkImage);
 				
@@ -107,7 +108,16 @@ public class ShopController {
 			@RequestParam(value = "saleStatus", required = false)String saleStatus,
 			@RequestParam(value ="size", required = false, defaultValue = "0") int size){
 		try {
+			System.out.println(page+ "page1");
+			System.out.println(category + "category1");
+			System.out.println(type + "type");
+			System.out.println(subject+ "subject");
+			System.out.println(keyword +"keyword");
+			System.out.println(saleStatus +"saleStatus");
+			System.out.println(size +"size");
+			
 			List<ArtworkDto> artworkList = shopService.artworkList(page, category, keyword, type, subject, saleStatus,size);
+
 			return new ResponseEntity<List<ArtworkDto>>(artworkList, HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();

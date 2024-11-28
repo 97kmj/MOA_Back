@@ -17,11 +17,11 @@ public class SubjectDto {
 	private String subjectName;
 	private Integer categoryId;
 	
-	public static Subject toEntity(SubjectDto subjectDto) {
+	public Subject toEntity() {
 		Subject subject = Subject.builder()
-				.subjectId(subjectDto.getSubjectId())
-				.subjectName(subjectDto.getSubjectName())
-				.category(Category.builder().categoryId(subjectDto.getCategoryId()).build())
+				.subjectId(subjectId)
+				.subjectName(subjectName)
+				.category(Category.builder().categoryId(categoryId).build())
 				.build();
 		return subject;
 	}

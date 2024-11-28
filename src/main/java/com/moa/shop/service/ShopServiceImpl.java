@@ -4,14 +4,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.moa.config.image.FolderConstants;
 import com.moa.config.image.ImageService;
 import com.moa.entity.Artwork;
-import com.moa.entity.Artwork.CanvasType;
-import com.moa.entity.Artwork.SaleStatus;
+import com.moa.entity.Canvas;
+import com.moa.entity.User;
 import com.moa.repository.ArtworkRepository;
 import com.moa.repository.CanvasRepository;
 import com.moa.repository.CategoryRepository;
@@ -41,21 +42,10 @@ public class ShopServiceImpl implements ShopService {
 	private final UserRepository userRepository;
 	private final ArtworkDslRepository artworkDslRepository;
 	
-	
 	@Override
-	public List<ArtworkDto> artworkList(Integer page, String category, String type, String subject, String saleStatus, String keyword, Integer size)throws Exception {
-		//페이징처리
-		PageRequest pageRequest = PageRequest.of(page, size);
-		List<ArtworkDto> artworkList = null;
-		//필터링
-//        if (subject != null || type != null || category != null || keyword != null) {
-//        	artworkList = artworkDslRepository.searchArtworkListByPaging(subject, type, category, keyword, saleStatus, pageRequest)
-//        			.stream().map(a->a.toDto()).collect(Collectors.toList());
-//        } else {//전체검색
-//        	artworkList = artworkDslRepository.findArtworkListByPaging(pageRequest)
-//        			.stream().map(a->a.toDto()).collect(Collectors.toList());
-//        }
-        return artworkList;
+	public List<ArtworkDto> artworkList(PageInfo page, String category, String type, String subject, String saletype)throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
@@ -69,33 +59,22 @@ public class ShopServiceImpl implements ShopService {
 		String rootFolder = FolderConstants.ARTWORK_ROOT;
 		String fileType = FolderConstants.ARTWORK_IMAGE;
 		
-		String ArtworkImgeUrl= null;
+		String artworkImgeUrl= null;
+		
+		User artist = userRepository.findById(artworkDto.getArtistId())
+	            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+		
 		
 		if(artworkImage != null && !artworkImage.isEmpty()) {
-			ArtworkImgeUrl = imageService.saveImage(rootFolder, fileType, artworkImage);
+			artworkImgeUrl = imageService.saveImage(rootFolder, fileType, artworkImage);
+			artworkDto.setImageUrl(artworkImgeUrl);
 		}
 		
-		Artwork artwork = Artwork.builder()
-						.adminCheck(false)
-						.canvasType(CanvasType.valueOf(artworkDto.getCanvasType()))
-						.description(artworkDto.getDescription()) 
-						.height(artworkDto.getHeight())
-						.imageUrl(ArtworkImgeUrl)
-						.isStandardCanvas(artworkDto.getIsStandardCanvas())
-						.length(artworkDto.getLength()) 
-						.price(artworkDto.getPrice() == null? artworkDto.getPrice() : 0 )
-						.saleStatus(SaleStatus.valueOf(artworkDto.getSaleStatus()))
-						.stock(artworkDto.getStock())
-						.termsAccepted(true)
-						.title(artworkDto.getTitle())
-						.width(artworkDto.getWidth() )
-						.artist(userRepository.findByUsername(artworkDto.getArtistId()).orElseThrow(()->new Exception("artistId오류")))
-						.canvas(canvasRepository.findById(artworkDto.getCanvasId()).orElseThrow(()->new Exception("CanvasId오류")))
-						.category(categoryRepository.findById(artworkDto.getCategoryId()).orElseThrow(()->new Exception("CategoryId오류")))
-						.subject(subjectRepository.findById(artworkDto.getSubjectId()).orElseThrow(()->new Exception("SubjectId오류")))
-						.type(typeRepository.findById(artworkDto.getTypeId()).orElseThrow(()->new Exception("TypeId오류")))
-						.build();
-			artworkRepository.save(artwork);
+		Artwork artwork = artworkDto.toArtworkEntity();
+		artwork.setArtist(artist);
+
+		
+		artworkRepository.save(artwork);
 		return artwork.getArtworkId();
 	
 	}
@@ -122,10 +101,40 @@ public class ShopServiceImpl implements ShopService {
 	}
 
 	@Override
-	public List<CanvasDto> canvasList() throws Exception {
-		List<CanvasDto> canvasList = canvasRepository.findAll().stream().map(c->
-		CanvasDto.fromEntity(c)).collect(Collectors.toList());
-		return canvasList;
+	public List<CanvasDto> canvasList(String canvasType) throws Exception {
+		
+		Canvas.CanvasType type = Canvas.CanvasType.valueOf(canvasType);;
+		return canvasRepository.findByCanvasType(type) 
+	            .stream()
+	            .map(CanvasDto::fromEntity)
+	            .collect(Collectors.toList());
+
+	}
+
+	@Override
+	public List<ArtworkDto> artworkList(Integer page, String category, String keyword, String type, String subject, String saleStatus,
+			Integer size) throws Exception {
+		System.out.println("if 들어가기전");
+		 	page = (page != null && page > 0) ? page - 1 : 0;
+		    size = (size != null && size > 0) ? size : 8;  // 기본 페이지 크기 설정
+			PageRequest pageRequest = PageRequest.of(page, size);
+			if ((subject != null && !subject.isEmpty()) || (type != null && !type.isEmpty()) || (category != null && !category.isEmpty()) || (keyword != null && !keyword.isEmpty())|| (saleStatus !=null && !saleStatus.isEmpty())) {
+				System.out.println("if 들어간후");
+				List<ArtworkDto> ListArtworkDto = artworkRepository.findBySearches(subject, type, category, keyword, saleStatus, pageRequest)
+						.stream().map(a->ArtworkDto.toArtworkDto(a)).collect(Collectors.toList());
+				return ListArtworkDto;
+			 } else {
+				 System.out.println("else");
+		            List<ArtworkDto> ListArtworkDto = artworkRepository.findAll(pageRequest)
+		            		.stream().map(a->ArtworkDto.toArtworkDto(a)).collect(Collectors.toList());
+		            return  ListArtworkDto;
+		       }
+			
+			
+//			List<ArtworkDto> ListArtworkDto = artworkDslRepository.searchArtworkListByPaging(category, type, subject, saleStatus, keyword, pageRequest)
+//					.stream().map(a->ArtworkDto.toArtworkDto(a)).collect(Collectors.toList());
+		
+		
 	}
 
 }
