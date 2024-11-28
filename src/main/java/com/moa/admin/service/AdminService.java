@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.util.List;
 
 import com.moa.admin.dto.ArtistUserDto;
+import com.moa.admin.dto.FrameDto;
 import com.moa.admin.dto.FundingApplyDto;
 import com.moa.admin.dto.NoticeDto;
 import com.moa.admin.dto.QuestionDto;
@@ -29,4 +30,7 @@ public interface AdminService {
 	List<FundingApplyDto> getApplyFundingList() throws Exception;
 	void approveFunding(Long fundingId) throws Exception;
 	void rejectFunding(Long fundingId) throws Exception;
+	
+	//관리자 프레임상품
+	List<FrameDto> getFrameList() throws Exception;
 }

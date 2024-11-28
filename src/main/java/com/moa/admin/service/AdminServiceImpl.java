@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.moa.admin.dto.ArtistUserDto;
+import com.moa.admin.dto.FrameDto;
 import com.moa.admin.dto.FundingApplyDto;
 import com.moa.admin.dto.FundingRewardDto;
 import com.moa.admin.dto.NoticeDto;
@@ -18,12 +19,14 @@ import com.moa.admin.dto.QuestionDto;
 import com.moa.admin.dto.RegistNoticeDto;
 import com.moa.admin.repository.AdminFundingRepository;
 import com.moa.admin.repository.AdminQnARepository;
+import com.moa.entity.FrameOption;
 import com.moa.entity.Funding;
 import com.moa.entity.Notice;
 import com.moa.entity.Question;
 import com.moa.entity.User;
 import com.moa.entity.User.ApprovalStatus;
 import com.moa.entity.User.Role;
+import com.moa.repository.FrameOptionRepository;
 import com.moa.repository.FundingRepository;
 import com.moa.repository.NoticeRepository;
 import com.moa.repository.QuestionRepository;
@@ -43,6 +46,7 @@ public class AdminServiceImpl implements AdminService {
 	private final FundingRepository fundingRepository;
 	private final AdminFundingRepository adminFundingRepository;
 	private final RewardRepository rewardRepository;
+	private final FrameOptionRepository frameOptionRepository;
 	//admin notice 
 	@Override
 	public List<NoticeDto> allNoticeList() throws Exception {
@@ -151,6 +155,11 @@ public class AdminServiceImpl implements AdminService {
 		fundingRepository.save(funding);		
 	}
 	
+	@Override
+	public List<FrameDto> getFrameList() throws Exception {
+		return frameOptionRepository.findAll().stream().map(f->FrameDto.fromEntity(f)).collect(Collectors.toList());
+		
+	}
 	
 	
 	
