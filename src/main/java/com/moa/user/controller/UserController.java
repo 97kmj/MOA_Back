@@ -3,6 +3,7 @@ package com.moa.user.controller;
 import com.moa.config.auth.PrincipalDetails;
 import com.moa.config.jwt.JwtToken;
 import com.moa.entity.User;
+import com.moa.entity.User.ApprovalStatus;
 import com.moa.user.dto.RegisterRequest;
 import com.moa.repository.UserRepository;
 import java.util.HashMap;
@@ -102,6 +103,14 @@ public class UserController {
             user.setAddress(request.getAddress());
             user.setDetailAddress(request.getDetailAddress());
             user.setExtraAddress(request.getExtraAddress());
+            // artistApprovalStatus Enum 처리
+            ApprovalStatus approvalStatus = request.getArtistApprovalStatus() != null
+                ? request.getArtistApprovalStatus() // 요청에서 Enum 값 가져오기
+                : ApprovalStatus.NORMAL; // 기본값 설정
+
+            user.setArtistApprovalStatus(approvalStatus);
+
+
             user.setRole(User.Role.USER);
 
             userRepository.save(user);

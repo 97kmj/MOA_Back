@@ -15,6 +15,7 @@ public class ArtworkController {
     @Autowired
     private ArtworkService artworkService;
 
+
     // 전체 작품 리스트 가져오기
     @GetMapping
     public List<Artwork> getAllArtworks(
@@ -34,4 +35,6 @@ public class ArtworkController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
+
+
 }
