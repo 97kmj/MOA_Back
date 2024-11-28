@@ -23,7 +23,7 @@ public class CorsConfig {
 
 		// 특정 엔드포인트에 대해 CORS 설정 적용
 		source.registerCorsConfiguration("/**", config);
-
+		
 		return new CorsFilter(source);
 	}
 }
