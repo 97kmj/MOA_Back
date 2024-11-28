@@ -33,6 +33,7 @@ public class AdminFrameController {
 			return new ResponseEntity<List<FrameDto>>(HttpStatus.BAD_REQUEST);
 		}
 	}
+	
 	@GetMapping("/getCanvas/{canvasType}")
 	public ResponseEntity<List<CanvasDto>> getCanvasByCanvasType(@PathVariable String canvasType) {
 		try {
@@ -43,15 +44,26 @@ public class AdminFrameController {
 			return new ResponseEntity<List<CanvasDto>>(HttpStatus.BAD_REQUEST);
 		}
 	}
+	
 	@PostMapping("/registFrame")
-	public ResponseEntity<String> registFrame(@RequestBody RegistFrameDto registFrameDto) {
+	public ResponseEntity<FrameDto> registFrame(@RequestBody RegistFrameDto registFrameDto) {
 		try {
-			adminService.registFrame(registFrameDto);
+			FrameDto newFrame = adminService.registFrame(registFrameDto);
+			return new ResponseEntity<FrameDto>(newFrame,HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<FrameDto>(HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@PostMapping("/updateFrame")
+	public ResponseEntity<String> updateFrame(@RequestBody FrameDto frameDto) {
+		try {
+			adminService.updateFrame(frameDto);
 			return new ResponseEntity<String>(String.valueOf(true),HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<String>(String.valueOf(false),HttpStatus.BAD_REQUEST);
 		}
 	}
-	
 }
