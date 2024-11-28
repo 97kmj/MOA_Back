@@ -65,3 +65,4 @@ test-output/
 #테스트
 test-output
 /src/test/
+/.metadata/

@@ -63,10 +63,10 @@ public class ArtworkDslRepository {
 	                System.out.println("Invalid sale status: " + saleStatus);
 	            }
 	        }
-	        // 5. Keyword 검색 (제목과 설명)
+	        // 5. Keyword 검색 (작가명)
 	        if (keyword != null && !keyword.isEmpty()) {
-	            builder.and(artwork.title.containsIgnoreCase(keyword)
-	                    .or(artwork.description.containsIgnoreCase(keyword)));
+	            builder.and(artwork.artist.name.containsIgnoreCase(keyword));
+	                   
 	        }
 	        // Query 실행
 	        List<Artwork> artworkList = jpaQueryFactory.selectFrom(artwork)
@@ -75,7 +75,7 @@ public class ArtworkDslRepository {
 	                .limit(pageRequest.getPageSize())
 	                .orderBy(artwork.artworkId.desc()) // ID 기준 최신순 정렬
 	                .fetch();
-
+	        
 	        return artworkList;
 	    }
 	}

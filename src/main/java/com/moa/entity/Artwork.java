@@ -52,7 +52,8 @@ public class Artwork {
     private Subject subject;
 
     private Boolean isStandardCanvas;
-
+    
+    
     @Enumerated(EnumType.STRING)
     private CanvasType canvasType;
 

@@ -21,7 +21,8 @@ public interface ShopService {
 	List<ArtworkDto> artworkListByArtist(PageInfo page,String keyword)throws Exception;
 	Long artworkAdd(ArtworkDto artworkDto,MultipartFile artworkImage) throws Exception;
 	List<CategoryDto> categoryList() throws Exception;
-	List<CanvasDto> canvasList() throws Exception;
+	List<CanvasDto> canvasList(String canvasType) throws Exception;
 	List<TypeDto> typeList(Integer categoryId) throws Exception;
 	List<SubjectDto> subjectList(Integer categoryId) throws Exception;
+	List<ArtworkDto> artworkList(PageInfo page, String category, String type, String subject, String saletype)throws Exception;
 }

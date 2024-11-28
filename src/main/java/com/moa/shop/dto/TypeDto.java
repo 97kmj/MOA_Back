@@ -19,11 +19,11 @@ public class TypeDto {
 	private Integer categoryId;
 	
 	
-	public static Type toEntity(TypeDto typeDto) {
+	public Type toEntity() {
 		Type type = Type.builder()
-				.typeId(typeDto.getTypeId())
-				.typeName(typeDto.getTypeName())
-				.category(Category.builder().categoryId(typeDto.getCategoryId()).build())
+				.typeId(typeId)
+				.typeName(typeName)
+				.category(Category.builder().categoryId(categoryId).build())
 				.build();
 		return type;			
 	}

@@ -7,5 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.moa.entity.Canvas;
 
 public interface CanvasRepository extends JpaRepository<Canvas, Long> {
-	List<Canvas> findAll();
+	List<Canvas> findByCanvasType(Canvas.CanvasType type);
+	
 }

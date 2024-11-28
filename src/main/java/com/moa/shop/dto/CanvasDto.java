@@ -1,6 +1,7 @@
 package com.moa.shop.dto;
 
 import com.moa.entity.Canvas;
+import com.moa.entity.Canvas.CanvasType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,11 +16,17 @@ public class CanvasDto {
 	
 	private Long canvasId;
 	private String canvasNum;
+	private CanvasType canvasType;
+    private String width;
+    private String height;
 	
-	public static Canvas toEntity(CanvasDto canvasDto) {
+	public Canvas toEntity() {
 		Canvas canvas = Canvas.builder()
-				.canvasId(canvasDto.getCanvasId())
-				.canvasNum(Canvas.CanvasNum.fromValue(canvasDto.getCanvasNum()))
+				.canvasId(getCanvasId())
+				.canvasNum(Canvas.CanvasNum.fromValue(canvasNum))
+				.canvasType(getCanvasType())
+				.width(getWidth())
+				.height(getHeight())
 				.build();
 		return canvas;					
 	}
@@ -28,6 +35,9 @@ public class CanvasDto {
 		CanvasDto canvasDto = CanvasDto.builder()
 				.canvasId(canvas.getCanvasId())
 				.canvasNum(canvas.getCanvasNum().getValue())
+				.canvasType(canvas.getCanvasType())
+				.width(canvas.getWidth())
+				.height(canvas.getHeight())
 				.build();
 		return canvasDto;
 				
