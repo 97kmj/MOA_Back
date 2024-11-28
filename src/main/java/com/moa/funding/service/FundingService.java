@@ -18,4 +18,7 @@ public interface FundingService {
 		FundingDetailDTO getFundingDetail(Long fundingId);
 
 		FundingResponse getFundingList(String filterType, String sortOption, int page);
+
+
+
 }

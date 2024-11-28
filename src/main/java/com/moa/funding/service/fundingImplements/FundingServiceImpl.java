@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.moa.config.image.FolderConstants;
@@ -46,6 +48,32 @@ public class FundingServiceImpl implements FundingService {
 	public FundingResponse getFundingList(String filterType, String sortOption, int page) {
 		return fundingRepositoryCustom.findFundingList(filterType, sortOption, page);
 
+	}
+
+	@Scheduled(cron = "0 0 0 * * *") // 매일 0시 0분 0초에 실행
+	// @Scheduled(cron = "0 */1 * * * *") // 매 1분마다 실행
+	@Transactional
+	public void scheduleUpdateToOngoing() {
+	   log.info("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 시작 " );
+	   fundingRepositoryCustom.updateFundingToOnGoing();
+	   log.info("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 완료 " );
+	}
+
+	@Scheduled(cron = "0 0 * * * *") // 매시간 0분 0초에 실행
+	// @Scheduled(cron = "0 30 * * * *") // 매시간 30분에 실행
+	@Transactional
+	public void scheduleUpdateToSuccessful() {
+	    log.info("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 시작 " );
+		fundingRepositoryCustom.updateFundingToSuccessful();
+		log.info("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 완료 " );
+	}
+
+	@Scheduled(cron = "0 0 0 * * *") // 매일 0시 0분 0초에 실행
+	@Transactional
+	public void scheduleUpdateToFailed() {
+		log.info("scheduleUpdateToFailed 스케줄링 실행 - FAILED 상태 변경 시작 " );
+		fundingRepositoryCustom.updateFundingToFailed();
+		log.info("scheduleUpdateToFailed 스케줄링 실행 - FAILED 상태 변경 완료 " );
 	}
 
 	@Override
