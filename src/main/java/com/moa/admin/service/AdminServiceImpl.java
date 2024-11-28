@@ -173,8 +173,9 @@ public class AdminServiceImpl implements AdminService {
 	            .map(CanvasDto::fromEntity)
 	            .collect(Collectors.toList());
 	}
+	//새로운 프레임 등록
 	@Override
-	public void registFrame(RegistFrameDto registFrameDto) throws Exception {
+	public FrameDto registFrame(RegistFrameDto registFrameDto) throws Exception {
 		FrameOption frame = FrameOption.builder()
 									.frameType(registFrameDto.getFrameType())
 									.framePrice(registFrameDto.getFramePrice())
@@ -182,7 +183,15 @@ public class AdminServiceImpl implements AdminService {
 									.stock(registFrameDto.getStock())
 									.build();
 		frameOptionRepository.save(frame);
-		
+		return FrameDto.fromEntity(frame);
+	}
+	//프레임 가격,재고 수정
+	@Override
+	public void updateFrame(FrameDto frameDto) throws Exception {
+		FrameOption frame = frameOptionRepository.findById(frameDto.getFrameId()).orElseThrow(()->new Exception("frameId 오류"));
+		frame.setFramePrice(frameDto.getFramePrice());
+		frame.setStock(frameDto.getStock());
+		frameOptionRepository.save(frame);
 	}
 	
 	

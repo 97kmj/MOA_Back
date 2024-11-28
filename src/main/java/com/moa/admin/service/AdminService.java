@@ -36,5 +36,6 @@ public interface AdminService {
 	//관리자 프레임상품
 	List<FrameDto> getFrameList() throws Exception;
 	List<CanvasDto> getCanvasList(String canvasType) throws Exception;
-	void registFrame(RegistFrameDto registFrameDto) throws Exception;
+	FrameDto registFrame(RegistFrameDto registFrameDto) throws Exception;
+	void updateFrame(FrameDto frameDto) throws Exception;
 }
