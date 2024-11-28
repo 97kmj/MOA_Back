@@ -15,6 +15,7 @@ public class CorsConfig {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		// CORS 설정
 		CorsConfiguration config = new CorsConfiguration();
+
 		config.setAllowCredentials(true); // 쿠키를 포함한 인증 정보 허용
 		config.addAllowedOriginPattern("*"); // 모든 도메인 허용
 		config.addAllowedHeader("*"); // 모든 헤더 허용

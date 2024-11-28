@@ -57,9 +57,16 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthenticationManager authenticationManager = authenticationManager(http.getSharedObject(AuthenticationConfiguration.class));
 
+        http.cors().and();
+
         //추가
         http.exceptionHandling()
-            .authenticationEntryPoint(authenticationEntryPoint());
+            .authenticationEntryPoint(authenticationEntryPoint())
+            .accessDeniedHandler((request, response, accessDeniedException) -> {
+                response.setContentType("application/json;charset=UTF-8");
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.getWriter().write("{\"error\": \"Forbidden\", \"message\": \"권한이 부족합니다.\"}");
+            });
 
 
         http.csrf().disable()
@@ -76,8 +83,9 @@ public class SecurityConfig {
             // 인증이 필요하지 않은 경로 설정
 
             // main 이나 / 넣어야할수도
-            .antMatchers("/api/user/check-username","/api/user/register", "/api/user/login", "/api/user/refresh-token", "/oauth2/**","/api/user/**","/api/mypage/**").permitAll()
+            .antMatchers("/api/user/check-username","/api/user/register", "/api/user/login", "/api/user/refresh-token", "/oauth2/**","/api/user/**").permitAll()
             .antMatchers("/user/**").authenticated() // 로그인 필요
+            .antMatchers("/mypage/**").authenticated()
             .antMatchers("/api/like/**").authenticated()
             .antMatchers("/admin/**").hasRole("ADMIN")
             .antMatchers("/artist/**").hasRole("ARTIST")
