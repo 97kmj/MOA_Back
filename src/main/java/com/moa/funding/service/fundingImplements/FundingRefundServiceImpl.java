@@ -28,8 +28,9 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 	private final RewardRepository rewardRepository;
 
 	@Override
-	@Scheduled(cron = "0 0 0 * * *") // 매일 자정 실행
+	// @Scheduled(cron = "0 0 0 * * *") // 매일 자정 실행
 	// @Scheduled(cron = "0 0/1 * * * *") // 매 1분마다 실행
+	@Scheduled(cron = "0 0 * * * *") // 매 시간 0분에 실행
 	@Transactional
 	public void scheduleUpdateToFailedAndRefund() {
 	  log.info("펀딩 실패 자동 환불 스케줄링 시작");

@@ -28,6 +28,8 @@ public class FundingDetailDTO {
 	private String introduction;
 	private List<RewardDTO> rewards;
 	private List<ImageDTO> images;
+	private int achievementRate; // 달성률 (0~100)
+	private int remainingDays; // 남은 날짜
 
 
 	@Getter
