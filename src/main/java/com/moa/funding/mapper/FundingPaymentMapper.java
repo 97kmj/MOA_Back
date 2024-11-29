@@ -54,7 +54,7 @@ public class FundingPaymentMapper {
 		FundingContributionDTO.FundingContributionDTOBuilder builder = FundingContributionDTO.builder()
 			.contributionId(contribution.getContributionId())
 			.fundingOrderId(contribution.getFundingOrder().getFundingOrderId())
-			.fundingId(contribution.getFunding().getFundingId())
+			// .fundingId(contribution.getFunding().getFundingId())
 			.rewardQuantity(contribution.getRewardQuantity())
 			.rewardPrice(contribution.getRewardPrice())
 			.contributionDate(contribution.getContributionDate());
@@ -120,7 +120,7 @@ public class FundingPaymentMapper {
 	) {
 		return FundingContribution.builder()
 			.fundingOrder(order)
-			.funding(funding)
+			// .funding(funding)
 			.reward(reward)
 			.rewardPrice(rewardRequest.getRewardPrice()) // RewardRequest에서 가져옴
 			.rewardQuantity(rewardRequest.getRewardQuantity()) // RewardRequest에서 가져옴

@@ -29,9 +29,9 @@ public class FundingContribution {
     @JoinColumn(name = "funding_order_id", nullable = false)
     private FundingOrder fundingOrder;
 
-    @ManyToOne
-    @JoinColumn(name = "funding_id", nullable = false)
-    private Funding funding;
+    // @ManyToOne
+    // @JoinColumn(name = "funding_id", nullable = false)
+    // private Funding funding;
 
     @ManyToOne
     @JoinColumn(name = "reward_id")

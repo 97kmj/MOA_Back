@@ -4,36 +4,79 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.moa.entity.Funding;
+import com.moa.entity.FundingContribution;
 import com.moa.entity.FundingOrder;
 import com.moa.entity.QFunding;
+import com.moa.entity.QFundingContribution;
 import com.moa.entity.QFundingOrder;
+import com.moa.entity.QReward;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-
-import static com.moa.entity.QFunding.funding;
-import static com.moa.entity.QReward.reward;
-import static com.moa.entity.QFundingImage.fundingImage;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Repository
-public class FundingStatusRepositoryCustomImpl implements FundingStatusRepositoryCustom {
+public class FundingManagementRepositoryCustomImpl implements FundingManagementRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 
 	@Autowired
-	public FundingStatusRepositoryCustomImpl(JPAQueryFactory queryFactory) {
+	public FundingManagementRepositoryCustomImpl(JPAQueryFactory queryFactory) {
 		this.queryFactory = queryFactory;
 	}
 
 
+
 	@Override
-	@Transactional
+	public Optional<FundingOrder> findRefundableOrderById(Long fundingOrderId) {
+		QFundingOrder fundingOrder = QFundingOrder.fundingOrder;
+		QFunding funding = QFunding.funding;
+
+		FundingOrder result = queryFactory
+			.selectFrom(fundingOrder)
+			.leftJoin(fundingOrder.funding, funding).fetchJoin()
+			.where(
+				fundingOrder.fundingOrderId.eq(fundingOrderId)
+					.and(funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)) // 승인된 펀딩
+					.and(funding.fundingStatus.in(Funding.FundingStatus.ONGOING, Funding.FundingStatus.SUCCESSFUL)) // 진행 중 또는 성공
+					.and(funding.endDate.after(Instant.now())) // 종료일이 현재 이후
+					.and(fundingOrder.refundStatus.eq(FundingOrder.RefundStatus.NOT_REFUNDED)) // 환불되지 않은 상태
+					.and(fundingOrder.totalAmount.gt(0)) // 환불 금액이 있는 주문
+			)
+			.fetchOne();
+
+		return Optional.ofNullable(result);
+	}
+
+	@Override
+	public List<FundingContribution> findContributionsByFundingOrderId(Long fundingOrderId) {
+		QFundingContribution fundingContribution = QFundingContribution.fundingContribution;
+		QReward reward = QReward.reward;
+
+		return queryFactory
+			.selectFrom(fundingContribution)
+			.leftJoin(fundingContribution.reward, reward).fetchJoin()
+			.where(fundingContribution.fundingOrder.fundingOrderId.eq(fundingOrderId))
+			.fetch();
+	}
+
+	@Override
+	public void updateRefundStatus(FundingOrder fundingOrder) {
+		QFundingOrder fundingOrderEntity = QFundingOrder.fundingOrder;
+
+		queryFactory.update(fundingOrderEntity)
+			.set(fundingOrderEntity.refundStatus, FundingOrder.RefundStatus.REFUNDED)
+			.where(fundingOrderEntity.fundingOrderId.eq(fundingOrder.getFundingOrderId()))
+			.execute();
+
+	}
+
+	@Override
 	public void updateFundingToOnGoing() {
 		QFunding funding = QFunding.funding;
 
@@ -59,7 +102,6 @@ public class FundingStatusRepositoryCustomImpl implements FundingStatusRepositor
 	}
 
 	@Override
-	@Transactional
 	public void updateFundingToSuccessful() {
 		QFunding funding = QFunding.funding;
 
@@ -77,24 +119,6 @@ public class FundingStatusRepositoryCustomImpl implements FundingStatusRepositor
 		log.info("updateFundingToSuccessful updateCount: {}", updateCount);
 	}
 
-	@Override
-	@Transactional
-	public void updateFundingToFailed(){
-		// QFunding funding = QFunding.funding;
-		//
-		// Instant today = Instant.now();
-		//
-		// long updatedCount = queryFactory.update(funding)
-		// 	.set(funding.fundingStatus, Funding.FundingStatus.FAILED)
-		// 	.where(funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)
-		// 		.and(funding.fundingStatus.eq(Funding.FundingStatus.ONGOING))
-		// 		.and(funding.endDate.before(today)) //endDate 날짜 < 오늘
-		// 		.and(funding.currentAmount.lt(funding.goalAmount)) // 현재금액 < 목표금액 :현재 금액이 목표금액보다 작은 경우
-		// 	)
-		// 	.execute();
-		//
-		// log.info("updateFundingToFailed updatedCount: {}", updatedCount);
-	}
 
 	@Override
 	public List<Long> updateFundingToFailedAndGetIds(Instant now) {
@@ -109,12 +133,17 @@ public class FundingStatusRepositoryCustomImpl implements FundingStatusRepositor
 				.and(funding.currentAmount.lt(funding.goalAmount)))
 			.fetch();
 
-		queryFactory.update(funding)
-			.set(funding.fundingStatus, Funding.FundingStatus.FAILED)
-			.where(funding.fundingId.in(fundingIds))
-			.execute();
-
+		if(fundingIdsNotEmpty(fundingIds)) {
+			queryFactory.update(funding)
+				.set(funding.fundingStatus, Funding.FundingStatus.FAILED)
+				.where(funding.fundingId.in(fundingIds))
+				.execute();
+		}
 		return fundingIds;
+	}
+
+	private static boolean fundingIdsNotEmpty(List<Long> fundingIds) {
+		return !fundingIds.isEmpty();
 	}
 
 	@Override
@@ -126,5 +155,6 @@ public class FundingStatusRepositoryCustomImpl implements FundingStatusRepositor
 				.and(fundingOrder.refundStatus.eq(FundingOrder.RefundStatus.NOT_REFUNDED)))
 			.fetch();
 	}
+
 
 }

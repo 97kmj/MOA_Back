@@ -2,6 +2,7 @@ package com.moa.funding.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.service.FundingPaymentService;
+import com.moa.funding.service.FundingRefundService;
 import com.moa.funding.service.portone.PortOneService;
 
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ public class FundingPaymentController {
 
 	private final FundingPaymentService fundingPaymentService;
 	private final PortOneService portOneService;
+	private final FundingRefundService fundingRefundService;
 
 
 	@PostMapping("/payment/prepare")
@@ -47,6 +50,15 @@ public class FundingPaymentController {
 		}
 	}
 
-
+	//단순 변심
+	@PostMapping("/refund/individual/{fundingOrderId}")
+	public ResponseEntity<String> refundIndividualFunding(@PathVariable Long fundingOrderId) {
+		try {
+			fundingRefundService.refundIndividualFunding(fundingOrderId);
+			return ResponseEntity.ok("환불 요청이 처리되었습니다.");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
 }
 
