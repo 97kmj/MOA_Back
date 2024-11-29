@@ -86,8 +86,6 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 		funding.setCurrentAmount(newAmount);
 	}
 
-
-
 	@Override
 	// @Scheduled(cron = "0 0 0 * * *") // 매일 자정 실행
 	// @Scheduled(cron = "0 0/1 * * * *") // 매 1분마다 실행
