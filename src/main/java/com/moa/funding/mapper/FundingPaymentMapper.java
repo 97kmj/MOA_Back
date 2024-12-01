@@ -82,6 +82,7 @@ public class FundingPaymentMapper {
 	public static FundingOrder toFundingOrder(PaymentRequest request, User user, Funding funding) {
 		return FundingOrder.builder()
 			.impUid(request.getImpUid())
+			.merchantUid(request.getMerchantUid())
 			.user(user)
 			.funding(funding)
 			.totalAmount(request.getTotalAmount())
@@ -90,27 +91,11 @@ public class FundingPaymentMapper {
 			.phoneNumber(request.getPhoneNumber())
 			.name(request.getName())
 			.paymentDate(new Timestamp(System.currentTimeMillis())) // 현재 시간
+			.paymentStatus(FundingOrder.PaymentStatus.PENDING)
 			.refundStatus(FundingOrder.RefundStatus.NOT_REFUNDED) // 기본값 설정
-
 			.build();
 	}
 
-
-	// public static FundingContribution toFundingContribution(
-	// 	RewardRequest rewardRequest,
-	// 	FundingOrder order,
-	// 	Funding funding,
-	// 	Reward reward
-	// ) {
-	// 	return FundingContribution.builder()
-	// 		.fundingOrder(order)
-	// 		.funding(funding)
-	// 		.reward(reward)
-	// 		.rewardPrice(rewardRequest.getRewardPrice())
-	// 		.rewardQuantity(rewardRequest.getRewardQuantity())
-	// 		.contributionDate(new Timestamp(System.currentTimeMillis()))
-	// 		.build();
-	// }
 
 	public static FundingContribution toFundingContribution(
 		RewardRequest rewardRequest,

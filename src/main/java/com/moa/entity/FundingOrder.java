@@ -45,8 +45,12 @@ public class FundingOrder {
 	private String phoneNumber;
 	private String name;
 
-	@Column(nullable = false, unique = true)
-	private String impUid; // 아임포트 결제 고유 ID (중복 방지)
+	@Column(nullable = true, unique = true) // 결제 성공 시 설정
+	private String impUid;
+
+	@Column(nullable = false, unique = true) // 사전 등록 시 설정
+	private String merchantUid;
+
 
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus paymentStatus; // 결제 상태 (PENDING, PAI

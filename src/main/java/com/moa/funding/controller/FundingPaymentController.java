@@ -26,16 +26,33 @@ public class FundingPaymentController {
 	private final PortOneService portOneService;
 	private final FundingRefundService fundingRefundService;
 
+	// @PostMapping("/payment/prepare")
+	// public ResponseEntity<String> preparePayment(@RequestBody PaymentRequest paymentRequest) {
+	// 	try {
+	// 		boolean success = portOneService.preparePayment(paymentRequest.getMerchantUid(), paymentRequest.getAmount());
+	//
+	// 		if (success) {
+	// 			fundingPaymentService.prepareFundingContribution(paymentRequest);
+	// 			return ResponseEntity.ok("결제 준비 완료");
+	// 		} else {
+	// 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 준비 실패");
+	// 		}
+	// 	} catch (Exception ex) {
+	// 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 준비 중 오류 발생: " + ex.getMessage());
+	// 	}
+	// }
 
 	@PostMapping("/payment/prepare")
-	public ResponseEntity<String> preparePayment(@RequestBody PaymentRequest request) {
-		boolean success = portOneService.preparePayment(request.getMerchantUid(), request.getAmount());
-		if (success) {
-			return ResponseEntity.ok("결제 사전 등록 성공");
-		} else {
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 사전 등록 실패");
+	public ResponseEntity<String> preparePayment(@RequestBody PaymentRequest paymentRequest) {
+		boolean success = portOneService.preparePayment(paymentRequest.getMerchantUid(), paymentRequest.getAmount());
+
+		if (!success) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 준비 실패");
 		}
+		fundingPaymentService.prepareFundingContribution(paymentRequest);
+		return ResponseEntity.ok("결제 준비 완료");
 	}
+
 
 
 	@PostMapping("/payment")

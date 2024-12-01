@@ -7,7 +7,11 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.moa.entity.Funding;
+import com.moa.entity.FundingContribution;
+import com.moa.entity.FundingOrder;
 import com.moa.entity.QFunding;
+import com.moa.entity.QFundingContribution;
+import com.moa.entity.QFundingOrder;
 import com.moa.funding.dto.funding.FundingDetailDTO;
 import com.moa.funding.dto.funding.FundingDetailDTO.ImageDTO;
 import com.moa.funding.dto.funding.FundingDetailDTO.RewardDTO;
@@ -24,6 +28,7 @@ import static com.moa.entity.QFunding.funding;
 import static com.moa.entity.QReward.reward;
 import static com.moa.entity.QFundingImage.fundingImage;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -191,6 +196,29 @@ public class FundingSelectRepositoryCustomImpl implements FundingSelectRepositor
 			.isLastPage(isLastPage)
 			.build();
 	}
+
+	@Override
+	public List<FundingContribution> findContributionsByOrderId(Long fundingOrderId) {
+		QFundingContribution contribution = QFundingContribution.fundingContribution;
+
+		return queryFactory.selectFrom(contribution)
+			.where(contribution.fundingOrder.fundingOrderId.eq(fundingOrderId))
+			.fetch();
+	}
+
+
+	@Override
+	public List<FundingOrder> findPendingOrdersOlderThan(Timestamp cutoffTime) {
+		QFundingOrder fundingOrder = QFundingOrder.fundingOrder;
+
+		return queryFactory.selectFrom(fundingOrder)
+			.where(
+				fundingOrder.paymentStatus.eq(FundingOrder.PaymentStatus.PENDING),
+				fundingOrder.paymentDate.before(cutoffTime)
+			)
+			.fetch();
+	}
+
 
 	private BooleanExpression getFilterCondition(String filterType) {
 		QFunding funding = QFunding.funding;
