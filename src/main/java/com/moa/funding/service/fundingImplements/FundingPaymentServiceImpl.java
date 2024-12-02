@@ -20,6 +20,7 @@ import com.moa.funding.exception.FundingPeriodException;
 import com.moa.funding.exception.RewardLimitException;
 import com.moa.funding.exception.RewardStockException;
 import com.moa.funding.mapper.FundingPaymentMapper;
+import com.moa.funding.repository.FundingManagementRepositoryCustom;
 import com.moa.funding.repository.FundingSelectRepositoryCustom;
 import com.moa.funding.service.FundingPaymentService;
 import com.moa.funding.service.RewardStockCache;
@@ -47,6 +48,28 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	private final RewardService rewardService;
 	private final FundingSelectRepositoryCustom fundingSelectRepositoryCustom;
 	private final RewardStockCache rewardStockCache;
+	private final FundingManagementRepositoryCustom fundingManagementRepositoryCustom;
+
+
+	@Transactional
+	@Scheduled(cron = "0 0/5 * * * *")//5분마다 실행
+	// @Scheduled(cron = "0 * * * * *") //1분마다 실행 태스트 용
+	public void cancelExpiredFundingOrders() {
+		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 10); // 10분 전
+		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60); // 1분 전 테스트용 코드
+		log.info("만료된 펀딩 주문 처리 중...");
+		Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 5); // 5분 전
+
+		List<FundingOrder> expiredOrders = fundingSelectRepositoryCustom.findPendingOrdersOlderThan(cutoffTime);
+
+		for (FundingOrder order : expiredOrders) {
+			cancelFundingContribution(order);
+			fundingOrderRepository.delete(order);
+		}
+
+		log.info("만료된 펀딩 주문 처리 완료 - 총 {}개 주문 삭제", expiredOrders.size());
+	}
+
 
 	@Override
 	@Transactional
@@ -93,28 +116,12 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		// Step 5: 펀딩의 currentAmount 업데이트
 		updateFundingCurrentAmount(paymentRequest);
 
+		fundingManagementRepositoryCustom.validateAndUpdateFundingStatuses();
+
 		log.info("결제된 펀딩 후원 처리 완료 - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
 	}
 
 
-	@Transactional
-	@Scheduled(cron = "0 0/5 * * * *")//5분마다 실행
-	// @Scheduled(cron = "0 * * * * *") //1분마다 실행 태스트 용
-	public void cancelExpiredFundingOrders() {
-		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 10); // 10분 전
-		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60); // 1분 전 테스트용 코드
-		log.info("만료된 펀딩 주문 처리 중...");
-		Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 5); // 5분 전
-
-		List<FundingOrder> expiredOrders = fundingSelectRepositoryCustom.findPendingOrdersOlderThan(cutoffTime);
-
-		for (FundingOrder order : expiredOrders) {
-			cancelFundingContribution(order);
-			fundingOrderRepository.delete(order);
-		}
-
-		log.info("만료된 펀딩 주문 처리 완료 - 총 {}개 주문 삭제", expiredOrders.size());
-	}
 
 	private void cancelFundingContribution(FundingOrder order) {
 		// 캐시에서 리워드 감소 정보를 조회

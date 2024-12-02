@@ -79,7 +79,6 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 	@Override
 	public void updateFundingToOnGoing() {
 		QFunding funding = QFunding.funding;
-
 		//오늘 날짜를 구함
 		LocalDate today = LocalDate.now();
 		//오늘 자정을 구함 2024-11-28 00:00 (한국) = 2024-11-27 15:00 (UTC)
@@ -142,6 +141,69 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 		}
 		return fundingIds;
 	}
+
+	@Override
+	public void updateFundingToOngoingIfRefund() {
+		QFunding funding = QFunding.funding;
+
+		Instant now = Instant.now();
+
+		long updateCount = queryFactory.update(funding)
+			.set(funding.fundingStatus, Funding.FundingStatus.ONGOING)
+			.where(
+				funding.fundingStatus.eq(Funding.FundingStatus.SUCCESSFUL) // 현재 SUCCESSFUL 상태
+					.and(funding.endDate.goe(now)) // 종료일이 지나지 않은 경우
+					.and(funding.currentAmount.lt(funding.goalAmount)) // 목표 금액보다 적은 경우
+			)
+			.execute();
+
+		log.info("updateFundingToOngoingIfRefund 메서드 updateCount: {}", updateCount);
+	}
+
+
+	@Override
+	public void validateAndUpdateFundingStatuses() {
+	   QFunding funding = QFunding.funding;
+	   Instant now = Instant.now();
+
+	   // ONGOING → SUCCESSFUL
+		long ongoingToSuccessful = queryFactory.update(funding)
+			.set(funding.fundingStatus, Funding.FundingStatus.SUCCESSFUL)
+			.where(
+				funding.fundingStatus.eq(Funding.FundingStatus.ONGOING)
+					.and(funding.currentAmount.goe(funding.goalAmount))
+					.and(funding.endDate.goe(now))
+			)
+			.execute();
+		log.info("ONGOING → SUCCESSFUL 변경된 펀딩 수: {}", ongoingToSuccessful);
+
+		// SUCCESSFUL → ONGOING
+
+		long successfulToOngoing = queryFactory.update(funding)
+			.set(funding.fundingStatus, Funding.FundingStatus.ONGOING)
+			.where(
+				funding.fundingStatus.eq(Funding.FundingStatus.SUCCESSFUL)
+					.and(funding.currentAmount.lt(funding.goalAmount))
+					.and(funding.endDate.goe(now))
+			)
+			.execute();
+		log.info("SUCCESSFUL → ONGOING 변경된 펀딩 수: {}", successfulToOngoing);
+
+		// ONGOING → FAILED
+		long ongoingToFailed = queryFactory.update(funding)
+			.set(funding.fundingStatus, Funding.FundingStatus.FAILED)
+		.where(
+			funding.fundingStatus.eq(Funding.FundingStatus.ONGOING)
+				.and(funding.currentAmount.lt(funding.goalAmount))
+				.and(funding.endDate.lt(now))
+		)
+			.execute();
+		log.info("ONGOING → FAILED 변경된 펀딩 수: {}", ongoingToFailed);
+
+	}
+
+
+
 
 	private static boolean fundingIdsNotEmpty(List<Long> fundingIds) {
 		return !fundingIds.isEmpty();

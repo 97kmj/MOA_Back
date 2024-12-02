@@ -28,6 +28,14 @@ public class RewardServiceImpl implements RewardService {
 		if (isBasicReward(reward)) {
 			return; // BASIC 리워드는 작업 건너뜀
 		}
+
+		// 재고가 null인 경우 "수량 제한 없음"으로 간주
+		if (stockIsLimitless(reward)) {
+			log.info("리워드 '{}'는 수량 제한이 없습니다. (Stock is null)", reward.getRewardName());
+			return; // 수량 제한이 없으므로 재고를 감소할 필요 없음
+		}
+
+
 		// 재고 검증
 		validateRewardStock(reward, rewardRequest.getRewardQuantity());
 		// 재고 감소
@@ -90,5 +98,12 @@ public class RewardServiceImpl implements RewardService {
 		}
 		return false;
 	}
+
+
+	private  boolean stockIsLimitless(Reward reward) {
+		return reward.getStock() == null;
+	}
+
+
 
 }
