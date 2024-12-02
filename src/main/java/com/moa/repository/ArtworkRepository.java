@@ -2,7 +2,7 @@ package com.moa.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
-
+import org.springframework.data.jpa.repository.Query;
 import com.moa.entity.Artwork;
 import com.moa.entity.Artwork.SaleStatus;
 
@@ -27,6 +27,8 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 		@Param("search") String search,
 		Pageable pageable
 	);
+	@Query("SELECT a FROM Artwork a WHERE a.artist.username = :username")
+	List<Artwork> findByArtistUsername(@Param("username") String username);
 	
 	
 	@Query("SELECT a FROM Artwork a " +

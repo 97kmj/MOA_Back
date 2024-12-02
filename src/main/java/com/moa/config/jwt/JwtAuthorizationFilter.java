@@ -34,9 +34,14 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getServletPath();
         // 등록 및 로그인 관련 경로는 필터를 적용하지 않음
+        String method = request.getMethod();
+
+        // OPTIONS 요청 제외
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            return true;
+        }
+
         return
-//            path.equals("/") ||
-//            path.equals("/main") ||
             path.equals("/api/user/check-username") ||
             path.equals("/api/user/register") ||
             path.equals("/api/user/login") ||
@@ -83,7 +88,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private boolean requiresAuthentication(String uri) {
-        return uri.startsWith("/api/like/") || uri.contains("/user") || uri.contains("/admin");
+        return uri.startsWith("/api/like/") || uri.startsWith("/api/artworks/") || uri.contains("/user") || uri.contains("/admin");
     }
 
 
