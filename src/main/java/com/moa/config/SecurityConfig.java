@@ -19,6 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.filter.CorsFilter;
 
 @Configuration
@@ -56,7 +57,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthenticationManager authenticationManager = authenticationManager(http.getSharedObject(AuthenticationConfiguration.class));
-
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@");
         http.cors().and();
 
         //추가
@@ -75,7 +76,8 @@ public class SecurityConfig {
             .addFilter(corsFilter)
             .formLogin().disable()
             .httpBasic().disable()
-            .addFilter(new JwtAuthenticationFilter(authenticationManager, jwtToken))
+            .addFilterAt(new JwtAuthenticationFilter(authenticationManager, jwtToken),
+                UsernamePasswordAuthenticationFilter.class)
             .addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository, jwtToken))
             .authorizeRequests()
 

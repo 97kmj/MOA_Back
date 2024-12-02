@@ -52,8 +52,6 @@ public class Artwork {
     private Subject subject;
 
     private Boolean isStandardCanvas;
-    
-    
 
     @ManyToOne
     @JoinColumn(name = "canvas_id") // 외래 키 설정

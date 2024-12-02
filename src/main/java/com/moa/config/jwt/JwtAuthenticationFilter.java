@@ -22,12 +22,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         this.jwtToken = jwtToken;
         // 수동으로 AuthenticationManager 설정
         setAuthenticationManager(authenticationManager);
+
     }
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
         FilterChain chain, Authentication authResult)
         throws IOException, ServletException {
+        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         // PrincipalDetails로부터 사용자 정보 가져오기
         PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
 
