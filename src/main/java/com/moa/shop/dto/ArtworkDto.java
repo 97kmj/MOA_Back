@@ -37,7 +37,7 @@ public class ArtworkDto {
 	private String title;
 	private String width;
 	private String artistId;
-	private String artisName;
+	private String artistName;
 	private Long canvasId;
 	private String canvasNum;
 	private Integer categoryId;
@@ -119,7 +119,7 @@ public class ArtworkDto {
 	            .title(artwork.getTitle() != null ? artwork.getTitle() : "") // null이면 빈 문자열
 	            .width(artwork.getWidth() != null ? artwork.getWidth() : "") // null이면 빈 문자열
 	            .artistId(artwork.getArtist() != null && artwork.getArtist().getUsername() != null ? artwork.getArtist().getUsername() : "") // null이면 빈 문자열
-	            .artisName(artwork.getArtist() != null && artwork.getArtist().getName() != null ? artwork.getArtist().getName() : "") // null이면 빈 문자열
+	            .artistName(artwork.getArtist() != null && artwork.getArtist().getName() != null ? artwork.getArtist().getName() : "") // null이면 빈 문자열
 	            .canvasId(artwork.getCanvas() != null && artwork.getCanvas().getCanvasId() != null ? artwork.getCanvas().getCanvasId() : 0L) // null이면 0L
 	            .canvasNum(artwork.getCanvas() != null && artwork.getCanvas().getCanvasNum() != null ? artwork.getCanvas().getCanvasNum().toString() : "") // null이면 빈 문자열
 	            .categoryId(artwork.getCategory() != null && artwork.getCategory().getCategoryId() != null ? artwork.getCategory().getCategoryId() : 1) // null이면 0L
