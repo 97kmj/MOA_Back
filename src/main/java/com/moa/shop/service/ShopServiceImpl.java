@@ -30,6 +30,7 @@ import com.moa.shop.dto.CategoryDto;
 import com.moa.shop.dto.SubjectDto;
 import com.moa.shop.dto.TypeDto;
 import com.moa.shop.repository.ArtworkDslRepository;
+import com.moa.user.dto.OrderUserInfoDto;
 import com.moa.user.service.util.PageInfo;
 
 import lombok.RequiredArgsConstructor;
@@ -156,6 +157,14 @@ public class ShopServiceImpl implements ShopService {
 
 	@Override
 	public ArtworkDto artworkDetail(Long artworkId) throws Exception {
-		return ArtworkDto.toArtworkDto(artworkRepository.findById(artworkId).orElseThrow(()->new Exception("아크워크 번호 오류")));
+		return ArtworkDto.toArtworkDto(artworkRepository.findById(artworkId).orElseThrow(()->new Exception("atrwork 번호 오류")));
+	}
+
+	@Override
+	public OrderUserInfoDto orderUserInfo(String username) throws Exception {
+		System.out.println("마지막username:"+username);
+		System.out.println("======================");
+		
+		return OrderUserInfoDto.fromUserInfo(userRepository.findById(username).orElseThrow(()->new Exception("User 번호 오류")));
 	}
 }
