@@ -11,16 +11,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MainArtworkDto {
+public class ArtistArtworkDto {
 	private Long artworkId;
+	private String title;
 	private String imageUrl;
-	private String saleStatus;
 	
-	public static MainArtworkDto fromEntity(Artwork artwork) {
-		return MainArtworkDto.builder()
+	public static ArtistArtworkDto fromEntity(Artwork artwork) {
+		return ArtistArtworkDto.builder()
 				.artworkId(artwork.getArtworkId())
+				.title(artwork.getTitle())
 				.imageUrl(artwork.getImageUrl())
-				.saleStatus(artwork.getSaleStatus().toString())
 				.build();
 	}
 }

@@ -21,7 +21,7 @@ public class MainPageServiceImpl implements MainPageService {
 	private final MainFundingRepository mainFundingRepository;
 	
 	@Override
-	public Map<String, Object> getMain() throws Exception {
+	public Map<String, Object> getMainContents() throws Exception {
 		//메인화면 이미지 리스트 가져오기
 		List<MainArtworkDto> artworkList = getArtworkList();
 		//펀딩 가져오기

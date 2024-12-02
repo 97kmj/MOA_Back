@@ -19,7 +19,7 @@ public class MainPageController {
 	@GetMapping("/main")
 	public ResponseEntity<Map<String,Object>> getMain() {
 		try {
-			Map<String,Object> response = mainPageService.getMain();
+			Map<String,Object> response = mainPageService.getMainContents();
 			return new ResponseEntity<Map<String,Object>>(response,HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
