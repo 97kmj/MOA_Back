@@ -60,7 +60,7 @@ public class LikeService {
             .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         Artwork artwork = artworkRepository.findById(artworkId)
             .orElseThrow(() -> new IllegalArgumentException("작품을 찾을 수 없습니다."));
-
+        System.out.println("서비스");
         return likeArtworkRepository.findByUserAndArtwork(user, artwork).isPresent();
     }
 

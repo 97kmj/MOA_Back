@@ -1,6 +1,5 @@
 package com.moa.shop.controller;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,12 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moa.entity.Artwork;
 import com.moa.shop.dto.ArtworkDto;
 import com.moa.shop.dto.CanvasDto;
@@ -23,16 +23,23 @@ import com.moa.shop.dto.CategoryDto;
 import com.moa.shop.dto.SubjectDto;
 import com.moa.shop.dto.TypeDto;
 import com.moa.shop.service.ShopService;
-import com.moa.user.service.util.PageInfo;
+import com.moa.user.service.LikeService;
+
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
+@RequestMapping("/shop")
+@Slf4j
 public class ShopController {
 	
+	private static final int ResponseEntity = 0;
+	private static final int Boolean = 0;
 	@Autowired
 	private ShopService shopService;
-	
-	
-	@GetMapping("shop/artworkAdd")
+    @Autowired
+    private LikeService likeService;
+    
+	@GetMapping("/artworkAdd")
 	public ResponseEntity<List<CategoryDto>> categoryList(){
 		try {
 			List<CategoryDto> categoryList = shopService.categoryList();
@@ -44,10 +51,9 @@ public class ShopController {
 		}
 	}
 	
-	@GetMapping("/shop/artworkAdd/canvas/{canvasType}")
+	@GetMapping("/artworkAdd/canvas/{canvasType}")
 	public ResponseEntity<List<CanvasDto>> CanvasList(@PathVariable("canvasType") String canvasType){
 		try {
-			
 			canvasType = canvasType.toUpperCase();
 			List<CanvasDto> canvasList = shopService.canvasList(canvasType);
 			return new ResponseEntity<List<CanvasDto>>(canvasList, HttpStatus.OK); 
@@ -57,9 +63,7 @@ public class ShopController {
 		}
 	}
 	
-	
-	
-	@PostMapping("shop/artworkAdd/type/{categoryId}")
+	@PostMapping("/artworkAdd/type/{categoryId}")
 	public ResponseEntity<List<TypeDto>> typeListByCategory(@PathVariable Integer categoryId) {
         try {
         	List<TypeDto> typeList = shopService.typeList(categoryId);
@@ -70,7 +74,7 @@ public class ShopController {
         }
         
     }
-	@PostMapping("shop/artworkAdd/subject/{categoryId}")
+	@PostMapping("/artworkAdd/subject/{categoryId}")
 	public ResponseEntity<List<SubjectDto>> subjectListByCategory(@PathVariable Integer categoryId) {
         try {
         	List<SubjectDto> subjectList = shopService.subjectList(categoryId);
@@ -82,7 +86,7 @@ public class ShopController {
     }
 	
 	// 작품등록
-	@PostMapping("/shop/artworkAdd")
+	@PostMapping("/artworkAdd")
 	public ResponseEntity<Long> artworkAdd(@RequestPart("artworkDto") ArtworkDto artworkDto,
 			@RequestPart("artworkImage")MultipartFile artworkImage){
 			try {
@@ -98,7 +102,7 @@ public class ShopController {
 			}
 		}
 
-	@GetMapping("/shop/saleList") 
+	@GetMapping("/saleList") 
 	public ResponseEntity<List<ArtworkDto>>saleList(
 			@RequestParam(value = "categoryName", required = false)String category,
 			@RequestParam(value = "typeId", required = false)String type,
@@ -108,16 +112,8 @@ public class ShopController {
 			@RequestParam(value="page", required = false, defaultValue = "1")Integer page,
 			@RequestParam(value ="size", required = false, defaultValue = "0") int size){
 		try {
-			System.out.println(page+ "page1");
-			System.out.println(category + "category1");
-			System.out.println(type + "type");
-			System.out.println(subject+ "subject");
-			System.out.println(keyword +"keyword");
-			System.out.println(saleStatus +"saleStatus");
-			System.out.println(size +"size");
-			
+
 			List<ArtworkDto> artworkList = shopService.artworkList(page, category, keyword, type, subject, saleStatus,size);
-			System.out.println(artworkList);
 			return new ResponseEntity<List<ArtworkDto>>(artworkList, HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -125,23 +121,36 @@ public class ShopController {
 		}
 		
 	}
+
 	
-	@GetMapping("/shop/saleList/{artwork_name}")
-	public ResponseEntity<Map<String,Object>>saleList(@RequestParam(value="page", required = false, defaultValue = "1")Integer page,
-			@RequestParam(value = "keyword", required = false)String keyword){
+	@GetMapping("/artworkDetail/{artworkId}")
+	public ResponseEntity<ArtworkDto> artworkDetail(@PathVariable Long artworkId){
 		try {
-			PageInfo pageInfo = new PageInfo();
-			pageInfo.setCurPage(page);
-			List<ArtworkDto> artworkList = shopService.artworkListByArtist(pageInfo,keyword);
-			Map<String, Object> listInfo = new HashMap<>();
-			listInfo.put("artworkList", artworkList);
-			listInfo.put("pageInfo", pageInfo);
-			return new ResponseEntity<Map<String,Object>>(listInfo, HttpStatus.OK);
-		}catch (Exception e) {
+			return new ResponseEntity<ArtworkDto>(shopService.artworkDetail(artworkId), HttpStatus.OK);
+		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Map<String,Object>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<ArtworkDto>(HttpStatus.BAD_REQUEST);
 		}
-		
-	}
+	}	  
 	
+	@PostMapping("/isLikeArtwork/{artworkId}")
+	public ResponseEntity<Boolean> isLikeArtwork(@PathVariable Long artworkId, @RequestBody Map<String,String> param){
+		try {
+			return new ResponseEntity<Boolean>(shopService.isLikeArtwork(param.get("username"), artworkId), HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
+		}
+	}	  
+	
+	@PostMapping("/likeArtwork")
+	public ResponseEntity<Boolean> likeArtwork(@RequestBody Map<String,String> param){
+		try {
+			Boolean isLike = shopService.toggleLikeArtwork(param.get("username"), Long.valueOf(param.get("artworkId")));
+			return new ResponseEntity<Boolean>(isLike, HttpStatus.OK);
+		} catch(Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
+		}
+	}
 }

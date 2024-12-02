@@ -51,6 +51,7 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 		Page<Artwork> findBySaleStatus(
 		Pageable pageable
 	);
+	
 }
 
 
