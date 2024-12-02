@@ -85,9 +85,10 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 		//오늘 자정을 구함 2024-11-28 00:00 (한국) = 2024-11-27 15:00 (UTC)
 		Instant startOfToday = today.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
-		//오늘에서 하루를 더해서 내일 자정을 구함 그리고 -1초를 해서 오늘의 마지막 시간 23:59:59를 구했당~
+		// 오늘에서 하루를 더한 내일 자정에서 -1초를 계산해 오늘의 마지막 순간(23:59:59)을 구함
 		Instant endOfToday = today.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
 
+		// 조회 없이 조건에 맞는 데이터를 업데이트 (JPA 영속성 컨텍스트에는 반영되지 않음)
 		long updatedCount = queryFactory.update(funding)
 			.set(funding.fundingStatus, Funding.FundingStatus.ONGOING)
 			.where(funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)
@@ -97,8 +98,9 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 				// .and(funding.startDate.lt(endOfToday))    // startDate < 내일 자정
 			)
 			.execute();
+		// 이미 업데이트해야 할 조건을 명확히 알고 있기 때문에, 개별적으로 데이터를 조회한 뒤 수정할 필요 없이 바로 업데이트 쿼리를 실행
 
-		log.info("updateFundingToOnGoing updatedCount: {}", updatedCount);
+		log.info("updateFundingToOnGoing 메서드 updatedCount: {}", updatedCount);
 	}
 
 	@Override
@@ -116,7 +118,7 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 			)
 			.execute();
 
-		log.info("updateFundingToSuccessful updateCount: {}", updateCount);
+		log.info("updateFundingToSuccessful 메서드 updateCount: {}", updateCount);
 	}
 
 
@@ -124,7 +126,6 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 	public List<Long> updateFundingToFailedAndGetIds(Instant now) {
 		QFunding funding = QFunding.funding;
 
-		// Step 1: Fetch funding IDs to update
 		List<Long> fundingIds = queryFactory.select(funding.fundingId)
 			.from(funding)
 			.where(funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)
@@ -155,6 +156,4 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 				.and(fundingOrder.refundStatus.eq(FundingOrder.RefundStatus.NOT_REFUNDED)))
 			.fetch();
 	}
-
-
 }

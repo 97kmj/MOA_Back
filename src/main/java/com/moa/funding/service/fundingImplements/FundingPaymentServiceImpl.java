@@ -52,21 +52,24 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	@Transactional
 	public void prepareFundingOrder(PaymentRequest paymentRequest) {
 		log.info("결제 준비 중 - PaymentRequest: {}", paymentRequest);
-
+		// Step 1: 펀딩 및 리워드 정보 확인
 		Funding funding = getFunding(paymentRequest);
+
+		//검증
 		validateFundingAndRewards(funding, paymentRequest.getRewardList());
 
-		// 리워드 재고 감소
+		// Step 2: 리워드 재고 감소
 		for (RewardRequest rewardRequest : paymentRequest.getRewardList()) {
 			rewardService.reduceRewardStock(rewardRequest);
 		}
-		// Step 2: 사용자 조회
+		// Step 3: 사용자 조회
 		User user = getUser(paymentRequest);
-		// Step 3: 펀딩 주문 생성 및 저장
+
+		// Step 4: 펀딩 주문 생성 및 저장
 		FundingOrder fundingOrder = createAndSaveFundingOrder(paymentRequest, user);
 
+		// Step 5: 리워드 감소 정보 캐시에 저장
 		rewardStockCache.addRewardChanges(fundingOrder.getFundingOrderId(), paymentRequest.getRewardList());
-
 		log.info("결제 준비 완료 - FundingOrder: {}", fundingOrder);
 	}
 
@@ -78,8 +81,10 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		// Step 1: 검증 및 중복 결제 리워드 정보 확인
 		validatePayment(impUid, paymentRequest);
 
+		// Step 2: 펀딩 및 리워드 정보 확인
 		FundingOrder fundingOrder = getFundingOrder(paymentRequest);
 
+		// Step 3: imUid 업데이트 및 결제 상태 업데이트
 		updateFundingOrderAfterSuccess(fundingOrder, impUid);
 
 		// Step 4: 펀딩 조회 및 후원 생성 및 저장
@@ -96,9 +101,9 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	@Scheduled(cron = "0 0/5 * * * *")//5분마다 실행
 	// @Scheduled(cron = "0 * * * * *") //1분마다 실행 태스트 용
 	public void cancelExpiredFundingOrders() {
-		log.info("만료된 펀딩 주문 처리 중...");
 		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 10); // 10분 전
 		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60); // 1분 전 테스트용 코드
+		log.info("만료된 펀딩 주문 처리 중...");
 		Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 5); // 5분 전
 
 		List<FundingOrder> expiredOrders = fundingSelectRepositoryCustom.findPendingOrdersOlderThan(cutoffTime);
