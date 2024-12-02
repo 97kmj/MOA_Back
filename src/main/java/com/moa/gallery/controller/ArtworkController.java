@@ -35,6 +35,4 @@ public class ArtworkController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
-
-
 }

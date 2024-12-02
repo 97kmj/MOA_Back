@@ -38,4 +38,6 @@ public interface LikeArtworkRepository extends JpaRepository<LikeArtwork, Long> 
         @Param("search") String search,
         Pageable pageable
     );
+    
+    Optional<LikeArtwork> findByUser_UsernameAndArtwork_ArtworkId(String username, Long artworkId);
 }

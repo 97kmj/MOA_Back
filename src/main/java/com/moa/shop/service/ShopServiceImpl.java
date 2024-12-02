@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,10 +15,12 @@ import com.moa.config.image.ImageService;
 import com.moa.entity.Artwork;
 import com.moa.entity.Artwork.SaleStatus;
 import com.moa.entity.Canvas;
+import com.moa.entity.LikeArtwork;
 import com.moa.entity.User;
 import com.moa.repository.ArtworkRepository;
 import com.moa.repository.CanvasRepository;
 import com.moa.repository.CategoryRepository;
+import com.moa.repository.LikeArtworkRepository;
 import com.moa.repository.SubjectRepository;
 import com.moa.repository.TypeRepository;
 import com.moa.repository.UserRepository;
@@ -30,6 +33,7 @@ import com.moa.shop.repository.ArtworkDslRepository;
 import com.moa.user.service.util.PageInfo;
 
 import lombok.RequiredArgsConstructor;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,8 +46,7 @@ public class ShopServiceImpl implements ShopService {
 	private final CanvasRepository canvasRepository;
 	private final ImageService imageService;
 	private final UserRepository userRepository;
-	private final ArtworkDslRepository artworkDslRepository;
-	
+	private final LikeArtworkRepository likeArtworkRepository;
 
 	@Override
 	public Long artworkAdd(ArtworkDto artworkDto, MultipartFile artworkImage) throws Exception {
@@ -105,45 +108,54 @@ public class ShopServiceImpl implements ShopService {
 	@Override
 	public List<ArtworkDto> artworkList(Integer page, String category, String keyword, String type, String subject, SaleStatus saleStatus,
 			Integer size) throws Exception {
-		System.out.println("if 들어가기전");
 		 	page = (page != null && page > 0) ? page - 1 : 0;
 		    size = (size != null && size > 0) ? size : 8;  // 기본 페이지 크기 설정
 			PageRequest pageRequest = PageRequest.of(page, size);
 			if ((subject != null && !subject.isEmpty()) || (type != null && !type.isEmpty()) || (category != null && !category.isEmpty()) || (keyword != null && !keyword.isEmpty())|| (saleStatus !=null)) {
-				System.out.println("if 들어간후");
 				List<ArtworkDto> ListArtworkDto = artworkRepository.findBySearches(subject, type, category, keyword, saleStatus, pageRequest)
 						.stream().map(a->ArtworkDto.toArtworkDto(a)).collect(Collectors.toList());
 				return ListArtworkDto;
 			 } else {
-				 System.out.println("else");
 		         List<ArtworkDto> ListArtworkDto = artworkRepository.findBySaleStatus(pageRequest)
 		            		.stream().map(a->ArtworkDto.toArtworkDto(a)).collect(Collectors.toList());
 		            return  ListArtworkDto;
 		       }
-			
-			
+	}
 
-		
+
+	@Override
+	public Boolean toggleLikeArtwork(String username, Long artworkId) throws Exception {
+		Optional<LikeArtwork> olikeArtwork = likeArtworkRepository.findByUser_UsernameAndArtwork_ArtworkId(username, artworkId);
+        Artwork artwork = artworkRepository.findById(artworkId)
+                .orElseThrow(() -> new IllegalArgumentException("작품을 찾을 수 없습니다."));
+
+        if(olikeArtwork.isPresent()) {
+			likeArtworkRepository.deleteById(olikeArtwork.get().getLikeId());
+			artwork.setLikeCount(artwork.getLikeCount()-1);
+			artworkRepository.save(artwork);
+
+			return false;
+		} else {
+			likeArtworkRepository.save(new LikeArtwork().builder()
+					.artwork(Artwork.builder().artworkId(artworkId).build())
+					.user(User.builder().username(username).build())
+					.build());
+			artwork.setLikeCount(artwork.getLikeCount()+1);
+			artworkRepository.save(artwork);
+			return true;
+		}
 	}
 
 	@Override
-	public List<ArtworkDto> artworkList(Integer page, String category, String type, String subject, String saleStatus,
-			String keyword, Integer size) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public Boolean isLikeArtwork(String username, Long artworkId) throws Exception {
+		if(likeArtworkRepository.findByUser_UsernameAndArtwork_ArtworkId(username, artworkId).isPresent()) {
+			return true;
+		} 
+		return false;
 	}
 
 	@Override
-	public List<ArtworkDto> artworkListByArtist(PageInfo page, String keyword) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public ArtworkDto artworkDetail(Long artworkId) throws Exception {
+		return ArtworkDto.toArtworkDto(artworkRepository.findById(artworkId).orElseThrow(()->new Exception("아크워크 번호 오류")));
 	}
-
-	@Override
-	public List<ArtworkDto> artworkList(PageInfo page, String category, String type, String subject, String saletype)
-			throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
