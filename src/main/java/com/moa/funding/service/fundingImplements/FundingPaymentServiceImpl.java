@@ -48,8 +48,8 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 	@Override
 	@Transactional
-	public void prepareFundingContribution(PaymentRequest paymentRequest) {
-		log.debug("결제 준비 중 - PaymentRequest: {}", paymentRequest);
+	public void prepareFundingOrder(PaymentRequest paymentRequest) {
+		log.info("결제 준비 중 - PaymentRequest: {}", paymentRequest);
 
 		Funding funding = getFunding(paymentRequest);
 		validateFundingAndRewards(funding, paymentRequest.getRewardList());
@@ -65,14 +65,14 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 		rewardStockCache.addRewardChanges(fundingOrder.getFundingOrderId(), paymentRequest.getRewardList());
 
-		log.debug("결제 준비 완료 - FundingOrder: {}", fundingOrder);
+		log.info("결제 준비 완료 - FundingOrder: {}", fundingOrder);
 	}
 
 
 	@Override
 	@Transactional
 	public void processFundingContribution(String impUid, PaymentRequest paymentRequest) {
-		log.debug("결제된 펀딩 후원 처리   - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
+		log.info("결제된 펀딩 후원 처리   - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
 		// Step 1: 검증 및 중복 결제 리워드 정보 확인
 		validatePayment(impUid, paymentRequest);
 
