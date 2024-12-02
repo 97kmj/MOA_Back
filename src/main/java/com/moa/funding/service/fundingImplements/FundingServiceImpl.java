@@ -21,7 +21,7 @@ import com.moa.funding.dto.funding.FundingResponse;
 import com.moa.funding.dto.funding.RewardDTO;
 import com.moa.funding.mapper.FundingMapper;
 import com.moa.funding.repository.FundingSelectRepositoryCustom;
-import com.moa.funding.repository.FundingStatusRepositoryCustom;
+import com.moa.funding.repository.FundingManagementRepositoryCustom;
 import com.moa.funding.service.FundingService;
 import com.moa.repository.FundingImageRepository;
 import com.moa.repository.FundingRepository;
@@ -39,7 +39,7 @@ public class FundingServiceImpl implements FundingService {
 	private final FundingImageRepository fundingImageRepository;
 	private final ImageService imageService;
 	private final FundingSelectRepositoryCustom fundingSelectRepositoryCustom;
-	private  final FundingStatusRepositoryCustom fundingStatusRepositoryCustom;
+	private  final FundingManagementRepositoryCustom fundingManagementRepositoryCustom;
 
 	@Override
 	public FundingDetailDTO getFundingDetail(Long fundingId) {
@@ -52,31 +52,33 @@ public class FundingServiceImpl implements FundingService {
 
 	}
 
-	@Scheduled(cron = "0 0 0 * * *") // 매일 0시 0분 0초에 실행
+	// @Scheduled(cron = "0 0 0 * * *") // 매일 0시 0분 0초에 실행
+	@Scheduled(cron = "0 0 * * * *")
 	// @Scheduled(cron = "0 */1 * * * *") // 매 1분마다 실행
 	@Transactional
 	public void scheduleUpdateToOngoing() {
 	   log.info("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 시작 " );
-		fundingStatusRepositoryCustom.updateFundingToOnGoing();
+		fundingManagementRepositoryCustom.updateFundingToOnGoing();
 	   log.info("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 완료 " );
 	}
 
 	@Scheduled(cron = "0 0 * * * *") // 매시간 0분 0초에 실행
 	// @Scheduled(cron = "0 30 * * * *") // 매시간 30분에 실행
+	// @Scheduled(cron = "0 */1 * * * *")
 	@Transactional
 	public void scheduleUpdateToSuccessful() {
 	    log.info("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 시작 " );
-		fundingStatusRepositoryCustom.updateFundingToSuccessful();
+		fundingManagementRepositoryCustom.updateFundingToSuccessful();
 		log.info("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 완료 " );
 	}
 
-	@Scheduled(cron = "0 0 0 * * *") // 매일 0시 0분 0초에 실행
-	@Transactional
-	public void scheduleUpdateToFailed() {
-		log.info("scheduleUpdateToFailed 스케줄링 실행 - FAILED 상태 변경 시작 " );
-		fundingStatusRepositoryCustom.updateFundingToFailed();
-		log.info("scheduleUpdateToFailed 스케줄링 실행 - FAILED 상태 변경 완료 " );
-	}
+	// @Scheduled(cron = "0 0 0 * * *") // 매일 0시 0분 0초에 실행
+	// @Transactional
+	// public void scheduleUpdateToFailed() {
+	// 	log.info("scheduleUpdateToFailed 스케줄링 실행 - FAILED 상태 변경 시작 " );
+	// 	fundingStatusRepositoryCustom.updateFundingToFailed();
+	// 	log.info("scheduleUpdateToFailed 스케줄링 실행 - FAILED 상태 변경 완료 " );
+	// }
 
 
 	@Override

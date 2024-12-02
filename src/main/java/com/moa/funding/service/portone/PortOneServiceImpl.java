@@ -116,6 +116,49 @@ public class PortOneServiceImpl implements PortOneService {
 		}
 	}
 
+	// @Override
+	// public String preparePayment(String merchantUid, BigDecimal amount) {
+	// 	try {
+	// 		// Step 1: 유효한 Bearer 토큰 가져오기
+	// 		String bearerToken = portOneAuthService.getAccessToken();
+	//
+	// 		// Step 2: HTTP 헤더 설정
+	// 		HttpHeaders headers = new HttpHeaders();
+	// 		headers.setContentType(MediaType.APPLICATION_JSON);
+	// 		headers.setBearerAuth(bearerToken);
+	//
+	// 		// Step 3: 요청 바디 설정
+	// 		Map<String, Object> body = new HashMap<>();
+	// 		body.put("merchant_uid", merchantUid);
+	// 		body.put("amount", amount);
+	//
+	// 		HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(body, headers);
+	// 		RestTemplate restTemplate = new RestTemplate();
+	//
+	// 		// Step 4: 아임포트 API 호출
+	// 		ResponseEntity<String> response = restTemplate.exchange(
+	// 			"https://api.iamport.kr/payments/prepare",
+	// 			HttpMethod.POST,
+	// 			httpEntity,
+	// 			String.class
+	// 		);
+	//
+	// 		if (response.getStatusCode() == HttpStatus.OK) {
+	// 			log.info("결제 사전 등록 성공: {}", response.getBody());
+	// 			return merchantUid; // 성공 시 merchantUid 반환
+	// 		} else {
+	// 			log.error("결제 사전 등록 실패: {}", response.getBody());
+	// 			throw new RuntimeException("결제 사전 등록 실패: " + response.getBody());
+	// 		}
+	// 	} catch (Exception e) {
+	// 		log.error("결제 사전 등록 중 오류 발생: {}", e.getMessage(), e);
+	// 		throw new RuntimeException("결제 사전 등록 중 오류 발생: " + e.getMessage(), e);
+	// 	}
+	// }
+	//
+
+
+
 	@Override
 	public void refundOrder(FundingOrder order) {
 		try {

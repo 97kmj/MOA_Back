@@ -1,5 +1,7 @@
 package com.moa.funding.mapper;
 
+import static com.moa.funding.mapper.FundingMapper.*;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -48,6 +50,8 @@ public class FundingDetailMapper {
 			.introduction(fundingEntity.getIntroduction())
 			.rewards(rewards)
 			.images(images)
+			.achievementRate(calculateAchievementRate(fundingEntity))
+			.remainingDays(calculateRemainingDays(fundingEntity.getEndDate()))
 			.build();
 	}
 

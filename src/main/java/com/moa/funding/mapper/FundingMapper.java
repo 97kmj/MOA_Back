@@ -94,7 +94,7 @@ public class FundingMapper {
 	}
 
 	//달성률 계산
-	private static int calculateAchievementRate(Funding funding) {
+	protected static int calculateAchievementRate(Funding funding) {
 		BigDecimal goalAmount = funding.getGoalAmount();
 		BigDecimal currentAmount = funding.getCurrentAmount();
 
@@ -111,7 +111,7 @@ public class FundingMapper {
 	}
 
 	// 남은 날짜 계산
-	private static int calculateRemainingDays(Instant endDate) {
+	protected static int calculateRemainingDays(Instant endDate) {
 		Instant today = Instant.now();
 		// 오늘 날짜와 종료 날짜의 차이 계산
 		long daysBetween = Duration.between(today, endDate).toDays();
