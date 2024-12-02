@@ -1,5 +1,6 @@
 package com.moa.user.controller;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import com.moa.config.auth.PrincipalDetails;
 import com.moa.config.jwt.JwtToken;
 import com.moa.entity.User;
@@ -11,6 +12,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -26,12 +29,17 @@ public class UserController {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtToken jwtToken;
+    private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public UserController(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtToken jwtToken) {
+    public UserController(UserRepository userRepository,
+        BCryptPasswordEncoder bCryptPasswordEncoder,
+        JwtToken jwtToken,
+        AuthenticationManager authenticationManager) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtToken = jwtToken;
+        this.authenticationManager = authenticationManager;
     }
 
     // 아이디 중복 확인
@@ -45,42 +53,45 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
+        System.out.println("컨트롤러왔나요@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         String username = loginRequest.get("username");
         String password = loginRequest.get("password");
 
-        // 사용자 검증
-        Optional<User> optionalUser = userRepository.findByUsername(username);
-        if (!optionalUser.isPresent()) {
+        // AuthenticationToken 생성
+        UsernamePasswordAuthenticationToken authenticationToken =
+            new UsernamePasswordAuthenticationToken(username, password);
+
+        try {
+            // AuthenticationManager를 사용하여 인증 시도
+            Authentication authentication = authenticationManager.authenticate(authenticationToken);
+
+            // 인증 성공 시 PrincipalDetails 가져오기
+            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+            User user = principalDetails.getUser();
+
+            // JWT 토큰 생성
+            String accessToken = jwtToken.makeAccessToken(user.getUsername());
+            String refreshToken = jwtToken.makeRefreshToken(user.getUsername());
+
+            // 사용자 데이터 생성
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("username", user.getUsername());
+            userData.put("nickname", user.getNickname());
+            userData.put("name", user.getName());
+            userData.put("email", user.getEmail());
+            userData.put("artistApprovalStatus", user.getArtistApprovalStatus());
+            userData.put("role", user.getRole());
+            userData.put("phone", user.getPhone());
+            userData.put("address", user.getAddress());
+
+            // 응답 데이터 설정 (JWT는 헤더로 전달)
+            return ResponseEntity.ok()
+                .header("Authorization", "Bearer " + accessToken)
+                .header("Refresh-Token", "Bearer " + refreshToken)
+                .body(userData);
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
         }
-
-        User user = optionalUser.get();
-
-        // 비밀번호 확인
-        if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
-        }
-
-        // JWT 토큰 생성
-        String accessToken = jwtToken.makeAccessToken(username);
-        String refreshToken = jwtToken.makeRefreshToken(username);
-
-        // 사용자 데이터 생성
-        Map<String, Object> userData = new HashMap<>();
-        userData.put("username", user.getUsername());
-        userData.put("nickname", user.getNickname());
-        userData.put("name", user.getName());
-        userData.put("email", user.getEmail());
-        userData.put("artistApprovalStatus", user.getArtistApprovalStatus());
-        userData.put("role", user.getRole());
-        userData.put("phone", user.getPhone());
-        userData.put("address", user.getAddress());
-
-        // 응답 데이터 설정 (JWT는 헤더로 전달)
-        return ResponseEntity.ok()
-            .header("Authorization", "Bearer " + accessToken)
-            .header("Refresh-Token", "Bearer " + refreshToken)
-            .body(userData);
     }
 
 
