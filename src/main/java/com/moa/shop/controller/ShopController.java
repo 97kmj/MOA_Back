@@ -122,6 +122,7 @@ public class ShopController {
 		
 	}
 
+	// detail 가가져오기
 	
 	@GetMapping("/artworkDetail/{artworkId}")
 	public ResponseEntity<ArtworkDto> artworkDetail(@PathVariable Long artworkId){
@@ -136,7 +137,9 @@ public class ShopController {
 	@PostMapping("/isLikeArtwork/{artworkId}")
 	public ResponseEntity<Boolean> isLikeArtwork(@PathVariable Long artworkId, @RequestBody Map<String,String> param){
 		try {
+			
 			return new ResponseEntity<Boolean>(shopService.isLikeArtwork(param.get("username"), artworkId), HttpStatus.OK);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
@@ -153,4 +156,10 @@ public class ShopController {
 			return new ResponseEntity<Boolean>(HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+//	@GetMapping("/orderData/{artworkID}")
+//	public ResponseEntity<artworkDto> 
+//	
+	
+	
 }

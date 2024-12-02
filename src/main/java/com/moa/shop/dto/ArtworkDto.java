@@ -70,36 +70,6 @@ public class ArtworkDto {
 			.build();
 	}
 	
-//	public static ArtworkDto toArtworkDto(Artwork artwork) throws Exception {
-//		return ArtworkDto.builder()
-//				.artworkId(artwork.getArtworkId())
-//				.adminCheck(artwork.getAdminCheck())
-//				.canvasType(artwork.getCanvasType().toString())
-//				.description(artwork.getDescription())
-//				.height(artwork.getHeight())
-//				.imageUrl(artwork.getImageUrl())
-//				.isStandardCanvas(artwork.getIsStandardCanvas())
-//				.length(artwork.getLength())
-//				.likeCount(artwork.getLikeCount())
-//				.price(artwork.getPrice())
-//				.saleStatus(artwork.getSaleStatus().toString())
-//				.stock(artwork.getStock())
-//				.termsAccepted(artwork.getTermsAccepted())
-//				.title(artwork.getTitle())
-//				.width(artwork.getWidth())
-//				.artistId(artwork.getArtist().getUsername())
-//				.artisName(artwork.getArtist().getName())
-//				.canvasId(artwork.getCanvas().getCanvasId())
-//				.canvasNum(artwork.getCanvas().getCanvasNum().toString())
-//				.categoryId(artwork.getCategory().getCategoryId())
-//				.categoryName(artwork.getCategory().getCategoryName())
-//				.subjectId(artwork.getSubject().getSubjectId())
-//				.subjectName(artwork.getSubject().getSubjectName())
-//				.typeId(artwork.getType().getTypeId())
-//				.typeName(artwork.getType().getTypeName())
-//				.build();
-//		
-//	}
 	public static ArtworkDto toArtworkDto(Artwork artwork) {
 	    // Null 체크를 통해 예외를 방지하고, null일 경우 기본값을 사용하거나 null을 반환
 	    return ArtworkDto.builder()
