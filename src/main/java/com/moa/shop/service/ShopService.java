@@ -11,6 +11,7 @@ import com.moa.shop.dto.CanvasDto;
 import com.moa.shop.dto.CategoryDto;
 import com.moa.shop.dto.SubjectDto;
 import com.moa.shop.dto.TypeDto;
+import com.moa.user.dto.OrderUserInfoDto;
 import com.moa.user.service.util.PageInfo;
 
 
@@ -27,5 +28,5 @@ public interface ShopService {
 	Boolean toggleLikeArtwork(String username, Long artworkId) throws Exception;  //
 	Boolean isLikeArtwork(String username, Long artworkId) throws Exception;  //
 	ArtworkDto artworkDetail(Long artworkId) throws Exception;
-	
+	OrderUserInfoDto orderUserInfo (String username) throws Exception;
 }

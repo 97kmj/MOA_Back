@@ -1,5 +1,6 @@
 package com.moa.shop.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ import com.moa.shop.dto.CategoryDto;
 import com.moa.shop.dto.SubjectDto;
 import com.moa.shop.dto.TypeDto;
 import com.moa.shop.service.ShopService;
+import com.moa.user.dto.OrderUserInfoDto;
 import com.moa.user.service.LikeService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -157,9 +159,26 @@ public class ShopController {
 		}
 	}
 	
-//	@GetMapping("/orderData/{artworkID}")
-//	public ResponseEntity<artworkDto> 
-//	
+	@GetMapping("/orderData")
+	public ResponseEntity<Map<String,Object>> OrderArtwork(@RequestParam Long artworkId, @RequestParam String username ){
+		try {
+
+			ArtworkDto artworkList= shopService.artworkDetail(artworkId);
+			System.out.println("컨트롤러" + artworkList);
+			System.out.println("컨트롤러" + username);
+			OrderUserInfoDto UserList = shopService.orderUserInfo(username);
+			System.out.println("컨트롤러" +UserList);
+			Map<String,Object> orderInfo = new HashMap<>();
+			orderInfo.put("artworkList", artworkList);
+			orderInfo.put("userList", UserList);
+			return new ResponseEntity<Map<String,Object>>(orderInfo, HttpStatus.OK);
+		}catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String,Object>>(HttpStatus.BAD_REQUEST);
+			
+		}
+	}
+	
 	
 	
 }
