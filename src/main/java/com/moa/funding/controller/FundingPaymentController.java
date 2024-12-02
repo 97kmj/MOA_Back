@@ -26,19 +26,6 @@ public class FundingPaymentController {
 	private final PortOneService portOneService;
 	private final FundingRefundService fundingRefundService;
 
-
-	// @PostMapping("/payment/prepare")
-	// public ResponseEntity<String> preparePayment(@RequestBody PaymentRequest paymentRequest) {
-	// 	boolean success = portOneService.preparePayment(paymentRequest.getMerchantUid(), paymentRequest.getAmount());
-	//
-	// 	if (!success) {
-	// 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 준비 실패");
-	// 	}
-	// 	fundingPaymentService.prepareFundingOrder(paymentRequest);
-	//
-	// 	return ResponseEntity.ok("결제 준비 완료");
-	// }
-
 	@PostMapping("/payment/prepare")
 	public ResponseEntity<String> preparePayment(@RequestBody PaymentRequest paymentRequest) {
 		boolean success = portOneService.preparePayment(paymentRequest.getMerchantUid(), paymentRequest.getAmount());
@@ -51,6 +38,35 @@ public class FundingPaymentController {
 	}
 
 
+
+	@PostMapping("/payment")
+	public ResponseEntity<Void> processPayment(@RequestBody PaymentRequest paymentRequest) {
+		log.info("impUid: {}, paymentRequest: {}", paymentRequest.getImpUid(), paymentRequest);
+		fundingPaymentService.processFundingContribution(paymentRequest.getImpUid(), paymentRequest);
+		return ResponseEntity.ok().build();
+	}
+
+
+	//단순 변심
+	@PostMapping("/refund/individual/{fundingOrderId}")
+	public ResponseEntity<String> refundIndividualFunding(@PathVariable Long fundingOrderId) {
+		fundingRefundService.refundIndividualFunding(fundingOrderId);
+		return ResponseEntity.ok("환불 요청이 처리되었습니다.");
+	}
+
+
+
+	// @PostMapping("/payment/prepare")
+	// public ResponseEntity<String> preparePayment(@RequestBody PaymentRequest paymentRequest) {
+	// 	boolean success = portOneService.preparePayment(paymentRequest.getMerchantUid(), paymentRequest.getAmount());
+	//
+	// 	if (!success) {
+	// 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 준비 실패");
+	// 	}
+	// 	fundingPaymentService.prepareFundingOrder(paymentRequest);
+	//
+	// 	return ResponseEntity.ok("결제 준비 완료");
+	// }
 
 
 	//
@@ -66,14 +82,6 @@ public class FundingPaymentController {
 	// 	}
 	// }
 
-	@PostMapping("/payment")
-	public ResponseEntity<Void> processPayment(@RequestBody PaymentRequest paymentRequest) {
-		log.info("impUid: {}, paymentRequest: {}", paymentRequest.getImpUid(), paymentRequest);
-		fundingPaymentService.processFundingContribution(paymentRequest.getImpUid(), paymentRequest);
-		return ResponseEntity.ok().build();
-	}
-
-
 
 	// //단순 변심
 	// @PostMapping("/refund/individual/{fundingOrderId}")
@@ -85,13 +93,6 @@ public class FundingPaymentController {
 	// 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 	// 	}
 	// }
-
-	//단순 변심
-	@PostMapping("/refund/individual/{fundingOrderId}")
-	public ResponseEntity<String> refundIndividualFunding(@PathVariable Long fundingOrderId) {
-		fundingRefundService.refundIndividualFunding(fundingOrderId);
-		return ResponseEntity.ok("환불 요청이 처리되었습니다.");
-	}
 
 }
 
