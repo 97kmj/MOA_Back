@@ -88,6 +88,7 @@ public class FundingSelectRepositoryCustomImpl implements FundingSelectRepositor
 			.stream()
 			.map(FundingDetailMapper::toRewardDTO)
 			.collect(Collectors.toList());
+
 	}
 
 	@NotNull

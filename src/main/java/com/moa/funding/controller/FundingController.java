@@ -31,56 +31,94 @@ import lombok.extern.slf4j.Slf4j;
 public class FundingController {
 	private final FundingService fundingService;
 
-
 	@GetMapping
-	public ResponseEntity <FundingResponse> getFundingList(@RequestParam String filterType, @RequestParam String sortOption, @RequestParam int page) {
-		try {
-			FundingResponse fundingList = fundingService.getFundingList(filterType, sortOption, page);
-			return ResponseEntity.ok(fundingList);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.badRequest().build();
-		}
+	public ResponseEntity<FundingResponse> getFundingList(
+		@RequestParam String filterType,
+		@RequestParam String sortOption,
+		@RequestParam int page) {
+		FundingResponse fundingList = fundingService.getFundingList(filterType, sortOption, page);
+		return ResponseEntity.ok(fundingList);
 	}
+
 
 
 	@PostMapping
 	public ResponseEntity<Void> createFunding(
-		@RequestPart("fundingInfo")FundingInfoDTO fundingInfo,
+		@RequestPart("fundingInfo") FundingInfoDTO fundingInfo,
 		@RequestPart("rewards") List<RewardDTO> rewards,
 		@RequestPart("artworks") List<ArtworkDTO> artwork,
 		@RequestPart("mainImage") MultipartFile mainImage,
-		@RequestPart("artworkImages") List<MultipartFile> artworkImages
-	) {
-		try {
-			log.info("fundingInfo: {}", fundingInfo);
-			log.debug("rewards: {}", rewards);
-			log.debug("artwork: {}", artwork);
-			log.debug("mainImage: {}", mainImage);
-			log.debug("artworkImages: {}", artworkImages);
-
-			fundingService.createFunding(fundingInfo, rewards, artwork, mainImage, artworkImages);
-			return ResponseEntity.ok().build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.badRequest().build();
-		}
+		@RequestPart("artworkImages") List<MultipartFile> artworkImages) {
+		log.info("fundingInfo: {}", fundingInfo);
+		fundingService.createFunding(fundingInfo, rewards, artwork, mainImage, artworkImages);
+		return ResponseEntity.ok().build();
 	}
-
-
 
 
 	@GetMapping("/{fundingId}")
 	public ResponseEntity<FundingDetailDTO> getFundingDetail(@PathVariable Long fundingId) {
-		try {
-			log.info("fundingId: {}", fundingId);
-			FundingDetailDTO fundingDetail = fundingService.getFundingDetail(fundingId);
-			return ResponseEntity.ok(fundingDetail);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.badRequest().build();
-		}
+		log.info("fundingId: {}", fundingId);
+		FundingDetailDTO fundingDetail = fundingService.getFundingDetail(fundingId);
+		return ResponseEntity.ok(fundingDetail);
 	}
 
 
 }
+
+
+
+
+
+// @GetMapping
+// public ResponseEntity <FundingResponse> getFundingList(@RequestParam String filterType, @RequestParam String sortOption, @RequestParam int page) {
+// 	try {
+// 		FundingResponse fundingList = fundingService.getFundingList(filterType, sortOption, page);
+// 		return ResponseEntity.ok(fundingList);
+// 	} catch (Exception e) {
+// 		e.printStackTrace();
+// 		return ResponseEntity.badRequest().build();
+// 	}
+// }
+
+
+
+//
+// @PostMapping
+// public ResponseEntity<Void> createFunding(
+// 	@RequestPart("fundingInfo")FundingInfoDTO fundingInfo,
+// 	@RequestPart("rewards") List<RewardDTO> rewards,
+// 	@RequestPart("artworks") List<ArtworkDTO> artwork,
+// 	@RequestPart("mainImage") MultipartFile mainImage,
+// 	@RequestPart("artworkImages") List<MultipartFile> artworkImages
+// ) {
+// 	try {
+// 		log.info("fundingInfo: {}", fundingInfo);
+// 		log.debug("rewards: {}", rewards);
+// 		log.debug("artwork: {}", artwork);
+// 		log.debug("mainImage: {}", mainImage);
+// 		log.debug("artworkImages: {}", artworkImages);
+//
+// 		fundingService.createFunding(fundingInfo, rewards, artwork, mainImage, artworkImages);
+// 		return ResponseEntity.ok().build();
+// 	} catch (Exception e) {
+// 		e.printStackTrace();
+// 		return ResponseEntity.badRequest().build();
+// 	}
+// }
+
+
+
+//
+// @GetMapping("/{fundingId}")
+// public ResponseEntity<FundingDetailDTO> getFundingDetail(@PathVariable Long fundingId) {
+// 	try {
+// 		log.info("fundingId: {}", fundingId);
+// 		FundingDetailDTO fundingDetail = fundingService.getFundingDetail(fundingId);
+// 		log.info("fundingDetail: {}", fundingDetail);
+//
+// 		return ResponseEntity.ok(fundingDetail);
+// 	} catch (Exception e) {
+// 		e.printStackTrace();
+// 		return ResponseEntity.badRequest().build();
+// 	}
+// }

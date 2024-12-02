@@ -53,8 +53,8 @@ public class FundingServiceImpl implements FundingService {
 	}
 
 	// @Scheduled(cron = "0 0 0 * * *") // 매일 0시 0분 0초에 실행
-	@Scheduled(cron = "0 0 * * * *")
-	// @Scheduled(cron = "0 */1 * * * *") // 매 1분마다 실행
+	// @Scheduled(cron = "0 0 * * * *")
+	@Scheduled(cron = "0 */1 * * * *") // 매 1분마다 실행
 	@Transactional
 	public void scheduleUpdateToOngoing() {
 	   log.info("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 시작 " );
@@ -62,9 +62,9 @@ public class FundingServiceImpl implements FundingService {
 	   log.info("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 완료 " );
 	}
 
-	@Scheduled(cron = "0 0 * * * *") // 매시간 0분 0초에 실행
+	// @Scheduled(cron = "0 0 * * * *") // 매시간 0분 0초에 실행
 	// @Scheduled(cron = "0 30 * * * *") // 매시간 30분에 실행
-	// @Scheduled(cron = "0 */1 * * * *")
+	@Scheduled(cron = "0 */1 * * * *")
 	@Transactional
 	public void scheduleUpdateToSuccessful() {
 	    log.info("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 시작 " );

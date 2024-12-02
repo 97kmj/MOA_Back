@@ -17,6 +17,8 @@ import com.moa.entity.User;
 import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.dto.payment.RewardRequest;
 import com.moa.funding.exception.FundingPeriodException;
+import com.moa.funding.exception.RewardLimitException;
+import com.moa.funding.exception.RewardStockException;
 import com.moa.funding.mapper.FundingPaymentMapper;
 import com.moa.funding.repository.FundingSelectRepositoryCustom;
 import com.moa.funding.service.FundingPaymentService;
@@ -50,21 +52,24 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	@Transactional
 	public void prepareFundingOrder(PaymentRequest paymentRequest) {
 		log.info("결제 준비 중 - PaymentRequest: {}", paymentRequest);
-
+		// Step 1: 펀딩 및 리워드 정보 확인
 		Funding funding = getFunding(paymentRequest);
+
+		//검증
 		validateFundingAndRewards(funding, paymentRequest.getRewardList());
 
-		// 리워드 재고 감소
+		// Step 2: 리워드 재고 감소
 		for (RewardRequest rewardRequest : paymentRequest.getRewardList()) {
 			rewardService.reduceRewardStock(rewardRequest);
 		}
-		// Step 2: 사용자 조회
+		// Step 3: 사용자 조회
 		User user = getUser(paymentRequest);
-		// Step 3: 펀딩 주문 생성 및 저장
+
+		// Step 4: 펀딩 주문 생성 및 저장
 		FundingOrder fundingOrder = createAndSaveFundingOrder(paymentRequest, user);
 
+		// Step 5: 리워드 감소 정보 캐시에 저장
 		rewardStockCache.addRewardChanges(fundingOrder.getFundingOrderId(), paymentRequest.getRewardList());
-
 		log.info("결제 준비 완료 - FundingOrder: {}", fundingOrder);
 	}
 
@@ -76,8 +81,10 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		// Step 1: 검증 및 중복 결제 리워드 정보 확인
 		validatePayment(impUid, paymentRequest);
 
+		// Step 2: 펀딩 및 리워드 정보 확인
 		FundingOrder fundingOrder = getFundingOrder(paymentRequest);
 
+		// Step 3: imUid 업데이트 및 결제 상태 업데이트
 		updateFundingOrderAfterSuccess(fundingOrder, impUid);
 
 		// Step 4: 펀딩 조회 및 후원 생성 및 저장
@@ -94,9 +101,9 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	@Scheduled(cron = "0 0/5 * * * *")//5분마다 실행
 	// @Scheduled(cron = "0 * * * * *") //1분마다 실행 태스트 용
 	public void cancelExpiredFundingOrders() {
-		log.info("만료된 펀딩 주문 처리 중...");
 		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 10); // 10분 전
 		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60); // 1분 전 테스트용 코드
+		log.info("만료된 펀딩 주문 처리 중...");
 		Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 5); // 5분 전
 
 		List<FundingOrder> expiredOrders = fundingSelectRepositoryCustom.findPendingOrdersOlderThan(cutoffTime);
@@ -147,18 +154,32 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		Instant now = Instant.now();
 
 		// 펀딩 기간 확인 	// 펀딩 시작일 이전 또는 종료일 이후에 결제 요청이 들어온 경우
-		if(now.isBefore(funding.getStartDate()) || now.isAfter(funding.getEndDate())){
+		if (now.isBefore(funding.getStartDate()) || now.isAfter(funding.getEndDate())) {
 			throw new FundingPeriodException("펀딩 기간이 아닙니다.");
 		}
 
 		// 리워드 검증
+		Reward reward = null;
 		for (RewardRequest rewardRequest : rewardRequests) {
-			Reward reward = rewardService.getReward(rewardRequest);
+			reward = rewardService.getReward(rewardRequest);
+
+			// (1) 가격 검증
 			if (isRewardPriceMismatched(rewardRequest, reward)) {
 				throw new IllegalStateException("리워드 가격이 서버 데이터와 일치하지 않습니다. - RewardId: " + reward.getRewardId());
 			}
-			log.debug("리워드 검증 완료 - RewardId: {}, 가격: {}", reward.getRewardId(), reward.getRewardPrice());
+
+			// (3) 구매 제한 검증
+			if (reward.getIsLimit() != null && reward.getIsLimit()
+				&& rewardRequest.getRewardQuantity() > reward.getLimitQuantity()) {
+				throw new RewardLimitException(
+					"리워드 구매 수량이 제한을 초과했습니다. - Reward이름 : " + reward.getRewardName() +
+						", 제한: " + reward.getLimitQuantity() +
+						", 요청 수량: " + rewardRequest.getRewardQuantity());
+			}
+
 		}
+		log.info("펀딩 및 리워드 검증 완료 - FundingId: {}, RewardRequests: {}", funding.getFundingId(), rewardRequests);
+
 	}
 
 
@@ -217,16 +238,13 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 
 	private void updateFundingOrderAfterSuccess(FundingOrder fundingOrder, String impUid) {
-		//빌더로 변경해놓기
+		//빌더와 다른점은 빌더는 새로운 객체를 생성하지만 set은 기존 객체를 업데이트
 		fundingOrder.setImpUid(impUid); // impUid 업데이트
 		fundingOrder.setPaymentDate(new Timestamp(System.currentTimeMillis())); // 결제 시간 업데이트
 		fundingOrder.setPaymentStatus(FundingOrder.PaymentStatus.PAID); // 결제 상태 업데이트
 
-		// FundingOrder updatedOrder = FundingOrder.builder()
-		// 	.impUid(impUid)
-		// 	.paymentDate(new Timestamp(System.currentTimeMillis()))
-		// 	.paymentStatus(FundingOrder.PaymentStatus.PAID)
-		// 	.build();
+        //위에는 영속성 상태이지만 가독성을 위해 추가
+		fundingOrderRepository.save(fundingOrder);
 
 	}
 
