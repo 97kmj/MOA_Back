@@ -3,6 +3,7 @@ package com.moa.config.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moa.config.auth.PrincipalDetails;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -22,9 +23,26 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         this.jwtToken = jwtToken;
         // 수동으로 AuthenticationManager 설정
         setAuthenticationManager(authenticationManager);
+//        setFilterProcessesUrl("/api/user/login");
 
     }
-
+//    @Override
+//    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
+//        try {
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            Map<String, String> loginRequest = objectMapper.readValue(request.getInputStream(), Map.class);
+//
+//            String username = loginRequest.get("username");
+//            String password = loginRequest.get("password");
+//
+//            UsernamePasswordAuthenticationToken authenticationToken =
+//                new UsernamePasswordAuthenticationToken(username, password);
+//
+//            return getAuthenticationManager().authenticate(authenticationToken);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
         FilterChain chain, Authentication authResult)
