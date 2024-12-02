@@ -52,6 +52,9 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 		Pageable pageable
 	);
 	
+	
+	
+	
 }
 
 
