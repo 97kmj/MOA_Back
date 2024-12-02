@@ -13,6 +13,7 @@ import static org.mockito.Mockito.*;
 
 import com.moa.entity.Reward;
 import com.moa.funding.dto.payment.RewardRequest;
+import com.moa.funding.exception.RewardStockException;
 import com.moa.repository.RewardRepository;
 
 class RewardServiceTest {
@@ -49,15 +50,16 @@ class RewardServiceTest {
 		assertEquals(7, reward.getStock(), "재고는 7이어야 합니다.");
 		verify(rewardRepository).save(reward);
 	}
-
 	@Test
 	@DisplayName("리워드 재고 부족 시 예외 발생 테스트")
 	void testReduceRewardStockFailure() {
 		// Given
 		Reward reward = Reward.builder()
 			.rewardId(1L)
+			.rewardName("테스트 리워드") // 리워드명 설정
 			.stock(2)
 			.build();
+
 		RewardRequest rewardRequest = RewardRequest.builder()
 			.rewardId(1L)
 			.rewardQuantity(3L)
@@ -66,14 +68,14 @@ class RewardServiceTest {
 		when(rewardRepository.findById(1L)).thenReturn(java.util.Optional.of(reward));
 
 		// When & Then
-		RuntimeException exception = assertThrows(RuntimeException.class, () ->
+		RewardStockException exception = assertThrows(RewardStockException.class, () ->
 			rewardService.reduceRewardStock(rewardRequest)
 		);
 
-		assertEquals("리워드 재고가 부족합니다.", exception.getMessage());
+		// 예외 메시지 검증
+		assertEquals("리워드 재고가 부족합니다. - 리워드명: 테스트 리워드", exception.getMessage());
 		verify(rewardRepository, never()).save(any());
 	}
-
 	@Test
 	@DisplayName("리워드 조회 성공 테스트")
 	void testGetReward() {

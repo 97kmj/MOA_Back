@@ -36,6 +36,7 @@ public class FundingDetailDTO {
 	@Builder
 	@NoArgsConstructor
 	@AllArgsConstructor
+	@ToString
 	public static class RewardDTO {
 		private Long rewardId;
 		private String rewardName;
@@ -51,6 +52,7 @@ public class FundingDetailDTO {
 	@Builder
 	@NoArgsConstructor
 	@AllArgsConstructor
+	@ToString
 	public static class ImageDTO {
 		private Long imageId;
 		private String title;

@@ -11,31 +11,36 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+
 	@ExceptionHandler(RewardStockException.class)
 	public ResponseEntity<Map<String, String>> rewardStockError(RewardStockException ex) {
-		Map<String, String> response = new HashMap<>();
-		response.put("error", "REWARD_STOCK_ERROR");
-		response.put("message", ex.getMessage());
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+		return createErrorResponse(HttpStatus.BAD_REQUEST, "REWARD_STOCK_ERROR", ex.getMessage());
 	}
 
-
-	// 펀딩 기간 예외 처리
 	@ExceptionHandler(FundingPeriodException.class)
 	public ResponseEntity<Map<String, String>> fundingPeriodError(FundingPeriodException ex) {
-		Map<String, String> response = new HashMap<>();
-		response.put("error", "FUNDING_PERIOD_ERROR");
-		response.put("message", ex.getMessage());
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+		return createErrorResponse(HttpStatus.BAD_REQUEST, "FUNDING_PERIOD_ERROR", ex.getMessage());
+	}
 
+	@ExceptionHandler(RewardLimitException.class)
+	public ResponseEntity<Map<String, String>> rewardLimitError(RewardLimitException ex) {
+		return createErrorResponse(HttpStatus.BAD_REQUEST, "REWARD_LIMIT_ERROR", ex.getMessage());
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<Map<String, String>> RuntimeException(RuntimeException ex) {
+		return createErrorResponse(HttpStatus.BAD_REQUEST, "RUNTIME_ERROR", ex.getMessage());
 	}
 
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Map<String, String>> fundingPeriodError(Exception ex) {
-		Map<String, String> response = new HashMap<>();
-		response.put("error", "GENERIC_ERROR");
-		response.put("message", "결제 준비 중 오류 발생: " + ex.getMessage());
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	public ResponseEntity<Map<String, String>> GenericException(Exception ex) {
+		return createErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "GENERIC_ERROR", "오류 발생: " + ex.getMessage());
 	}
 
+	private ResponseEntity<Map<String, String>> createErrorResponse(HttpStatus status, String error, String message) {
+		Map<String, String> response = new HashMap<>();
+		response.put("error", error);
+		response.put("message", message);
+		return ResponseEntity.status(status).body(response);
+	}
 }

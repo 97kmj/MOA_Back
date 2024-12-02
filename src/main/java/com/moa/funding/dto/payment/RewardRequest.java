@@ -22,5 +22,7 @@ public class RewardRequest {
 	private Long rewardId;
 	private BigDecimal rewardPrice;
 	private Long rewardQuantity;
+	private Boolean isLimit;            // 구매 제한 여부
+	private Integer limitQuantity;      // 구매 제한 수량
 
 }

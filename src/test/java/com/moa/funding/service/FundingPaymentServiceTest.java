@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 
 import com.moa.entity.Funding;
 import com.moa.entity.FundingContribution;
+import com.moa.entity.FundingOrder;
 import com.moa.entity.Reward;
 import com.moa.entity.User;
 import com.moa.funding.dto.payment.PaymentRequest;
@@ -117,63 +120,145 @@ class FundingPaymentServiceTest {
 			funding.getCurrentAmount().compareTo(BigDecimal.valueOf(15000)) == 0
 		));
 	}
-
 	@Test
-	@DisplayName("결제 성공 시 펀딩 주문 및 후원 저장 테스트") // 테스트의 목적: 결제 성공 시 주문 및 후원이 올바르게 저장되는지 확인
-	void testProcessFundingContributionSuccess() {
-		// Given: 테스트에 필요한 Mock 데이터 및 의존성 설정
-		// 사용자가 선택한 리워드 요청 목록 생성
+	@DisplayName("펀딩 주문 준비 테스트 - 리워드 재고 감소 및 주문 저장")
+	void testPrepareFundingOrder() {
+		// Given
 		List<RewardRequest> rewardRequests = List.of(
-			MockHelper.createMockRewardRequest(1L, BigDecimal.valueOf(50000), 2L), // 리워드 ID 1, 가격 50,000원, 수량 2개
-			MockHelper.createMockRewardRequest(2L, BigDecimal.valueOf(10000), 1L)  // 리워드 ID 2, 가격 10,000원, 수량 1개
+			RewardRequest.builder()
+				.rewardId(1L)
+				.rewardPrice(BigDecimal.valueOf(50000))
+				.rewardQuantity(2L)
+				.build(),
+			RewardRequest.builder()
+				.rewardId(2L)
+				.rewardPrice(BigDecimal.valueOf(10000))
+				.rewardQuantity(1L)
+				.build()
 		);
 
-		// 결제 요청 객체 생성
-		PaymentRequest paymentRequest = MockHelper.createMockPaymentRequest(120000L, "user1", 1L, rewardRequests);
+		PaymentRequest paymentRequest = PaymentRequest.builder()
+			.fundingId(1L)
+			.userName("user1")
+			.rewardList(rewardRequests)
+			.build();
 
-		// Mock 데이터를 통해 사용자, 펀딩, 리워드 객체를 생성하고 Mock 리포지토리에 등록
-		User mockUser = MockHelper.createMockUser("user1", userRepository); // 사용자 데이터
-		Funding mockFunding = MockHelper.createMockFunding(1L, BigDecimal.valueOf(10000L), fundingRepository); // 펀딩 데이터
-		Reward mockReward1 = MockHelper.createMockReward(1L, rewardRepository); // 리워드 1 데이터
-		Reward mockReward2 = MockHelper.createMockReward(2L, rewardRepository); // 리워드 2 데이터
+		Funding funding = Funding.builder()
+			.fundingId(1L)
+			.title("펀딩 제목")
+			.currentAmount(BigDecimal.ZERO)
+			.goalAmount(BigDecimal.valueOf(100000))
+			.startDate(Timestamp.valueOf("2024-12-01 00:00:00").toInstant())
+			.endDate(Timestamp.valueOf("2024-12-31 23:59:59").toInstant())
+			.build();
 
-		// Mock 설정: 결제 검증 서비스가 항상 성공하도록 설정
-		when(iamportOneService.verifyPayment(120000L, "imp_123456")).thenReturn(true);
+		User user = User.builder()
+			.username("user1")
+			.name("홍길동")
+			.build();
 
-		when(rewardService.getReward(any())).thenAnswer(invocation -> {
-			RewardRequest request = invocation.getArgument(0);
-			if (request == null) {
-				return null; // null 처리
-			}
-			return request.getRewardId().equals(1L) ? mockReward1 : mockReward2;
-		});
+		FundingOrder fundingOrder = FundingOrder.builder()
+			.fundingOrderId(1L)
+			.user(user)
+			.funding(funding)
+			.build();
 
-		// When: 테스트 대상 메서드 호출
-		// 결제를 처리하는 메서드 호출 (실제 로직 수행)
-		paymentService.processFundingContribution("imp_123456", paymentRequest);
+		// Mock Reward 설정
+		Reward reward1 = Reward.builder()
+			.rewardId(1L)
+			.rewardPrice(BigDecimal.valueOf(50000))
+			.build();
 
-		// Then: 결과 검증
-		// Mock 리포지토리 호출 여부를 확인
-		verify(userRepository).findByUsername("user1"); // 사용자 조회가 한 번 호출되었는지 확인
-		verify(fundingOrderRepository).save(any());     // 펀딩 주문이 저장되었는지 확인
+		Reward reward2 = Reward.builder()
+			.rewardId(2L)
+			.rewardPrice(BigDecimal.valueOf(10000))
+			.build();
 
-		// ArgumentCaptor를 사용해 저장된 후원 객체를 캡처하고 검증
-		ArgumentCaptor<FundingContribution> contributionCaptor = ArgumentCaptor.forClass(FundingContribution.class);
-		verify(fundingContributionRepository, times(2)).save(contributionCaptor.capture()); // 두 번 저장되었는지 확인
+		// Mock 설정
+		when(fundingRepository.findById(1L)).thenReturn(Optional.of(funding));
+		when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
+		when(fundingOrderRepository.save(any())).thenReturn(fundingOrder);
+		when(rewardService.getReward(rewardRequests.get(0))).thenReturn(reward1);
+		when(rewardService.getReward(rewardRequests.get(1))).thenReturn(reward2);
 
-		// 저장된 후원 객체 리스트 가져오기
-		List<FundingContribution> savedContributions = contributionCaptor.getAllValues();
+		// When
+		paymentService.prepareFundingOrder(paymentRequest);
 
-		// 저장된 후원의 개수 확인
-		assertEquals(2, savedContributions.size(), "저장된 후원의 개수는 2개여야 합니다.");
+		// Then
+		verify(rewardService, times(2)).reduceRewardStock(any(RewardRequest.class));
+		verify(fundingOrderRepository).save(any(FundingOrder.class));
+		verify(rewardStockCache).addRewardChanges(eq(1L), eq(rewardRequests));
+	}
 
-		// 각 후원의 Reward 필드가 null이 아닌지 확인
-		assertNotNull(savedContributions.get(0).getReward(), "첫 번째 후원의 Reward는 null이 아니어야 합니다.");
-		assertNotNull(savedContributions.get(1).getReward(), "두 번째 후원의 Reward는 null이 아니어야 합니다.");
+	@Test
+	@DisplayName("결제 후 펀딩 후원 처리 테스트 - 정상 흐름")
+	void testProcessFundingContribution() {
+		// Given
+		String impUid = "imp_test_123";
+		List<RewardRequest> rewardRequests = List.of(
+			RewardRequest.builder()
+				.rewardId(1L)
+				.rewardPrice(BigDecimal.valueOf(50000))
+				.rewardQuantity(2L)
+				.build(),
+			RewardRequest.builder()
+				.rewardId(2L)
+				.rewardPrice(BigDecimal.valueOf(10000))
+				.rewardQuantity(1L)
+				.build()
+		);
 
-		// 저장된 각 후원의 Reward가 예상된 리워드와 일치하는지 확인
-		assertEquals(mockReward1.getRewardId(), savedContributions.get(0).getReward().getRewardId());
-		assertEquals(mockReward2.getRewardId(), savedContributions.get(1).getReward().getRewardId());
+		PaymentRequest paymentRequest = PaymentRequest.builder()
+			.fundingId(1L)
+			.userName("user1")
+			.rewardList(rewardRequests)
+			.totalAmount(120000L)
+			.merchantUid("merchant_test_123")
+			.build();
+
+		Funding funding = Funding.builder()
+			.fundingId(1L)
+			.title("펀딩 제목")
+			.currentAmount(BigDecimal.ZERO)
+			.goalAmount(BigDecimal.valueOf(100000))
+			.startDate(Timestamp.valueOf("2024-12-01 00:00:00").toInstant())
+			.endDate(Timestamp.valueOf("2024-12-31 23:59:59").toInstant())
+			.build();
+
+		FundingOrder fundingOrder = FundingOrder.builder()
+			.fundingOrderId(1L)
+			.funding(funding)
+			.user(User.builder().username("user1").name("홍길동").build())
+			.build();
+
+		Reward reward1 = Reward.builder()
+			.rewardId(1L)
+			.rewardPrice(BigDecimal.valueOf(50000))
+			.build();
+
+		Reward reward2 = Reward.builder()
+			.rewardId(2L)
+			.rewardPrice(BigDecimal.valueOf(10000))
+			.build();
+
+		// Mock 설정
+		when(iamportOneService.verifyPayment(120000L, impUid)).thenReturn(true);
+		when(fundingOrderRepository.existsByImpUid(impUid)).thenReturn(false);
+		when(fundingOrderRepository.findByMerchantUid("merchant_test_123")).thenReturn(Optional.of(fundingOrder));
+		when(fundingOrderRepository.save(any(FundingOrder.class))).thenReturn(fundingOrder);
+		when(fundingRepository.findById(1L)).thenReturn(Optional.of(funding));
+		when(rewardService.getReward(rewardRequests.get(0))).thenReturn(reward1);
+		when(rewardService.getReward(rewardRequests.get(1))).thenReturn(reward2);
+
+		// When
+		paymentService.processFundingContribution(impUid, paymentRequest);
+
+		// Then
+		verify(iamportOneService).verifyPayment(120000L, impUid); // 결제 검증 호출 확인
+		verify(fundingOrderRepository).findByMerchantUid("merchant_test_123"); // 주문 조회 호출 확인
+		verify(fundingOrderRepository).save(any(FundingOrder.class)); // 주문 저장 호출 확인
+		verify(fundingContributionRepository, times(2)).save(any(FundingContribution.class)); // 후원 저장 호출 확인
+		verify(fundingRepository).save(any(Funding.class)); // 펀딩 금액 업데이트 확인
 	}
 
 

@@ -16,6 +16,7 @@ import com.moa.funding.repository.FundingManagementRepositoryCustom;
 import com.moa.funding.service.FundingRefundService;
 import com.moa.funding.service.portone.PortOneService;
 import com.moa.repository.FundingOrderRepository;
+import com.moa.repository.FundingRepository;
 import com.moa.repository.RewardRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 	private final FundingManagementRepositoryCustom fundingManagementRepositoryCustom; //펀딩 성공 실패는 여기 있음
 	private final PortOneService portOneService;
 	private final RewardRepository rewardRepository;
+	private final FundingRepository fundingRepository;
 
 	@Override
 	@Transactional
@@ -84,13 +86,17 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 
 		// 영속성 컨텍스트에서 관리되는 엔티티이므로 save 호출하지 않아도 업데이트된다.
 		funding.setCurrentAmount(newAmount);
+
+		// 영속성 컨텍스트에서 관리되는 엔티티이므로 save 호출하지 않아도 업데이트 되지만 가독성 위해 추가
+		fundingRepository.save(funding);
+
 	}
 
 	@Override
 	// @Scheduled(cron = "0 0 0 * * *") // 매일 자정 실행
-	// @Scheduled(cron = "0 0/1 * * * *") // 매 1분마다 실행
+	@Scheduled(cron = "0 0/1 * * * *") // 매 1분마다 실행
 	// @Scheduled(cron = "0 0 * * * *") // 매 시간 0분에 실행
-	@Scheduled(cron = "0 */5 * * * *")	//5분마다 실행
+	// @Scheduled(cron = "0 */5 * * * *")	//5분마다 실행
 	@Transactional
 	public void scheduleUpdateToFailedAndRefund() {
 		log.info("펀딩 실패 자동 환불 스케줄링 시작");
