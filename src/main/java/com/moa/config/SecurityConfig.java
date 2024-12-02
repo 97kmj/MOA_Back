@@ -87,6 +87,7 @@ public class SecurityConfig {
             .antMatchers("/user/**").authenticated() // 로그인 필요
             .antMatchers("/mypage/**").authenticated()
             .antMatchers("/api/like/**").authenticated()
+            .antMatchers("/api/artworks/list").authenticated()
             .antMatchers("/admin/**").hasRole("ADMIN")
             .antMatchers("/artist/**").hasRole("ARTIST")
             .anyRequest().permitAll()

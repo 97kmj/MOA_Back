@@ -65,25 +65,24 @@ public class UserController {
         String accessToken = jwtToken.makeAccessToken(username);
         String refreshToken = jwtToken.makeRefreshToken(username);
 
-        // 응답 데이터 생성
-        Map<String, Object> response = new HashMap<>();
-        response.put("access_token", accessToken);
-        response.put("refresh_token", refreshToken);
-
-        // 사용자 정보 추가
+        // 사용자 데이터 생성
         Map<String, Object> userData = new HashMap<>();
         userData.put("username", user.getUsername());
         userData.put("nickname", user.getNickname());
         userData.put("name", user.getName());
         userData.put("email", user.getEmail());
-        userData.put("artistApprovalStatus",user.getArtistApprovalStatus());
+        userData.put("artistApprovalStatus", user.getArtistApprovalStatus());
         userData.put("role", user.getRole());
         userData.put("phone", user.getPhone());
         userData.put("address", user.getAddress());
-        response.put("user", userData);
 
-        return ResponseEntity.ok(response);
+        // 응답 데이터 설정 (JWT는 헤더로 전달)
+        return ResponseEntity.ok()
+            .header("Authorization", "Bearer " + accessToken)
+            .header("Refresh-Token", "Bearer " + refreshToken)
+            .body(userData);
     }
+
 
     // 회원가입
     @PostMapping("/register")
