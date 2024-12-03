@@ -49,6 +49,8 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 
 		updateFundingCurrentAmount(fundingOrder);
 
+		fundingManagementRepositoryCustom.validateAndUpdateFundingStatuses();
+
 		fundingOrder.setRefundStatus(FundingOrder.RefundStatus.REFUNDED);
 		fundingManagementRepositoryCustom.updateRefundStatus(fundingOrder);
 
@@ -68,11 +70,21 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 
 			// Step 3. reward가 custom이면 stock을 원래대로 복구한다.
 			if (reward != null && reward.getRewardType() == Reward.RewardType.CUSTOM) {
+				if (stockIsLimitless(reward)) {
+					log.info("Reward ID {}는 수량 무제한이므로 재고 복구를 건너뜁니다.", reward.getRewardId());
+					continue;
+				}
+
+
 				reward.setStock(reward.getStock() + contribution.getRewardQuantity().intValue());
 				rewardRepository.save(reward);
 			}
 
 		}
+	}
+
+	private  boolean stockIsLimitless(Reward reward) {
+		return reward.getStock() == null;
 	}
 
 	private void updateFundingCurrentAmount(FundingOrder fundingOrder) {
@@ -92,11 +104,10 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 
 	}
 
-	@Override
 	// @Scheduled(cron = "0 0 0 * * *") // 매일 자정 실행
-	@Scheduled(cron = "0 0/1 * * * *") // 매 1분마다 실행
 	// @Scheduled(cron = "0 0 * * * *") // 매 시간 0분에 실행
-	// @Scheduled(cron = "0 */5 * * * *")	//5분마다 실행
+	@Override
+	@Scheduled(cron = "0 0/5 * * * *") // 매 1분마다 실행
 	@Transactional
 	public void scheduleUpdateToFailedAndRefund() {
 		log.info("펀딩 실패 자동 환불 스케줄링 시작");

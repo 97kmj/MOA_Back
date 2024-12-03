@@ -23,6 +23,7 @@ import com.moa.entity.Reward;
 import com.moa.entity.User;
 import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.dto.payment.RewardRequest;
+import com.moa.funding.repository.FundingManagementRepositoryCustom;
 import com.moa.funding.repository.FundingSelectRepositoryCustom;
 import com.moa.funding.service.fundingImplements.FundingPaymentServiceImpl;
 import com.moa.funding.service.portone.PortOneService;
@@ -46,6 +47,7 @@ class FundingPaymentServiceTest {
 	private RewardService rewardService;
 	private FundingSelectRepositoryCustom fundingSelectRepositoryCustom;
 	private RewardStockCache rewardStockCache;
+	private FundingManagementRepositoryCustom fundingManagementRepositoryCustom;
 
 	@BeforeEach
 	void setUp() {
@@ -58,6 +60,8 @@ class FundingPaymentServiceTest {
 		rewardService = mock(RewardService.class);
 		fundingSelectRepositoryCustom = mock(FundingSelectRepositoryCustom.class);
 		rewardStockCache = mock(RewardStockCache.class);
+		fundingManagementRepositoryCustom = mock(FundingManagementRepositoryCustom.class);
+
 
 		paymentService = new FundingPaymentServiceImpl(
 			iamportOneService,
@@ -68,7 +72,8 @@ class FundingPaymentServiceTest {
 			rewardRepository,
 			rewardService,
 			fundingSelectRepositoryCustom,
-			rewardStockCache
+			rewardStockCache,
+			fundingManagementRepositoryCustom
 
 
 		);
