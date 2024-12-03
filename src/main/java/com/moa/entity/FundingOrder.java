@@ -51,7 +51,6 @@ public class FundingOrder {
 	@Column(nullable = false, unique = true) // 사전 등록 시 설정
 	private String merchantUid;
 
-
 	@Enumerated(EnumType.STRING)
 	private PaymentStatus paymentStatus; // 결제 상태 (PENDING, PAI
 
