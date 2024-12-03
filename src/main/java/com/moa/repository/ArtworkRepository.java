@@ -19,14 +19,17 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 		"AND (:type IS NULL OR a.type.typeName = :type) " +
 		"AND (:category IS NULL OR a.category.categoryName = :category) " +
 		"AND (:search IS NULL OR LOWER(a.artist.name) LIKE LOWER(CONCAT('%', :search, '%')) " +
-		"OR LOWER(a.title) LIKE LOWER(CONCAT('%', :search, '%')))")
-		Page<Artwork> findByFilters(
+		"OR LOWER(a.title) LIKE LOWER(CONCAT('%', :search, '%'))) " +
+		"AND a.saleStatus = :saleStatus")
+	Page<Artwork> findByFilters(
 		@Param("subject") String subject,
 		@Param("type") String type,
 		@Param("category") String category,
 		@Param("search") String search,
+		@Param("saleStatus") Artwork.SaleStatus saleStatus, // Enum 타입으로 처리
 		Pageable pageable
 	);
+
 	@Query("SELECT a FROM Artwork a WHERE a.artist.username = :username")
 	List<Artwork> findByArtistUsername(@Param("username") String username);
 	
