@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.moa.admin.dto.FrameDto;
 import com.moa.entity.Artwork;
 import com.moa.shop.dto.ArtworkDto;
 import com.moa.shop.dto.CanvasDto;
@@ -52,6 +53,21 @@ public class ShopController {
 			return new ResponseEntity<List<CategoryDto>>(HttpStatus.BAD_REQUEST);
 		}
 	}
+	
+	@PostMapping("/getFrame/{canvasId}")
+	public ResponseEntity<List<FrameDto>> FrameListByCanvasId (@PathVariable("canvasId") Long canvasId ){
+		try {
+			List<FrameDto> frameList = shopService.frameList(canvasId);
+			return new ResponseEntity<List<FrameDto>>(frameList, HttpStatus.OK);
+		}catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<List<FrameDto>>(HttpStatus.BAD_REQUEST);
+		}
+		
+	}
+	
+	
+	
 	
 	@GetMapping("/artworkAdd/canvas/{canvasType}")
 	public ResponseEntity<List<CanvasDto>> CanvasList(@PathVariable("canvasType") String canvasType){
@@ -179,6 +195,7 @@ public class ShopController {
 		}
 	}
 	
+
 	
 	
 }

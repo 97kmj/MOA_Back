@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.moa.admin.dto.FrameDto;
 import com.moa.config.image.FolderConstants;
 import com.moa.config.image.ImageService;
 import com.moa.entity.Artwork;
@@ -20,6 +21,7 @@ import com.moa.entity.User;
 import com.moa.repository.ArtworkRepository;
 import com.moa.repository.CanvasRepository;
 import com.moa.repository.CategoryRepository;
+import com.moa.repository.FrameOptionRepository;
 import com.moa.repository.LikeArtworkRepository;
 import com.moa.repository.SubjectRepository;
 import com.moa.repository.TypeRepository;
@@ -48,6 +50,7 @@ public class ShopServiceImpl implements ShopService {
 	private final ImageService imageService;
 	private final UserRepository userRepository;
 	private final LikeArtworkRepository likeArtworkRepository;
+	private final FrameOptionRepository frameOptionRepository; 
 
 	@Override
 	public Long artworkAdd(ArtworkDto artworkDto, MultipartFile artworkImage) throws Exception {
@@ -162,9 +165,15 @@ public class ShopServiceImpl implements ShopService {
 
 	@Override
 	public OrderUserInfoDto orderUserInfo(String username) throws Exception {
-		System.out.println("마지막username:"+username);
-		System.out.println("======================");
-		
 		return OrderUserInfoDto.fromUserInfo(userRepository.findById(username).orElseThrow(()->new Exception("User 번호 오류")));
+	}
+
+	@Override
+	public List<FrameDto> frameList(Long canvasId) throws Exception {
+		
+		List<FrameDto> frameList = frameOptionRepository.findById(canvasId).stream().map(c->
+		FrameDto.fromEntity(c)).collect(Collectors.toList());
+		return frameList;
+
 	}
 }
