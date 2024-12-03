@@ -168,12 +168,21 @@ public class ShopServiceImpl implements ShopService {
 		return OrderUserInfoDto.fromUserInfo(userRepository.findById(username).orElseThrow(()->new Exception("User 번호 오류")));
 	}
 
+	
+	
 	@Override
-	public List<FrameDto> frameList(Long canvasId) throws Exception {
+	public List<FrameDto> frameListByCanvasId(Long canvasId) throws Exception {
 		
-		List<FrameDto> frameList = frameOptionRepository.findById(canvasId).stream().map(c->
+		List<FrameDto> frameList = frameOptionRepository.findByCanvasCanvasId(canvasId).stream().map(c->
 		FrameDto.fromEntity(c)).collect(Collectors.toList());
 		return frameList;
 
+	}
+
+	@Override
+	public List<FrameDto> frameList(Long frameOptionId) throws Exception {
+		List<FrameDto> frameList = frameOptionRepository.findById(frameOptionId).stream().map(c->
+		FrameDto.fromEntity(c)).collect(Collectors.toList());
+		return frameList;
 	}
 }
