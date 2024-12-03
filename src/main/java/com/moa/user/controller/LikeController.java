@@ -46,9 +46,10 @@ public class LikeController {
     public ResponseEntity<?> checkLikeStatus(@PathVariable Long artworkId, HttpServletRequest request) {
         String username = getUsernameFromToken(request);
         if (username == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("isLiked", false));
+            // 비로그인 상태에서도 접근 가능, 좋아요 상태를 false로 반환
+            return ResponseEntity.ok(Map.of("isLiked", false));
         }
+
 
         boolean isLiked = likeService.isLikedByUser(username, artworkId);
         return ResponseEntity.ok(Map.of("isLiked", isLiked));
@@ -82,9 +83,10 @@ public class LikeController {
         }
 
         String token = authorizationHeader.replace("Bearer ", "");
-        if (!jwtToken.validateToken(token)) {
-            return null; // 토큰이 유효하지 않은 경우
+        if (token == null || !jwtToken.validateToken(token)) {
+            return null; // 비로그인 상태도 처리
         }
+
 
         return jwtToken.getUsernameFromToken(token); // 토큰에서 username 추출
     }
