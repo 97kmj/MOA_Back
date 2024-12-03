@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.moa.admin.dto.FrameDto;
 import com.moa.entity.Artwork;
 import com.moa.entity.Artwork.SaleStatus;
 import com.moa.shop.dto.ArtworkDto;
@@ -29,4 +30,5 @@ public interface ShopService {
 	Boolean isLikeArtwork(String username, Long artworkId) throws Exception;  //
 	ArtworkDto artworkDetail(Long artworkId) throws Exception;
 	OrderUserInfoDto orderUserInfo (String username) throws Exception;
+	List<FrameDto> frameList (Long canvasId) throws Exception;
 }
