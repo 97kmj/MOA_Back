@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import com.moa.entity.Artwork;
 import com.moa.entity.QArtwork;
+import com.moa.entity.QLikeArtist;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -24,29 +25,17 @@ public class ArtistDetailRepository {
 				.fetch();
 	}
 	
-//	public List<Artwork> selectNotSaleArtworkByUsername(String username) {
-//		QArtwork artwork = QArtwork.artwork;
-//		return jpaQueryFactory.selectFrom(artwork)
-//				.where(artwork.artist.username.eq(username)
-//						.and(artwork.saleStatus.eq(Artwork.SaleStatus.NOT_SALE)))
-//				.fetch();
-//	}
-//	
-//	public List<Artwork> selectSoldOutArtworkByUsername(String username) {
-//		QArtwork artwork = QArtwork.artwork;
-//		return jpaQueryFactory.selectFrom(artwork)
-//				.where(artwork.artist.username.eq(username)
-//						.and(artwork.saleStatus.eq(Artwork.SaleStatus.SOLD_OUT)))
-//				.fetch();
-//	}
-//	
-//	public List<Artwork> selectSaleArtworkByUsername(String username) {
-//		QArtwork artwork = QArtwork.artwork;
-//		return jpaQueryFactory.selectFrom(artwork)
-//				.where(artwork.artist.username.eq(username)
-//						.and(artwork.saleStatus.eq(Artwork.SaleStatus.AVAILABLE)))
-//				.fetch();
-//	}
+	public Boolean existsLikeArtist(String artistId, String username) {
+		QLikeArtist likeArtist = QLikeArtist.likeArtist;
+		return jpaQueryFactory.select(likeArtist.likeArtistId)
+				.from(likeArtist)
+				.where(likeArtist.artist.username.eq(artistId)
+						.and(likeArtist.user.username.eq(username)))
+				.fetchFirst() != null;
+	}
+	
+	
+	
 	
 	public Long selectArtworkCount(String username) {
 		QArtwork artwork = QArtwork.artwork;
@@ -57,4 +46,7 @@ public class ArtistDetailRepository {
 						artwork.saleStatus.ne(Artwork.SaleStatus.DELETE))
 				.fetchOne();
 	}
+	
+	
+	
 }

@@ -11,6 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
 
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -43,7 +44,7 @@ public class Message {
     @Column(nullable = false)
     private String content;
 
-    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
     private Timestamp createAt;
     
     private Boolean readStatus;
@@ -51,4 +52,9 @@ public class Message {
     private Boolean replyReadState;
     private Timestamp replyAt;
 
+    @PrePersist
+   	protected void onCreate() {
+       	this.createAt = new Timestamp(System.currentTimeMillis());
+       	this.readStatus = false;
+   	}
 }
