@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.moa.admin.dto.ArtistUserDto;
+import com.moa.admin.dto.BlackArtworkDto;
 import com.moa.admin.dto.FrameDto;
 import com.moa.admin.dto.FundingApplyDto;
 import com.moa.admin.dto.FundingRewardDto;
@@ -20,14 +21,17 @@ import com.moa.admin.dto.RegistFrameDto;
 import com.moa.admin.dto.RegistNoticeDto;
 import com.moa.admin.repository.AdminFundingRepository;
 import com.moa.admin.repository.AdminQnARepository;
+import com.moa.entity.Artwork;
 import com.moa.entity.Canvas;
 import com.moa.entity.FrameOption;
 import com.moa.entity.Funding;
 import com.moa.entity.Notice;
 import com.moa.entity.Question;
 import com.moa.entity.User;
+import com.moa.entity.Artwork.SaleStatus;
 import com.moa.entity.User.ApprovalStatus;
 import com.moa.entity.User.Role;
+import com.moa.repository.ArtworkRepository;
 import com.moa.repository.CanvasRepository;
 import com.moa.repository.FrameOptionRepository;
 import com.moa.repository.FundingRepository;
@@ -52,6 +56,7 @@ public class AdminServiceImpl implements AdminService {
 	private final RewardRepository rewardRepository;
 	private final FrameOptionRepository frameOptionRepository;
 	private final CanvasRepository canvasRepository;
+	private final ArtworkRepository artworkRepository;
 	//admin notice 
 	@Override
 	public List<NoticeDto> allNoticeList() throws Exception {
@@ -194,7 +199,28 @@ public class AdminServiceImpl implements AdminService {
 		frameOptionRepository.save(frame);
 	}
 	
-	
+	//의심작품 체크
+	@Override
+	public void changeAdminCheck(Long artworkId, Boolean isSuspicious) throws Exception {
+		Artwork artwork = artworkRepository.findById(artworkId).orElseThrow(()->new Exception("artworkId 오류"));
+		artwork.setAdminCheck(isSuspicious);
+		artworkRepository.save(artwork);
+	}
+	//의심작품목록 가져오기
+	@Override
+	public List<BlackArtworkDto> getBlackArtworks() throws Exception {
+		return artworkRepository.findByAdminCheck(Boolean.TRUE).stream()
+				.map(a->BlackArtworkDto.fromEntity(a))
+				.collect(Collectors.toList());
+	}
+	//의심작품 삭제
+	@Override
+	public void deleteBlackArtwork(Long artworkId) throws Exception {
+		Artwork blackArtwork = artworkRepository.findById(artworkId).orElseThrow(()->new Exception("artworkId 오류"));
+		blackArtwork.setSaleStatus(SaleStatus.DELETE);
+		blackArtwork.setAdminCheck(Boolean.FALSE);
+		artworkRepository.save(blackArtwork);
+	}
 	
 	
 }

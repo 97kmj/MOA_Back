@@ -56,6 +56,8 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 	);
 	
 	
+	//의심작품 가져오기
+	List<Artwork> findByAdminCheck(Boolean isChecked);
 	
 	
 }
