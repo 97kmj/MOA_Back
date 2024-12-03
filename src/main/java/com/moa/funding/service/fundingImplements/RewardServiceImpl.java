@@ -28,13 +28,11 @@ public class RewardServiceImpl implements RewardService {
 		if (isBasicReward(reward)) {
 			return; // BASIC 리워드는 작업 건너뜀
 		}
-
 		// 재고가 null인 경우 "수량 제한 없음"으로 간주
 		if (stockIsLimitless(reward)) {
 			log.info("리워드 '{}'는 수량 제한이 없습니다. (Stock is null)", reward.getRewardName());
 			return; // 수량 제한이 없으므로 재고를 감소할 필요 없음
 		}
-
 
 		// 재고 검증
 		validateRewardStock(reward, rewardRequest.getRewardQuantity());
@@ -57,15 +55,14 @@ public class RewardServiceImpl implements RewardService {
 		if (isBasicReward(reward)) {
 			return; // BASIC 리워드는 작업 건너뜀
 		}
-		// 재고 복구  // 밑에 코드 정리하기  비교해서
-		// 기존 재고가 없으면 요청한 수량으로 설정
-		// if (reward.getStock() == null) {
-		// 	reward.setStock(rewardRequest.getRewardQuantity().intValue());
-		// } else { // 기존 재고가 있으면 요청한 수량을 추가
-		// 	reward.setStock(reward.getStock() + rewardRequest.getRewardQuantity().intValue());
-		// }
+		//재고 복구
+		if (stockIsLimitless(reward)) {
+			log.info("리워드 '{}'는 수량 제한이 없습니다. ", reward.getRewardName());
+			return; // 수량 제한이 없으므로 재고를 복구할 필요 없음
+		}
 
-		reward.setStock(Optional.ofNullable(reward.getStock()).orElse(0) + rewardRequest.getRewardQuantity().intValue());
+		reward.setStock(reward.getStock() + rewardRequest.getRewardQuantity().intValue());
+		log.info("리워드 '{}'의 재고 복구: {}", reward.getRewardName(), rewardRequest.getRewardQuantity());
 
 		rewardRepository.save(reward);
 	}
@@ -90,7 +87,6 @@ public class RewardServiceImpl implements RewardService {
 		}
 	}
 
-
 	private boolean isBasicReward(Reward reward) {
 		if (reward.getRewardType() == Reward.RewardType.BASIC) {
 			log.info("기본 리워드(BASIC)는 작업을 건너뜀 - RewardId: {}", reward.getRewardId());
@@ -99,11 +95,8 @@ public class RewardServiceImpl implements RewardService {
 		return false;
 	}
 
-
 	private  boolean stockIsLimitless(Reward reward) {
 		return reward.getStock() == null;
 	}
-
-
 
 }

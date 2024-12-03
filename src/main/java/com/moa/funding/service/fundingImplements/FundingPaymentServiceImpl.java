@@ -66,10 +66,8 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 			cancelFundingContribution(order);
 			fundingOrderRepository.delete(order);
 		}
-
 		log.info("만료된 펀딩 주문 처리 완료 - 총 {}개 주문 삭제", expiredOrders.size());
 	}
-
 
 	@Override
 	@Transactional
@@ -96,7 +94,6 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		log.info("결제 준비 완료 - FundingOrder: {}", fundingOrder);
 	}
 
-
 	@Override
 	@Transactional
 	public void processFundingContribution(String impUid, PaymentRequest paymentRequest) {
@@ -122,7 +119,6 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	}
 
 
-
 	private void cancelFundingContribution(FundingOrder order) {
 		// 캐시에서 리워드 감소 정보를 조회
 		List<RewardRequest> rewardRequests = rewardStockCache.getAndRemoveRewardChanges(order.getFundingOrderId());
@@ -137,7 +133,6 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		fundingOrderRepository.delete(order);
 		log.info("만료된 펀딩 주문 취소 - FundingOrderId: {}", order.getFundingOrderId());
 	}
-
 
 
 	private void validatePayment(String impUid, PaymentRequest paymentRequest) {
@@ -164,6 +159,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		if (now.isBefore(funding.getStartDate()) || now.isAfter(funding.getEndDate())) {
 			throw new FundingPeriodException("펀딩 기간이 아닙니다.");
 		}
+
 
 		// 리워드 검증
 		Reward reward = null;
@@ -223,6 +219,18 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		fundingRepository.save(funding);
 	}
 
+	private void updateFundingOrderAfterSuccess(FundingOrder fundingOrder, String impUid) {
+		//빌더와 다른점은 빌더는 새로운 객체를 생성하지만 set은 기존 객체를 업데이트
+		fundingOrder.setImpUid(impUid); // impUid 업데이트
+		fundingOrder.setPaymentDate(new Timestamp(System.currentTimeMillis())); // 결제 시간 업데이트
+		fundingOrder.setPaymentStatus(FundingOrder.PaymentStatus.PAID); // 결제 상태 업데이트
+
+		//위에는 영속성 상태이지만 가독성을 위해 추가
+		fundingOrderRepository.save(fundingOrder);
+
+	}
+
+
 	private Funding getFunding(PaymentRequest paymentRequest) {
 		return fundingRepository.findById(paymentRequest.getFundingId())
 			.orElseThrow(() -> new IllegalArgumentException("펀딩이 존재하지 않습니다."));
@@ -244,16 +252,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	}
 
 
-	private void updateFundingOrderAfterSuccess(FundingOrder fundingOrder, String impUid) {
-		//빌더와 다른점은 빌더는 새로운 객체를 생성하지만 set은 기존 객체를 업데이트
-		fundingOrder.setImpUid(impUid); // impUid 업데이트
-		fundingOrder.setPaymentDate(new Timestamp(System.currentTimeMillis())); // 결제 시간 업데이트
-		fundingOrder.setPaymentStatus(FundingOrder.PaymentStatus.PAID); // 결제 상태 업데이트
 
-        //위에는 영속성 상태이지만 가독성을 위해 추가
-		fundingOrderRepository.save(fundingOrder);
-
-	}
 
 }
 
