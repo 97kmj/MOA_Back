@@ -10,9 +10,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.moa.entity.Funding;
+import com.moa.entity.FundingContribution;
 import com.moa.entity.FundingOrder;
 import com.moa.entity.QFunding;
+import com.moa.entity.QFundingContribution;
 import com.moa.entity.QFundingOrder;
+import com.moa.entity.QReward;
+import com.moa.entity.QUser;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -61,6 +65,29 @@ public class MyPageFundingRepositoryCustomImpl implements MyPageFundingRepositor
 
 		return new PageImpl<>(orders, pageable, total);
 
+	}
+
+	@Override
+	public FundingOrder findFundingOrder(Long fundingOrderId) {
+		QFundingOrder fundingOrder = QFundingOrder.fundingOrder;
+		QUser user = QUser.user;
+
+
+		return queryFactory.selectFrom(fundingOrder)
+			.join(fundingOrder.user, user).fetchJoin()
+			.where(fundingOrder.fundingOrderId.eq(fundingOrderId))
+			.fetchOne();
+	}
+
+	@Override
+	public List<FundingContribution> findFundingContributions(Long fundingOrderId) {
+		QFundingContribution fundingContribution = QFundingContribution.fundingContribution;
+		QReward reward = QReward.reward;
+
+		return queryFactory.selectFrom(fundingContribution)
+			.leftJoin(fundingContribution.reward, reward).fetchJoin()
+			.where(fundingContribution.fundingOrder.fundingOrderId.eq(fundingOrderId))
+			.fetch();
 	}
 
 	private BooleanExpression getFilterCondition(String status) {

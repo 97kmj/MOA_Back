@@ -75,7 +75,6 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 					continue;
 				}
 
-
 				reward.setStock(reward.getStock() + contribution.getRewardQuantity().intValue());
 				rewardRepository.save(reward);
 			}
