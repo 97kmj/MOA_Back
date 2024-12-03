@@ -30,5 +30,6 @@ public interface ShopService {
 	Boolean isLikeArtwork(String username, Long artworkId) throws Exception;  //
 	ArtworkDto artworkDetail(Long artworkId) throws Exception;
 	OrderUserInfoDto orderUserInfo (String username) throws Exception;
-	List<FrameDto> frameList (Long canvasId) throws Exception;
+	List<FrameDto> frameListByCanvasId (Long canvasId) throws Exception;
+	List<FrameDto> frameList (Long frameOptionId) throws Exception;
 }

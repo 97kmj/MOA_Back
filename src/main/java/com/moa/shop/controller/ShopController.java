@@ -57,7 +57,10 @@ public class ShopController {
 	@PostMapping("/getFrame/{canvasId}")
 	public ResponseEntity<List<FrameDto>> FrameListByCanvasId (@PathVariable("canvasId") Long canvasId ){
 		try {
-			List<FrameDto> frameList = shopService.frameList(canvasId);
+			
+
+			List<FrameDto> frameList = shopService.frameListByCanvasId(canvasId);
+
 			return new ResponseEntity<List<FrameDto>>(frameList, HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -176,7 +179,8 @@ public class ShopController {
 	}
 	
 	@GetMapping("/orderData")
-	public ResponseEntity<Map<String,Object>> OrderArtwork(@RequestParam Long artworkId, @RequestParam String username ){
+	public ResponseEntity<Map<String,Object>> OrderArtwork(@RequestParam Long artworkId, @RequestParam String username,
+			@RequestBody Map<String,String> param){
 		try {
 
 			ArtworkDto artworkList= shopService.artworkDetail(artworkId);
@@ -185,8 +189,16 @@ public class ShopController {
 			OrderUserInfoDto UserList = shopService.orderUserInfo(username);
 			System.out.println("컨트롤러" +UserList);
 			Map<String,Object> orderInfo = new HashMap<>();
-			orderInfo.put("artworkList", artworkList);
-			orderInfo.put("userList", UserList);
+
+			Long frameId = Long.valueOf(param.get("frameId"));
+			System.out.println("프레임");
+			System.out.println(frameId);
+			if (frameId != null) {
+	            List<FrameDto> frameList = shopService.frameList(frameId);
+	            orderInfo.put("frameList", frameList);
+	            
+	        }
+				
 			return new ResponseEntity<Map<String,Object>>(orderInfo, HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();
