@@ -40,4 +40,8 @@ public interface LikeArtworkRepository extends JpaRepository<LikeArtwork, Long> 
     );
     
     Optional<LikeArtwork> findByUser_UsernameAndArtwork_ArtworkId(String username, Long artworkId);
+    
+    //좋아요 한 ID 목록 가져오기 
+    @Query("SELECT l.artwork.artworkId FROM LikeArtwork l WHERE l.user.username = :username")
+    List<Long> findArtworkIdsByUsername(@Param("username") String username);
 }

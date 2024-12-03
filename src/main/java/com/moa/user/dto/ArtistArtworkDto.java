@@ -15,6 +15,7 @@ public class ArtistArtworkDto {
 	private Long artworkId;
 	private String title;
 	private String imageUrl;
+	private Boolean isLiked;
 	
 	public static ArtistArtworkDto fromEntity(Artwork artwork) {
 		return ArtistArtworkDto.builder()
