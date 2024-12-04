@@ -20,4 +20,8 @@ public interface MyPageFundingRepositoryCustom {
 	Page<Funding> findMyRegisteredFunding(String username, String status, Pageable pageable);
 
 	Page<FundingContribution> findContributionsForMyFunding(Long fundingId, Pageable pageable);
+
+	Page<FundingOrder> findFundingOrdersForFunding(Long fundingId, Pageable pageable);
+
+	List<FundingContribution> findContributionsByFundingOrderId(Long fundingOrderId);
 }
