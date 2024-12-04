@@ -70,7 +70,18 @@ public class Funding {
     private FundingStatus fundingStatus;
 
     public enum ApprovalStatus { PENDING, APPROVED, REJECTED }
-    public enum FundingStatus { STANDBY, ONGOING, SUCCESSFUL, FAILED, CANCELLED }
+
+    public enum FundingStatus {
+		STANDBY,
+		ONGOING,
+		SUCCESSFUL,
+		FAILED,
+		CANCELLED;
+
+		public boolean isRefundable() {
+			return this == ONGOING || this == SUCCESSFUL;
+		}
+	}
 
 	@PrePersist
 	protected void onCreate() {

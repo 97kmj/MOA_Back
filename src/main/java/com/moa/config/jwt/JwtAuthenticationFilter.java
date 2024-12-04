@@ -47,7 +47,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
         FilterChain chain, Authentication authResult)
         throws IOException, ServletException {
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         // PrincipalDetails로부터 사용자 정보 가져오기
         PrincipalDetails principalDetails = (PrincipalDetails) authResult.getPrincipal();
 

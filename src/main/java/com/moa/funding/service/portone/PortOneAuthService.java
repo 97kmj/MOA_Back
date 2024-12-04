@@ -15,8 +15,6 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class PortOneAuthService {
 
-
-
 	@Value("${iamport.api-key}")
 	private String apiKey;
 

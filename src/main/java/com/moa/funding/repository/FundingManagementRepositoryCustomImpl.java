@@ -3,6 +3,7 @@ package com.moa.funding.repository;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +45,8 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 				fundingOrder.fundingOrderId.eq(fundingOrderId)
 					.and(funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)) // 승인된 펀딩
 					.and(funding.fundingStatus.in(Funding.FundingStatus.ONGOING, Funding.FundingStatus.SUCCESSFUL)) // 진행 중 또는 성공
-					.and(funding.endDate.after(Instant.now())) // 종료일이 현재 이후
+					// .and(funding.endDate.after(Instant.now())) // 종료일이 오늘이후
+					.and(funding.endDate.goe(Instant.now().truncatedTo(ChronoUnit.DAYS)))
 					.and(fundingOrder.refundStatus.eq(FundingOrder.RefundStatus.NOT_REFUNDED)) // 환불되지 않은 상태
 					.and(fundingOrder.totalAmount.gt(0)) // 환불 금액이 있는 주문
 			)
