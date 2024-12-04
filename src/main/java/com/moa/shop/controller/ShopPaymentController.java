@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.shop.dto.OrderPaymentRequest;
-import com.moa.shop.service.OrderPaymentService;
 
 import io.jsonwebtoken.lang.Collections;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ShopPaymentController {
 	
-	private final OrderPaymentService orderPaymentService;
+	// private final OrderPaymentService orderPaymentService;
 	
 	
 	

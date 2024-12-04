@@ -59,7 +59,7 @@ public class MyPageFundingController {
 	@GetMapping("registeredFunding/{fundingId}")
 	public ResponseEntity<Page<FundingContributionWithFundingDTO>> getContributionsForMyFunding(@PathVariable Long fundingId,
 		@RequestParam(defaultValue = "0") int page,
-		@RequestParam(defaultValue = "50") int size
+		@RequestParam(defaultValue = "10") int size
 	) {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<FundingContributionWithFundingDTO> contributions = fundingMyPageService.getContributionsForMyFunding(fundingId, pageable);

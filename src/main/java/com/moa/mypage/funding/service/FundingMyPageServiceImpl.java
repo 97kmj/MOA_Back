@@ -2,10 +2,12 @@ package com.moa.mypage.funding.service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -61,36 +63,23 @@ public class FundingMyPageServiceImpl implements FundingMyPageService {
 		return funding.map(this::toMyFundingResponseDTO);
 	}
 
+
 	@Override
 	public Page<FundingContributionWithFundingDTO> getContributionsForMyFunding(Long fundingId, Pageable pageable) {
 		log.debug("getContributionsForMyFunding : fundingId: {}, pageable: {}", fundingId, pageable);
 
-		Page<FundingContribution> contributionsPage = fundingMyPageRepository.findContributionsForMyFunding(fundingId, pageable);
+		Page<FundingOrder> fundingOrderPage = fundingMyPageRepository.findFundingOrdersForFunding(fundingId, pageable);
 
-		return contributionsPage.map(this::toFundingContributionWithFundingDTO);
+		List<FundingContributionWithFundingDTO> result = fundingOrderPage.getContent().stream()
+			.map(fundingOrder -> {
+				List<FundingContribution> contributions = fundingMyPageRepository.findFundingContributions(fundingOrder.getFundingOrderId());
+				return ToFundingContributionWithFundingDTO(fundingOrder, contributions);
+			})
+			.collect(Collectors.toList());
+
+
+		return new PageImpl<>(result, pageable, fundingOrderPage.getTotalElements());
 	}
-
-
-	private FundingContributionWithFundingDTO toFundingContributionWithFundingDTO(FundingContribution contribution) {
-		Funding funding = contribution.getFundingOrder().getFunding();
-		User user = funding.getUser(); // 펀딩 작성자 정보
-
-		return FundingContributionWithFundingDTO.builder()
-			.fundingId(funding.getFundingId())
-			.fundingOrderId(contribution.getFundingOrder().getFundingOrderId())
-			.userName(user.getUsername())
-			.address(user.getAddress())
-			.phoneNumber(user.getPhone())
-			.contributionId(contribution.getContributionId())
-			.rewardId(contribution.getReward() != null ? contribution.getReward().getRewardId() : null)
-			.rewardName(contribution.getReward() != null ? contribution.getReward().getRewardName() : "No Reward")
-			.rewardPrice(contribution.getRewardPrice())
-			.rewardQuantity(contribution.getRewardQuantity())
-			.contributionDate(contribution.getContributionDate())
-			.build();
-	}
-
-
 
 
 
@@ -155,20 +144,6 @@ public class FundingMyPageServiceImpl implements FundingMyPageService {
 			.build();
 	}
 
-	private FundingOrderDetailResponseDTO.FundingContributionResponseDTO toDetailedContributorDTO(FundingContribution contribution) {
-	FundingOrder fundingOrder = contribution.getFundingOrder();
-	User user = fundingOrder.getUser();
-
-		return FundingOrderDetailResponseDTO.FundingContributionResponseDTO.builder()
-			.contributionId(contribution.getContributionId())
-			.rewardId(contribution.getReward().getRewardId())
-			.rewardName(contribution.getReward().getRewardName())
-			.rewardPrice(contribution.getReward().getRewardPrice())
-			.rewardQuantity(contribution.getRewardQuantity())
-			.contributionDate(contribution.getContributionDate())
-			.build();
-	}
-
 
 
 
@@ -182,5 +157,38 @@ public class FundingMyPageServiceImpl implements FundingMyPageService {
 			fundingOrder.getRefundStatus() == FundingOrder.RefundStatus.NOT_REFUNDED &&
 			fundingOrder.getTotalAmount() > 0;
 	}
+
+
+	public  FundingContributionWithFundingDTO ToFundingContributionWithFundingDTO(FundingOrder fundingOrder, List<FundingContribution> contributions) {
+		List<FundingContributionWithFundingDTO.RewardDTO> rewards = contributions.stream()
+			.map(this::ToRewardDtoOfFundingContributionWithFundingDTO)
+			.collect(Collectors.toList());
+
+		return FundingContributionWithFundingDTO.builder()
+			.fundingId(fundingOrder.getFunding().getFundingId())
+			.fundingOrderId(fundingOrder.getFundingOrderId())
+			.refundStatus(fundingOrder.getRefundStatus().toString())
+			.orderUserName(fundingOrder.getUser().getUsername())
+			.totalAmount(fundingOrder.getTotalAmount())
+			.paymentDate(fundingOrder.getPaymentDate())
+			.paymentType(fundingOrder.getPaymentType())
+			.address(fundingOrder.getUser().getAddress())
+			.phoneNumber(fundingOrder.getPhoneNumber())
+			.name(fundingOrder.getName())
+			.rewards(rewards)
+			.build();
+	}
+
+	private  FundingContributionWithFundingDTO.RewardDTO ToRewardDtoOfFundingContributionWithFundingDTO(FundingContribution contribution) {
+		return FundingContributionWithFundingDTO.RewardDTO.builder()
+			.rewardId(contribution.getReward().getRewardId())
+			.rewardName(contribution.getReward().getRewardName())
+			.rewardPrice(contribution.getReward().getRewardPrice())
+			.rewardQuantity(contribution.getRewardQuantity())
+			.contributionId(contribution.getContributionId())
+			.contributionDate(contribution.getContributionDate())
+			.build();
+	}
+
 
 }
