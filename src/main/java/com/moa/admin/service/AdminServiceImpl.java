@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.moa.admin.dto.AdminOrderItemDto;
 import com.moa.admin.dto.ArtistUserDto;
 import com.moa.admin.dto.BlackArtworkDto;
 import com.moa.admin.dto.FrameDto;
@@ -19,16 +20,20 @@ import com.moa.admin.dto.NoticeDto;
 import com.moa.admin.dto.QuestionDto;
 import com.moa.admin.dto.RegistFrameDto;
 import com.moa.admin.dto.RegistNoticeDto;
+import com.moa.admin.dto.UpdateOrderItemStatusRequest;
 import com.moa.admin.repository.AdminFundingRepository;
+import com.moa.admin.repository.AdminItemRepository;
 import com.moa.admin.repository.AdminQnARepository;
 import com.moa.entity.Artwork;
+import com.moa.entity.Artwork.SaleStatus;
 import com.moa.entity.Canvas;
 import com.moa.entity.FrameOption;
 import com.moa.entity.Funding;
 import com.moa.entity.Notice;
+import com.moa.entity.OrderItem;
+import com.moa.entity.OrderItem.ShippingStatus;
 import com.moa.entity.Question;
 import com.moa.entity.User;
-import com.moa.entity.Artwork.SaleStatus;
 import com.moa.entity.User.ApprovalStatus;
 import com.moa.entity.User.Role;
 import com.moa.repository.ArtworkRepository;
@@ -36,6 +41,8 @@ import com.moa.repository.CanvasRepository;
 import com.moa.repository.FrameOptionRepository;
 import com.moa.repository.FundingRepository;
 import com.moa.repository.NoticeRepository;
+import com.moa.repository.OrderItemRepository;
+import com.moa.repository.OrderRepository;
 import com.moa.repository.QuestionRepository;
 import com.moa.repository.RewardRepository;
 import com.moa.repository.UserRepository;
@@ -57,6 +64,9 @@ public class AdminServiceImpl implements AdminService {
 	private final FrameOptionRepository frameOptionRepository;
 	private final CanvasRepository canvasRepository;
 	private final ArtworkRepository artworkRepository;
+	private final AdminItemRepository adminItemRepository;
+	private final OrderRepository orderRepository;
+	private final OrderItemRepository orderItemRepository; 
 	//admin notice 
 	@Override
 	public List<NoticeDto> allNoticeList() throws Exception {
@@ -220,6 +230,23 @@ public class AdminServiceImpl implements AdminService {
 		blackArtwork.setSaleStatus(SaleStatus.DELETE);
 		blackArtwork.setAdminCheck(Boolean.FALSE);
 		artworkRepository.save(blackArtwork);
+	}
+	
+	
+	//상품 관리 목록 가져오기
+	@Override
+	public List<AdminOrderItemDto> getOrderItemList() throws Exception {
+		List<OrderItem> orderItemEntity = adminItemRepository.findOrderItemList();
+		return orderItemEntity.stream().map(o->AdminOrderItemDto.fromEntity(o)).collect(Collectors.toList());
+	}
+	
+	@Override
+	public void updateShippingStatus(List<UpdateOrderItemStatusRequest> updateList) throws Exception {
+		for(UpdateOrderItemStatusRequest update : updateList) {
+			OrderItem orderItem = orderItemRepository.findById(update.getOrderItemId()).orElseThrow(()->new Exception("수정할 orderItemId 오류"));
+			orderItem.setShippingStatus(ShippingStatus.valueOf(update.getStatus()));
+			orderItemRepository.save(orderItem);
+		}
 	}
 	
 	

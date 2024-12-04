@@ -3,6 +3,7 @@ package com.moa.admin.service;
 import java.sql.Date;
 import java.util.List;
 
+import com.moa.admin.dto.AdminOrderItemDto;
 import com.moa.admin.dto.ArtistUserDto;
 import com.moa.admin.dto.BlackArtworkDto;
 import com.moa.admin.dto.FrameDto;
@@ -11,6 +12,7 @@ import com.moa.admin.dto.NoticeDto;
 import com.moa.admin.dto.QuestionDto;
 import com.moa.admin.dto.RegistFrameDto;
 import com.moa.admin.dto.RegistNoticeDto;
+import com.moa.admin.dto.UpdateOrderItemStatusRequest;
 import com.moa.shop.dto.CanvasDto;
 
 public interface AdminService {
@@ -47,5 +49,7 @@ public interface AdminService {
 	
 	
 	//관리자 상품관리
-	
+	List<AdminOrderItemDto> getOrderItemList() throws Exception;
+	//상품 상태 변경
+	void updateShippingStatus(List<UpdateOrderItemStatusRequest> updateList) throws Exception; 
 }
