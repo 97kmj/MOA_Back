@@ -2,11 +2,15 @@ package com.moa.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+
+import com.moa.entity.Order.ShippingStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,5 +47,9 @@ public class OrderItem {
     
     private Long framePrice;
     private Long totalPrice;
+    
+    @Enumerated(EnumType.STRING)
+    private ShippingStatus shippingStatus;
+    public enum ShippingStatus { NOT_SHIPPED, SHIPPING, DELIVERED }
 
 }

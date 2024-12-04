@@ -132,17 +132,21 @@ public class MyPageFundingRepositoryCustomImpl implements MyPageFundingRepositor
 		QFundingOrder fundingOrder = QFundingOrder.fundingOrder;
 		QFunding funding = QFunding.funding;
 		QUser user = QUser.user;
+		QReward reward = QReward.reward;
 
+		// 펀딩 기여 정보 조회 (FundingContribution과 관련된 Reward 포함)
 		List<FundingContribution> contributions = queryFactory
 			.selectFrom(contribution)
 			.join(contribution.fundingOrder, fundingOrder).fetchJoin()
 			.leftJoin(fundingOrder.funding, funding).fetchJoin()
 			.join(fundingOrder.user, user).fetchJoin()
+			.leftJoin(contribution.reward, reward)  // Reward와의 관계도 가져옴
 			.where(funding.fundingId.eq(fundingId))
 			.offset(pageable.getOffset())
 			.limit(pageable.getPageSize())
 			.fetch();
 
+		// Total count
 		long total = Optional.ofNullable(queryFactory
 			.select(contribution.count())
 			.from(contribution)
@@ -152,8 +156,8 @@ public class MyPageFundingRepositoryCustomImpl implements MyPageFundingRepositor
 			.fetchOne()).orElse(0L);
 
 		return new PageImpl<>(contributions, pageable, total);
-
 	}
+
 
 	private BooleanExpression getFilterCondition(String status) {
 		QFunding funding = QFunding.funding;
@@ -171,5 +175,55 @@ public class MyPageFundingRepositoryCustomImpl implements MyPageFundingRepositor
 				return null;
 		}
 	}
+
+
+	@Override
+	public Page<FundingOrder> findFundingOrdersForFunding(Long fundingId, Pageable pageable) {
+		QFundingOrder fundingOrder = QFundingOrder.fundingOrder;
+		QFunding funding = QFunding.funding;
+		QUser user = QUser.user;
+
+		// FundingOrder 관련 정보 조회
+		List<FundingOrder> fundingOrders = queryFactory
+			.selectFrom(fundingOrder)
+			.join(fundingOrder.funding, funding)
+			.join(fundingOrder.user, user)
+			.where(funding.fundingId.eq(fundingId))
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.fetch();
+
+		// Total count 조회
+		long total = Optional.ofNullable(queryFactory
+			.select(fundingOrder.count())
+			.from(fundingOrder)
+			.join(fundingOrder.funding, funding)
+			.join(fundingOrder.user, user)
+			.where(funding.fundingId.eq(fundingId))
+			.fetchOne()).orElse(0L);
+
+		return new PageImpl<>(fundingOrders, pageable, total);
+	}
+
+
+	@Override
+	public List<FundingContribution> findContributionsByFundingOrderId(Long fundingOrderId) {
+		QFundingContribution contribution = QFundingContribution.fundingContribution;
+		QFundingOrder fundingOrder = QFundingOrder.fundingOrder;
+		QReward reward = QReward.reward;
+
+		return queryFactory
+			.selectFrom(contribution)
+			.join(contribution.fundingOrder, fundingOrder)
+			.leftJoin(contribution.reward, reward)
+			.where(fundingOrder.fundingOrderId.eq(fundingOrderId))
+			.fetch();
+	}
+
+
+
+
+
+
 
 }
