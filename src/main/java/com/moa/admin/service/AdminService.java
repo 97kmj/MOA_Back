@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.util.List;
 
 import com.moa.admin.dto.ArtistUserDto;
+import com.moa.admin.dto.BlackArtworkDto;
 import com.moa.admin.dto.FrameDto;
 import com.moa.admin.dto.FundingApplyDto;
 import com.moa.admin.dto.NoticeDto;
@@ -38,4 +39,9 @@ public interface AdminService {
 	List<CanvasDto> getCanvasList(String canvasType) throws Exception;
 	FrameDto registFrame(RegistFrameDto registFrameDto) throws Exception;
 	void updateFrame(FrameDto frameDto) throws Exception;
+	
+	//관리자 작품 블랙
+	void changeAdminCheck(Long artworkId, Boolean isSuspicious) throws Exception;
+	List<BlackArtworkDto> getBlackArtworks() throws Exception;
+	void deleteBlackArtwork(Long artworkId) throws Exception;
 }
