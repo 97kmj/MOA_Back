@@ -44,7 +44,7 @@ public class OrderItem {
 
     @Column(nullable = false)
     private Long price;
-
+    
     private Long framePrice;
     private Long totalPrice;
     

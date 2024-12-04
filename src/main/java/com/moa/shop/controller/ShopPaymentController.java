@@ -3,6 +3,9 @@
 //
 //import java.util.Map;
 //
+
+//import org.springframework.beans.factory.annotation.Autowired;
+
 //import org.springframework.http.HttpStatus;
 //import org.springframework.http.ResponseEntity;
 //import org.springframework.web.bind.annotation.PostMapping;
@@ -15,23 +18,27 @@
 //import com.moa.shop.service.OrderPaymentService;
 //
 //import io.jsonwebtoken.lang.Collections;
-//import lombok.RequiredArgsConstructor;
-//@RequestMapping("/shop")
+
+//
 //
 //@RestController
-//@RequiredArgsConstructor
+//@RequestMapping("/shop")
 //public class ShopPaymentController {
 //
-//	private final OrderPaymentService orderPaymentService;
+//    @Autowired
+//    private OrderPaymentService orderPaymentService;
 //
-//
-//
-//
-//	 @PostMapping("/payment")
-//	    public ResponseEntity<Map<String, Object>> processPayment(@RequestBody OrderPaymentRequest orderPaymentRequest) {
-//
-//		return null;
-//	    }
-//
+//    @PostMapping("/payment")
+//    public ResponseEntity<Map<String, Object>> processPayment(@RequestBody OrderPaymentRequest orderPaymentRequest) {
+//        try {
+//            // 결제 처리 및 DB 저장
+//        	orderPaymentService.processPayment(orderPaymentRequest);
+//            return ResponseEntity.ok(Collections.singletonMap("success", true));
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(Collections.singletonMap("success", false));
+//        }
+//    }
 //}
 

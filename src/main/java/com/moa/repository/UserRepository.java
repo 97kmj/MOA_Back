@@ -17,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, String> {
     
     //승인 여부로 유저리스트 
     List<User> findByArtistApprovalStatus(ApprovalStatus status);
+
+	User findByEmail(String buyer_email);
     
 
 }
