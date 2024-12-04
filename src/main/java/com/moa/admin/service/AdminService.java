@@ -44,4 +44,8 @@ public interface AdminService {
 	void changeAdminCheck(Long artworkId, Boolean isSuspicious) throws Exception;
 	List<BlackArtworkDto> getBlackArtworks() throws Exception;
 	void deleteBlackArtwork(Long artworkId) throws Exception;
+	
+	
+	//관리자 상품관리
+	
 }

@@ -1,7 +1,9 @@
 package com.moa.shop.service;
 
-import com.moa.funding.dto.payment.PaymentRequest;
+import org.springframework.stereotype.Service;
+
 import com.moa.shop.dto.OrderPaymentRequest;
+
 
 public class OrderPaymentServiceImpl implements OrderPaymentService {
 
