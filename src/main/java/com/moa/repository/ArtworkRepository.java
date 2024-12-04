@@ -39,7 +39,8 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 			"AND (:type IS NULL OR a.type.typeName = :type) " +
 			"AND (:category IS NULL OR a.category.categoryName = :category) " +
 			"AND (:status IS NULL AND a.saleStatus in ('AVAILABLE','SOLD_OUT') OR a.saleStatus = :status) " +
-			"AND (:search IS NULL OR LOWER(a.artist.name) LIKE LOWER(CONCAT('%', :search, '%')))")	
+			"AND (:search IS NULL OR LOWER(a.artist.name) LIKE LOWER(CONCAT('%', :search, '%')))" +
+			"ORDER BY a.createAt DESC")	
 			Page<Artwork> findBySearches(
 			@Param("subject") String subject,
 			@Param("type") String type,
@@ -50,7 +51,8 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 	);
 	
 	@Query("SELECT a FROM Artwork a " +
-		   "WHERE  a.saleStatus in ('AVAILABLE','SOLD_OUT')")
+		   "WHERE  a.saleStatus in ('AVAILABLE','SOLD_OUT')"+
+		   "ORDER BY a.createAt DESC")	
 		Page<Artwork> findBySaleStatus(
 		Pageable pageable
 	);

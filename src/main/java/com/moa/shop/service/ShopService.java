@@ -32,4 +32,5 @@ public interface ShopService {
 	OrderUserInfoDto orderUserInfo (String username) throws Exception;
 	List<FrameDto> frameListByCanvasId (Long canvasId) throws Exception;
 	List<FrameDto> frameList (Long frameOptionId) throws Exception;
+	
 }
