@@ -178,23 +178,27 @@ public class ShopController {
 		}
 	}
 	
-	@GetMapping("/orderData")
-	public ResponseEntity<Map<String,Object>> OrderArtwork(@RequestParam Long artworkId, @RequestParam String username,
-			@RequestBody Map<String,String> param){
+	@PostMapping("/orderData")
+	public ResponseEntity<Map<String,Object>> OrderArtwork(@RequestBody Map<String,String> param){
 		try {
-
+			Long artworkId = Long.parseLong(param.get("artworkId"));
+			String username = param.get("username");
+			System.out.println("-----------------------------------------------");
+			System.out.println("artworkId : " + artworkId);
+			System.out.println("username : " + username);
+			
+			
 			ArtworkDto artworkList= shopService.artworkDetail(artworkId);
-			System.out.println("컨트롤러" + artworkList);
-			System.out.println("컨트롤러" + username);
 			OrderUserInfoDto UserList = shopService.orderUserInfo(username);
-			System.out.println("컨트롤러" +UserList);
+			
 			Map<String,Object> orderInfo = new HashMap<>();
+			orderInfo.put("artworkList", artworkList);
+			orderInfo.put("userList", UserList);
 
-			Long frameId = Long.valueOf(param.get("frameId"));
-			System.out.println("프레임");
-			System.out.println(frameId);
-			if (frameId != null) {
+			if (param.get("frameId") != null && !param.get("frameId").isEmpty()) {
+				Long frameId = Long.valueOf(param.get("frameId"));
 	            List<FrameDto> frameList = shopService.frameList(frameId);
+	            System.out.println(frameList);
 	            orderInfo.put("frameList", frameList);
 	            
 	        }
