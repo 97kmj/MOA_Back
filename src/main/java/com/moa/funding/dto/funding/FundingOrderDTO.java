@@ -19,6 +19,6 @@ public class FundingOrderDTO {
 	private String address;
 	private String phoneNumber;
 	private String name;
-	private String userName; // 추가: 사용자 이름
-	private Timestamp paymentDate; // 추가: 결제 일자
+	private String userName;
+	private Timestamp paymentDate;
 }
