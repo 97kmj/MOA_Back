@@ -1,12 +1,19 @@
 package com.moa.shop.service;
 
 
+import java.util.Optional;
+
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.moa.admin.dto.FrameDto;
 import com.moa.entity.Artwork;
 import com.moa.entity.FrameOption;
 import com.moa.entity.Order;
+import com.moa.entity.Order.OrderStatus;
+import com.moa.entity.Order.ShippingStatus;
 import com.moa.entity.OrderItem;
 import com.moa.entity.User;
 import com.moa.funding.dto.payment.PaymentRequest;
@@ -18,6 +25,7 @@ import com.moa.repository.UserRepository;
 import com.moa.shop.dto.OrderDto;
 import com.moa.shop.dto.OrderItemDto;
 import com.moa.shop.dto.OrderPaymentRequest;
+import com.twilio.rest.api.v2010.account.call.FeedbackSummary.Status;
 
 @Service
 
@@ -39,57 +47,66 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
     private FrameOptionRepository frameOptionRepository;
     
 	@Override
-	public void processPayment(OrderPaymentRequest orderPaymentRequest) throws Exception {
-        // 1. 사용자 정보 조회 (구매자의 이메일로 사용자 확인)
-        User user = userRepository.findByEmail(orderPaymentRequest.getBuyer_email());
-        if (user == null) {
-            throw new IllegalArgumentException("사용자를 찾을 수 없습니다.");
-        }
-        // 2. 결제 요청에서 주문 DTO 추출
-        OrderDto orderDto = orderPaymentRequest.getOrderDto();
-        
-        
-
-        // 3. 프레임 옵션 재고 확인 및 감소
-        for (OrderItemDto orderItemDto : orderDto.getOrderItems()) {
-            Long frameOptionId = orderItemDto.getFrameOptionId();
-            FrameOption frameOption = frameOptionRepository.findById(frameOptionId)
-                    .orElseThrow(() -> new Exception("FrameOption not found"));
-
-            if (frameOption.getStock() > 0) {
-                // 수량에 맞게 재고 감소
-                frameOption.setStock(frameOption.getStock() - orderItemDto.getQuantity());
-                frameOptionRepository.save(frameOption);
-            } else {
-                throw new Exception("Frame option stock is 0");
-            }
-        }
-     // 4. Artwork 재고 확인 및 감소
-        for (OrderItemDto orderItemDto : orderDto.getOrderItems()) {
-            Long artworkId = orderItemDto.getArtworkId();
-            Artwork artwork = artworkRepository.findById(artworkId)
-                    .orElseThrow(() -> new Exception("Artwork not found"));
-
-            if (artwork.getStock() > 0) {
-                // 수량에 맞게 재고 감소
-                artwork.setStock(artwork.getStock() - orderItemDto.getQuantity());
-                artworkRepository.save(artwork);
-            } else {
-                throw new Exception("Artwork stock is 0");
-            }
-        }
-
-        // 5. 주문 저장
-        Order order = orderDto.toOrderEntity();
-        orderRepository.save(order);
-
-        // 6. 주문 항목 저장
-        for (OrderItemDto orderItemDto : orderDto.getOrderItems()) {
-            OrderItem orderItem = orderItemDto.toOrderItemEntity();
-            orderItem.setOrder(order); // 주문 항목에 연관된 Order 설정
-            orderItemRepository.save(orderItem);
-        }
-        
+	@Transactional
+	public void processPayment(OrderPaymentRequest orderPaymentRequest, String username, OrderItem saleData) throws Exception {
+		//1. 유저 확인 나중에
+		
+		
+		
+		
+		
+		//2. 그림 재고 확인
+		Artwork artwork = artworkRepository.findById(saleData.getArtwork().getArtworkId()).orElseThrow(()->new Exception("artworkID 오류"));
+		Integer saleStock = saleData.getArtwork().getStock();
+		
+		if (artwork.getStock() <saleStock) {
+			System.out.println("판매수량보다 주문수량이 많습니다.");
+			return;
+		}
+		//2-1.프레임 재고 확인
+		FrameOption frame = frameOptionRepository.findById(saleData.getFrameOption().getFrameOptionId()).orElseThrow(()->new Exception("frameId 오류"));
+		Integer saleFrameStock = saleData.getFrameOption().getStock();
+		
+		if(frame.getStock() < saleFrameStock ) {
+			System.out.println("판매프레임보다 주문수량이 더 많습니다.");
+			return;
+		}
+		//3.order 저장
+		Order order = Order.builder()
+				.user(User.builder().nickname(username).build())
+				.totalAmount(orderPaymentRequest.getTotal_price())
+				.paymentType(orderPaymentRequest.getPaymentType())
+				.shippingStatus(ShippingStatus.NOT_SHIPPED)
+				.status(OrderStatus.PENDING)
+				.address(orderPaymentRequest.getBuyer_addr())
+				.phoneNumber(orderPaymentRequest.getBuyer_tel())
+				.name(orderPaymentRequest.getBuyer_name())
+				.build();
+		orderRepository.save(order);	
+		
+		//4. orderItem 저장
+		OrderItem orderItem = OrderItem.builder()
+				.order(order)
+				.artwork(artwork)
+				.frameOption(frame)
+				.quantity(saleStock)
+				.framePrice(frame.getFramePrice())
+				.totalPrice(orderPaymentRequest.getTotal_price())
+				.build();
+		orderItemRepository.save(orderItem); 
+		
+		//5.그림 프레임수량 감소
+		Artwork artworkDecrease = Artwork.builder()
+				.artworkId(saleData.getArtwork().getArtworkId())
+				.stock(artwork.getStock()-saleStock)
+				.build();
+		artworkRepository.save(artworkDecrease);
+		
+		FrameOption frameOption = FrameOption.builder()
+				.frameOptionId(frame.getFrameOptionId())
+				.stock(frame.getStock() - saleFrameStock)
+				.build();
+        frameOptionRepository.save(frameOption);
         
         
 

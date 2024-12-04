@@ -21,15 +21,19 @@ import lombok.ToString;
 @AllArgsConstructor
 public class OrderPaymentRequest {
 
-	private String imp_uid;         // 결제 고유 ID (아임포트에서 받은 결제 고유 ID)
+	private String impUid;         // 결제 고유 ID (아임포트에서 받은 결제 고유 ID)
     private String merchant_uid;    // 주문 고유 ID
     private Long total_price;        // 결제 총 금액
     private String buyer_name;      // 구매자 이름
     private String buyer_email;     // 구매자 이메일
     private String buyer_tel;       // 구매자 전화번호
     private String buyer_addr;      // 구매자 배송지 주소
-    private String artwork_id;     // 구매한 작품의 ID (단일 상품이므로 하나만 전송)
+    private Long artwork_id;     // 구매한 작품의 ID (단일 상품이므로 하나만 전송)
     private Long frame_option_id;  // 선택한 프레임 옵션의 ID
+    private Integer artworkStock;
+    private String paymentType;
+    
+    
     
     public OrderDto getOrderDto() {
 
