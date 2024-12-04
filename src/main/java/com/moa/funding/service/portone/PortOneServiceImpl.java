@@ -165,7 +165,6 @@ public class PortOneServiceImpl implements PortOneService {
 			iamportClient.cancelPaymentByImpUid(
 				new CancelData(order.getImpUid(), true, BigDecimal.valueOf(order.getTotalAmount()))
 			);
-
 			log.info("환불 성공: orderId={}, impUid={}, amount={}",
 				order.getFundingOrderId(), order.getImpUid(), order.getTotalAmount());
 		} catch (IamportResponseException | IOException e) {

@@ -14,7 +14,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
 import com.moa.entity.Funding;
 import com.moa.entity.FundingContribution;
@@ -96,7 +95,7 @@ class FundingPaymentServiceTest {
 
 		// 결제 검증 실패 시 RuntimeException 발생 확인
 		RuntimeException exception = assertThrows(RuntimeException.class, () ->
-			paymentService.processFundingContribution("test_imp_uid", paymentRequest)
+			paymentService.completeFundingContribution("test_imp_uid", paymentRequest)
 		);
 
 		assertEquals("결제 검증 실패", exception.getMessage());
@@ -187,7 +186,7 @@ class FundingPaymentServiceTest {
 		when(rewardService.getReward(rewardRequests.get(1))).thenReturn(reward2);
 
 		// When
-		paymentService.prepareFundingOrder(paymentRequest);
+		paymentService.prepareFundingOrder(paymentRequest,"user1");
 
 		// Then
 		verify(rewardService, times(2)).reduceRewardStock(any(RewardRequest.class));
@@ -197,7 +196,7 @@ class FundingPaymentServiceTest {
 
 	@Test
 	@DisplayName("결제 후 펀딩 후원 처리 테스트 - 정상 흐름")
-	void testProcessFundingContribution() {
+	void testCompleteFundingContribution() {
 		// Given
 		String impUid = "imp_test_123";
 		List<RewardRequest> rewardRequests = List.of(
@@ -256,7 +255,7 @@ class FundingPaymentServiceTest {
 		when(rewardService.getReward(rewardRequests.get(1))).thenReturn(reward2);
 
 		// When
-		paymentService.processFundingContribution(impUid, paymentRequest);
+		paymentService.completeFundingContribution(impUid, paymentRequest);
 
 		// Then
 		verify(iamportOneService).verifyPayment(120000L, impUid); // 결제 검증 호출 확인
@@ -269,7 +268,7 @@ class FundingPaymentServiceTest {
 
 	@Test
 	@DisplayName("리워드가 없는 경우 예외 처리 테스트")
-	void testProcessFundingContributionWithoutRewards() {
+	void testCompleteFundingContributionWithoutRewards() {
 		// Given
 		PaymentRequest paymentRequest = MockHelper.createMockPaymentRequest(
 			50000L, "user1", 1L, List.of() // 빈 리스트 전달
@@ -286,7 +285,7 @@ class FundingPaymentServiceTest {
 
 		// When & Then
 		RuntimeException exception = assertThrows(RuntimeException.class, () ->
-			paymentService.processFundingContribution("imp_123456", paymentRequest)
+			paymentService.completeFundingContribution("imp_123456", paymentRequest)
 		);
 
 		assertEquals("리워드 정보가 존재하지 않습니다.", exception.getMessage());
@@ -308,7 +307,7 @@ class FundingPaymentServiceTest {
 
 		// When & Then
 		RuntimeException exception = assertThrows(RuntimeException.class, () ->
-			paymentService.processFundingContribution("imp_123456", paymentRequest)
+			paymentService.completeFundingContribution("imp_123456", paymentRequest)
 		);
 		assertEquals("결제 검증 실패", exception.getMessage());
 	}

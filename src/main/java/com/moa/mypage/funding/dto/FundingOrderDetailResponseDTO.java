@@ -24,6 +24,7 @@ public class FundingOrderDetailResponseDTO {
 	private String address;
 	private String phoneNumber;
 	private String name;
+	private boolean isRefundable;
 	private List<FundingContributionResponseDTO> contributions;
 
 	@Data

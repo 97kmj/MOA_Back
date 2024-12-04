@@ -71,21 +71,20 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 	@Override
 	@Transactional
-	public void prepareFundingOrder(PaymentRequest paymentRequest) {
+	public void prepareFundingOrder(PaymentRequest paymentRequest,String userName) {
 		log.info("결제 준비 중 - PaymentRequest: {}", paymentRequest);
-		// Step 1: 펀딩 및 리워드 정보 확인
-		Funding funding = getFunding(paymentRequest);
 
-		//검증
+		// Step 1: 사용자 정보 확인
+		User user = getUserAndSetUserName(paymentRequest, userName);
+		// Step 2: 펀딩 정보 확인
+		Funding funding = getFunding(paymentRequest);
+		//검증 및 리워드 펀딩기간 확인
 		validateFundingAndRewards(funding, paymentRequest.getRewardList());
 
-		// Step 2: 리워드 재고 감소
+		// Step 3: 리워드 재고 감소
 		for (RewardRequest rewardRequest : paymentRequest.getRewardList()) {
 			rewardService.reduceRewardStock(rewardRequest);
 		}
-		// Step 3: 사용자 조회
-		User user = getUser(paymentRequest);
-
 		// Step 4: 펀딩 주문 생성 및 저장
 		FundingOrder fundingOrder = createAndSaveFundingOrder(paymentRequest, user);
 
@@ -96,7 +95,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 	@Override
 	@Transactional
-	public void processFundingContribution(String impUid, PaymentRequest paymentRequest) {
+	public void completeFundingContribution(String impUid, PaymentRequest paymentRequest) {
 		log.info("결제된 펀딩 후원 처리   - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
 		// Step 1: 검증 및 중복 결제 리워드 정보 확인
 		validatePayment(impUid, paymentRequest);
@@ -105,7 +104,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		FundingOrder fundingOrder = getFundingOrder(paymentRequest);
 
 		// Step 3: imUid 업데이트 및 결제 상태 업데이트
-		updateFundingOrderAfterSuccess(fundingOrder, impUid);
+		updateFundingOrderAfterSuccess(fundingOrder, impUid, paymentRequest.getPaymentType());
 
 		// Step 4: 펀딩 조회 및 후원 생성 및 저장
 		createAndSaveFundingContribution(paymentRequest, fundingOrder);
@@ -159,7 +158,6 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		if (now.isBefore(funding.getStartDate()) || now.isAfter(funding.getEndDate())) {
 			throw new FundingPeriodException("펀딩 기간이 아닙니다.");
 		}
-
 
 		// 리워드 검증
 		Reward reward = null;
@@ -219,11 +217,12 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		fundingRepository.save(funding);
 	}
 
-	private void updateFundingOrderAfterSuccess(FundingOrder fundingOrder, String impUid) {
+	private void updateFundingOrderAfterSuccess(FundingOrder fundingOrder, String impUid, String paymentType) {
 		//빌더와 다른점은 빌더는 새로운 객체를 생성하지만 set은 기존 객체를 업데이트
 		fundingOrder.setImpUid(impUid); // impUid 업데이트
 		fundingOrder.setPaymentDate(new Timestamp(System.currentTimeMillis())); // 결제 시간 업데이트
 		fundingOrder.setPaymentStatus(FundingOrder.PaymentStatus.PAID); // 결제 상태 업데이트
+		fundingOrder.setPaymentType(paymentType); // 결제 수단 업데이트
 
 		//위에는 영속성 상태이지만 가독성을 위해 추가
 		fundingOrderRepository.save(fundingOrder);
@@ -240,6 +239,15 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		return userRepository.findByUsername(paymentRequest.getUserName())
 			.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 	}
+
+	private User getUserAndSetUserName(PaymentRequest paymentRequest, String userName) {
+		paymentRequest.setUserName(userName);
+		// User 조회 및 반환
+		return userRepository.findByUsername(userName)
+			.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+	}
+
+
 
 	private FundingOrder getFundingOrder(PaymentRequest paymentRequest) {
 		return fundingOrderRepository.findByMerchantUid(paymentRequest.getMerchantUid())

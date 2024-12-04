@@ -53,7 +53,6 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
-        System.out.println("컨트롤러왔나요@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         String username = loginRequest.get("username");
         String password = loginRequest.get("password");
 

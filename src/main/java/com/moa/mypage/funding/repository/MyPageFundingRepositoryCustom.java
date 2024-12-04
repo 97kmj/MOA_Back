@@ -5,14 +5,19 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.moa.entity.Funding;
 import com.moa.entity.FundingContribution;
 import com.moa.entity.FundingOrder;
-import com.moa.mypage.funding.dto.FundingOrderDetailResponseDTO;
 
 public interface MyPageFundingRepositoryCustom {
 	Page<FundingOrder> findMyContributedFunding(String username, String status, Pageable pageable);
 
-	FundingOrder findFundingOrder(Long fundingOrderId);
+	FundingOrder findFundingOrderWithUser(Long fundingOrderId);
 	List<FundingContribution> findFundingContributions(Long fundingOrderId);
 
+	FundingOrder findFundingOrderWithFunding(Long fundingOrderId);
+
+	Page<Funding> findMyRegisteredFunding(String username, String status, Pageable pageable);
+
+	Page<FundingContribution> findContributionsForMyFunding(Long fundingId, Pageable pageable);
 }

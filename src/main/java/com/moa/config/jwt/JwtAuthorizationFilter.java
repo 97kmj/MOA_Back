@@ -89,7 +89,12 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private boolean requiresAuthentication(String uri) {
-        return uri.startsWith("/api/like/") || uri.startsWith("/api/artworks/") || uri.contains("/user") || uri.contains("/admin");
+        return uri.startsWith("/api/like/")
+            || uri.startsWith("/api/artworks/")
+            || uri.contains("/user")
+            || uri.contains("/admin")
+            ||uri.startsWith("/api/funding/refund/individual/")
+            || uri.startsWith("/api/funding/payment/");
     }
 
 

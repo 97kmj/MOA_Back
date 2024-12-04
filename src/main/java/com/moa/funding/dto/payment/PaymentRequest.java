@@ -11,6 +11,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 @Getter
@@ -25,14 +26,12 @@ public class PaymentRequest {
 	private Long fundingId;
 	private Long rewardId;
 	private List<RewardRequest> rewardList;
+	@Setter
 	private String userName; // 사용자 정보
 	private String address; // 배송지 정보
 	private String phoneNumber; // 배송지 정보
 	private String name; // 배송지 정보
 	private String merchantUid;
 	private BigDecimal amount;
-
-
-
 
 }

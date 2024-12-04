@@ -37,7 +37,7 @@ public class PortOneWebhookService {
 			log.info("PaymentRequest 생성: {}", paymentRequest);
 
 			// Step 4: 결제 처리 (DB 저장 포함)
-			fundingPaymentService.processFundingContribution(request.getImpUid(), paymentRequest);
+			fundingPaymentService.completeFundingContribution(request.getImpUid(), paymentRequest);
 			log.info("결제 처리 완료");
 
 		} catch (Exception e) {

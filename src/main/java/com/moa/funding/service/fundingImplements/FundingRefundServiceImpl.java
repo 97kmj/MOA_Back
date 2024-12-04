@@ -33,15 +33,40 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 	private final RewardRepository rewardRepository;
 	private final FundingRepository fundingRepository;
 
+	// @Scheduled(cron = "0 0 0 * * *") // 매일 자정 실행
+	// @Scheduled(cron = "0 0 * * * *") // 매 시간 0분에 실행
+	@Override
+	@Scheduled(cron = "0 0/5 * * * *") // 매 1분마다 실행
+	@Transactional
+	public void scheduleUpdateToFailedAndRefund() {
+		log.info("펀딩 실패 자동 환불 스케줄링 시작");
+
+		//실패한 펀딩 ID 가져오기
+		List<Long> failedFundingIds = fundingManagementRepositoryCustom.updateFundingToFailedAndGetIds(Instant.now());
+
+		if (failedFundingIds.isEmpty()) {
+			log.info("환불 대상 펀딩이 없습니다.");
+			return;
+		}
+
+		for (Long fundingId : failedFundingIds) {
+			try {
+				refundFailedFunding(fundingId);
+				log.info("펀딩 ID={} 환불 성공", fundingId);
+			} catch (Exception e) {
+				log.error("펀딩 ID={} 환불 실패: {}", fundingId, e.getMessage());
+			}
+		}
+		log.info("자동 환불 스케줄링 종료");
+	}
+
 	@Override
 	@Transactional
-	public void refundIndividualFunding(Long fundingOrderId) {
+	public void refundIndividualFunding(Long fundingOrderId, String userName) {
 		FundingOrder fundingOrder = fundingManagementRepositoryCustom.findRefundableOrderById(fundingOrderId)
 			.orElseThrow(() -> new IllegalArgumentException("유효하지 않은 주문 ID입니다."));
 
-		if (fundingOrder.getRefundStatus() == FundingOrder.RefundStatus.REFUNDED) {
-			throw new IllegalStateException("환불이 불가능한 주문입니다.");
-		}
+		validateRefundRequest(userName, fundingOrder);
 
 		portOneService.refundOrder(fundingOrder);
 
@@ -82,15 +107,13 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 		}
 	}
 
-	private  boolean stockIsLimitless(Reward reward) {
-		return reward.getStock() == null;
-	}
-
 	private void updateFundingCurrentAmount(FundingOrder fundingOrder) {
 		Funding funding = fundingOrder.getFunding();
 		BigDecimal refundAmount = BigDecimal.valueOf(fundingOrder.getTotalAmount());
 		BigDecimal newAmount = funding.getCurrentAmount().subtract(refundAmount);
 
+		log.info("CurrentAmount: {}", funding.getCurrentAmount());
+		log.info("RefundAmount: {}", refundAmount);
 		if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
 			throw new IllegalStateException("펀딩의 총 금액이 음수가 될 수 없습니다.");
 		}
@@ -101,33 +124,6 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 		// 영속성 컨텍스트에서 관리되는 엔티티이므로 save 호출하지 않아도 업데이트 되지만 가독성 위해 추가
 		fundingRepository.save(funding);
 
-	}
-
-	// @Scheduled(cron = "0 0 0 * * *") // 매일 자정 실행
-	// @Scheduled(cron = "0 0 * * * *") // 매 시간 0분에 실행
-	@Override
-	@Scheduled(cron = "0 0/5 * * * *") // 매 1분마다 실행
-	@Transactional
-	public void scheduleUpdateToFailedAndRefund() {
-		log.info("펀딩 실패 자동 환불 스케줄링 시작");
-
-		//실패한 펀딩 ID 가져오기
-		List<Long> failedFundingIds = fundingManagementRepositoryCustom.updateFundingToFailedAndGetIds(Instant.now());
-
-		if (failedFundingIds.isEmpty()) {
-			log.info("환불 대상 펀딩이 없습니다.");
-			return;
-		}
-
-		for (Long fundingId : failedFundingIds) {
-			try {
-				refundFailedFunding(fundingId);
-				log.info("펀딩 ID={} 환불 성공", fundingId);
-			} catch (Exception e) {
-				log.error("펀딩 ID={} 환불 실패: {}", fundingId, e.getMessage());
-			}
-		}
-		log.info("자동 환불 스케줄링 종료");
 	}
 
 	@Override
@@ -152,6 +148,21 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 			}
 		}
 
+	}
+
+	private void validateRefundRequest(String userName, FundingOrder fundingOrder) {
+		// 유저 권한 검증
+		if (!fundingOrder.getUser().getUsername().equals(userName)) {
+			throw new IllegalStateException("해당 주문에 대한 권한이 없습니다.");
+		}
+
+		if (fundingOrder.getRefundStatus() == FundingOrder.RefundStatus.REFUNDED) {
+			throw new IllegalStateException("환불이 불가능한 주문입니다.");
+		}
+	}
+
+	private boolean stockIsLimitless(Reward reward) {
+		return reward.getStock() == null;
 	}
 
 }
