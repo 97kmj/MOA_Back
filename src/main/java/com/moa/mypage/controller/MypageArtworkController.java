@@ -26,7 +26,7 @@ public class MypageArtworkController {
     public List<ArtworkDTO> getArtworksByArtist(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         // 헤더에서 Access Token 추출
         String accessToken = authorizationHeader.replace("Bearer ", "");
-
+        System.out.println("Authorization Header: " + authorizationHeader);
         // 토큰에서 사용자 이름 추출
         String username = jwtToken.getUsernameFromToken(accessToken);
 
