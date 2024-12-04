@@ -50,6 +50,6 @@ public class OrderItem {
     
     @Enumerated(EnumType.STRING)
     private ShippingStatus shippingStatus;
-    public enum ShippingStatus { NOT_SHIPPED, SHIPPING, DELIVERED }
+    public enum ShippingStatus { WAITING, INSPECTION, DELIVERED, DEFECTIVE } // 작가 대기중, 검수중, 발송완료, 검수 불량
 
 }
