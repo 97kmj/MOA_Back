@@ -20,16 +20,16 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class ShopPaymentController {
-	
-	private final OrderPaymentService orderPaymentService;
-	
-	
-	
-	
-	 @PostMapping("/payment")
-	    public ResponseEntity<Map<String, Object>> processPayment(@RequestBody OrderPaymentRequest orderPaymentRequest) {
-	     
-		return null;
-	    }
+//	
+//	private final OrderPaymentService orderPaymentService;
+//	
+//	
+//	
+//	
+//	 @PostMapping("/payment")
+//	    public ResponseEntity<Map<String, Object>> processPayment(@RequestBody OrderPaymentRequest orderPaymentRequest) {
+//	     
+//		return null;
+//	    }
 	
 }
