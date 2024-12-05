@@ -31,7 +31,7 @@ public class AdminItemController {
 		}
 	}
 	
-	@PutMapping("/updateStatus")
+	@PutMapping("/adminItem")
 	public ResponseEntity<String> updateOrderItemStatus(@RequestBody List<UpdateOrderItemStatusRequest> updates) throws Exception {
 		try {
 			adminService.updateShippingStatus(updates);
