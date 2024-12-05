@@ -1,6 +1,8 @@
 package com.moa.shop.controller;
 
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,8 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.moa.entity.OrderItem;
-
+import com.moa.shop.dto.OrderItemDto;
 import com.moa.shop.dto.OrderPaymentRequest;
+import com.moa.shop.dto.PaymentRequest;
 import com.moa.shop.service.OrderPaymentService;
 
 
@@ -25,14 +28,15 @@ public class ShopPaymentController {
     private OrderPaymentService orderPaymentService;
 
     @PostMapping("/payment")
-    public ResponseEntity<String> processPayment(@RequestBody OrderPaymentRequest paymentRequest,
-    		@RequestBody String username,
-    		@RequestBody OrderItem saleData) {
+    public ResponseEntity<String> processPayment(
+    		@RequestBody PaymentRequest  request) {
         try {
             // 결제 처리 및 DB 저장
+        	OrderPaymentRequest paymentData =request.getPaymentData();
+        	String username = request.getUsername();
+        	List<OrderItemDto> saleData = request.getSaleData();
         	
-        	
-        	orderPaymentService.processPayment(paymentRequest,username,saleData);
+        	orderPaymentService.processPayment(paymentData,username,saleData);
             return new ResponseEntity<String>(String.valueOf(true),HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
