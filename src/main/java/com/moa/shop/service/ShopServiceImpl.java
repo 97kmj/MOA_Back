@@ -1,12 +1,10 @@
 package com.moa.shop.service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,9 +29,8 @@ import com.moa.shop.dto.CanvasDto;
 import com.moa.shop.dto.CategoryDto;
 import com.moa.shop.dto.SubjectDto;
 import com.moa.shop.dto.TypeDto;
-import com.moa.shop.repository.ArtworkDslRepository;
 import com.moa.user.dto.OrderUserInfoDto;
-import com.moa.user.service.util.PageInfo;
+
 
 import lombok.RequiredArgsConstructor;
 import java.util.Optional;

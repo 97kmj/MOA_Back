@@ -49,7 +49,14 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             path.equals("/api/user/login") ||
             path.equals("/main") ||
 			path.equals("/api/artworks") || path.startsWith("/api/artworks/") ||
-            path.startsWith("/oauth2/");
+            path.startsWith("/oauth2/") ||
+            path.startsWith("/shop/") ||
+            path.equals("/artistDetail") ||
+            path.equals("/artistArtworks") || 
+            path.equals("/notice") ||
+            (path.equals("/api/funding") && "GET".equalsIgnoreCase(method)) ||
+				    (path.matches("^/api/funding/\\d+$") && "GET".equalsIgnoreCase(method));
+
     }
 
     @Override
@@ -58,49 +65,52 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         String uri = request.getRequestURI();
         System.out.println("Request URI: " + uri);
 
+
 		String authentication = request.getHeader(JwtProperties.HEADER_STRING);
-		if(authentication==null ) {
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"로그인 필요");
+		if (authentication == null) {
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인 필요");
 			return;
 		}
-		
+
 		ObjectMapper objectMapper = new ObjectMapper();
-		Map<String,String> token = objectMapper.readValue(authentication, Map.class);
-		
-		
+		Map<String, String> token = objectMapper.readValue(authentication, Map.class);
+
 		//accessToken : Header로 부터 accessToken 가져와 bearer 체크 
 		String accessToken = token.get("access_token");
-		if(!accessToken.startsWith(JwtProperties.TOKEN_PREFIX)) {
-			response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"로그인 필요");
+		if (!accessToken.startsWith(JwtProperties.TOKEN_PREFIX)) {
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인 필요");
 			return;
 		}
-		
-		accessToken = accessToken.replace(JwtProperties.TOKEN_PREFIX,"");
+
+		accessToken = accessToken.replace(JwtProperties.TOKEN_PREFIX, "");
 		try {
 			//1. Access Token check
 			//1-1. 보안키, 만료시간 check
 			String username = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET))
-			 	.build()
-			 	.verify(accessToken)
-			 	.getClaim("sub")
-			 	.asString();
-			
+				.build()
+				.verify(accessToken)
+				.getClaim("sub")
+				.asString();
+
 			//1-2. username check
-			if(username == null || username.equals("")) throw new Exception(); // 사용자가 없을 때 
+			if (username == null || username.equals(""))
+				throw new Exception(); // 사용자가 없을 때
 			Optional<User> ouser = userRepository.findById(username);
-			if(ouser.isEmpty()) throw new Exception();
+			if (ouser.isEmpty())
+				throw new Exception();
 			User user = ouser.get();
-			
-			if(user==null) throw new Exception(); // 사용자가 DB에 없을 때
+
+			if (user == null)
+				throw new Exception(); // 사용자가 DB에 없을 때
 			//1-3. User 를 Authentication로 생성하여 Security Session에 넣어준다. (그러면 COntroller에서 사용할 수 있다.)
 			PrincipalDetails principalDetails = new PrincipalDetails(user);
 			UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(principalDetails,
-					null,
-					principalDetails.getAuthorities());
+				null,
+				principalDetails.getAuthorities());
 			SecurityContextHolder.getContext().setAuthentication(auth);
 			chain.doFilter(request, response);
 			return;
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			try {
@@ -113,33 +123,35 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 				refreshToken = refreshToken.replace(JwtProperties.TOKEN_PREFIX, "");
 				//2-1. 보안키, 만료시간 check
 				String username = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET))
-						.build()
-						.verify(refreshToken)
-						.getClaim("sub")
-						.asString();
+					.build()
+					.verify(refreshToken)
+					.getClaim("sub")
+					.asString();
 				System.out.println(username);
 				//2-2. username check
-				if (username == null || username.equals("")) throw new Exception(); // 사용자가 없을 때
+				if (username == null || username.equals(""))
+					throw new Exception(); // 사용자가 없을 때
 				Optional<User> ouser = userRepository.findById(username);
-				if(ouser.isEmpty()) throw new Exception();
+				if (ouser.isEmpty())
+					throw new Exception();
 				User user = ouser.get();
-				
+
 				//accessToken, refreshToken 다시 만들어 보낸다.
 				String reAccessToken = jwtToken.makeAccessToken(username);
 				String reRefreshToken = jwtToken.makeRefreshToken(username);
-				Map<String,String> map = new HashMap<>();
-				map.put("access_token",JwtProperties.TOKEN_PREFIX + reAccessToken);
-				map.put("refresh_token",JwtProperties.TOKEN_PREFIX + reRefreshToken);
+				Map<String, String> map = new HashMap<>();
+				map.put("access_token", JwtProperties.TOKEN_PREFIX + reAccessToken);
+				map.put("refresh_token", JwtProperties.TOKEN_PREFIX + reRefreshToken);
 				String reToken = objectMapper.writeValueAsString(map); // map -> jsonString
 				response.addHeader(JwtProperties.HEADER_STRING, reToken);
 				response.setContentType("application/json; charset=utf-8");
 				//response.getWriter().print("token");				
-				
+
 			} catch (Exception e2) {
 				e2.printStackTrace();
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인 필요");
 			}
 		}
-    }
+	}
 }
 
