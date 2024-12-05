@@ -1,17 +1,11 @@
 package com.moa.shop.repository;
 
-import java.util.List;
-
-import org.jetbrains.annotations.Nullable;
+import com.moa.entity.QLikeArtwork;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.moa.entity.Artwork;
-import com.moa.entity.QArtwork;
-import com.moa.entity.QLikeArtwork;
 import com.moa.entity.User;
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 

@@ -1,12 +1,12 @@
 package com.moa.user.repository;
 
+import com.moa.entity.QFunding;
 import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
 import com.moa.entity.Funding;
-import com.moa.entity.QFunding;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;

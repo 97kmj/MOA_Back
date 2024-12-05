@@ -1,5 +1,6 @@
 package com.moa.user.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moa.config.jwt.JwtToken;
 import com.moa.entity.Artwork;
 import com.moa.user.service.LikeService;
@@ -78,17 +79,28 @@ public class LikeController {
     // JWT 토큰에서 사용자 이름 추출
     private String getUsernameFromToken(HttpServletRequest request) {
         String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            return null; // 토큰이 없는 경우
+
+        if (authorizationHeader == null) {
+            return null; // 헤더가 없는 경우 비로그인 상태 처리
         }
 
-        String token = authorizationHeader.replace("Bearer ", "");
-        if (token == null || !jwtToken.validateToken(token)) {
-            return null; // 비로그인 상태도 처리
+        try {
+            // JSON 형태로 파싱
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, String> tokenMap = objectMapper.readValue(authorizationHeader, Map.class);
+
+            // access_token 추출
+            String token = tokenMap.get("access_token");
+            if (token == null || !jwtToken.validateToken(token.replace("Bearer ", ""))) {
+                return null; // 유효하지 않은 토큰
+            }
+
+            return jwtToken.getUsernameFromToken(token.replace("Bearer ", "")); // 토큰에서 username 추출
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null; // 파싱 실패 시 비로그인 상태 처리
         }
-
-
-        return jwtToken.getUsernameFromToken(token); // 토큰에서 username 추출
     }
+
 }
 

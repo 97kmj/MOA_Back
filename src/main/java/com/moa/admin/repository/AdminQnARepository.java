@@ -1,12 +1,11 @@
 package com.moa.admin.repository;
 
+import com.moa.entity.QQuestion;
 import java.sql.Date;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import com.moa.entity.QQuestion;
 import com.moa.entity.Question;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 

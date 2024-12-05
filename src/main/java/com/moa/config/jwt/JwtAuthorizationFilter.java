@@ -47,7 +47,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             path.equals("/api/user/check-username") ||
             path.equals("/api/user/register") ||
             path.equals("/api/user/login") ||
-            path.equals("/main") || 
+            path.equals("/main") ||
+			path.equals("/api/artworks") || path.startsWith("/api/artworks/") ||
             path.startsWith("/oauth2/");
     }
 
