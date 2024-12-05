@@ -51,48 +51,6 @@ public class UserController {
     }
 
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> loginRequest) {
-        String username = loginRequest.get("username");
-        String password = loginRequest.get("password");
-
-        // AuthenticationToken 생성
-        UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken(username, password);
-
-        try {
-            // AuthenticationManager를 사용하여 인증 시도
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
-
-            // 인증 성공 시 PrincipalDetails 가져오기
-            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-            User user = principalDetails.getUser();
-
-            // JWT 토큰 생성
-            String accessToken = jwtToken.makeAccessToken(user.getUsername());
-            String refreshToken = jwtToken.makeRefreshToken(user.getUsername());
-
-            // 사용자 데이터 생성
-            Map<String, Object> userData = new HashMap<>();
-            userData.put("username", user.getUsername());
-            userData.put("nickname", user.getNickname());
-            userData.put("name", user.getName());
-            userData.put("email", user.getEmail());
-            userData.put("artistApprovalStatus", user.getArtistApprovalStatus());
-            userData.put("role", user.getRole());
-            userData.put("phone", user.getPhone());
-            userData.put("address", user.getAddress());
-
-            // 응답 데이터 설정 (JWT는 헤더로 전달)
-            return ResponseEntity.ok()
-                .header("Authorization", "Bearer " + accessToken)
-                .header("Refresh-Token", "Bearer " + refreshToken)
-                .body(userData);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password.");
-        }
-    }
-
 
     // 회원가입
     @PostMapping("/register")
@@ -148,24 +106,5 @@ public class UserController {
         }
     }
 
-    // JWT 토큰 재발급
-    @PostMapping("/refresh-token")
-    public ResponseEntity<String> refreshToken(@RequestHeader("Authorization") String refreshToken) {
-        // Bearer 토큰에서 "Bearer " 제거
-        if (refreshToken.startsWith("Bearer ")) {
-            refreshToken = refreshToken.substring(7);
-        }
-
-        // 토큰 검증
-        if (!jwtToken.validateToken(refreshToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token.");
-        }
-
-        // 사용자 정보 추출
-        String username = jwtToken.getUsernameFromToken(refreshToken);
-
-        // 새로운 Access Token 생성
-        String newAccessToken = jwtToken.makeAccessToken(username);
-        return ResponseEntity.ok(newAccessToken);
-    }
+    
 }

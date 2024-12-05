@@ -57,6 +57,12 @@ dependencies {
 	implementation 'mysql:mysql-connector-java:8.0.33'
 	runtimeOnly('com.mysql:mysql-connector-j')
 
+	
+	//이메일 인증
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	//coolsms
+	implementation 'net.nurigo:sdk:4.2.7'
+	
 	//TWilio
 	implementation 'com.twilio.sdk:twilio:8.30.1'
 
