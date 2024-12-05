@@ -43,4 +43,11 @@ public class MessageServiceImpl implements MessageService {
 		newMessage.setReplyReadState(false);
 		messageRepository.save(newMessage);
 	}
+	
+	@Override
+	public void markMessageAsRead(Long messageId) throws Exception {
+		Message message = messageRepository.findById(messageId).orElseThrow(()-> new Exception("messageId 오류"));
+		message.setReadStatus(true);
+		messageRepository.save(message);
+	}
 }
