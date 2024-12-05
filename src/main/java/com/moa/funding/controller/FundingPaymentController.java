@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/funding")
+@RequestMapping("/api/payment/funding")
 @RequiredArgsConstructor
 public class FundingPaymentController {
 
@@ -28,7 +28,7 @@ public class FundingPaymentController {
 	private final PortOneService portOneService;
 	private final FundingRefundService fundingRefundService;
 
-	@PostMapping("/payment/prepare")
+	@PostMapping("/prepare")
 	public ResponseEntity<String> preparePayment(@RequestBody PaymentRequest paymentRequest,
 		@AuthenticationPrincipal PrincipalDetails principalDetails) {
 
@@ -43,7 +43,7 @@ public class FundingPaymentController {
 		return ResponseEntity.ok("결제 준비 완료");
 	}
 
-	@PostMapping("/payment/complete")
+	@PostMapping("/complete")
 	public ResponseEntity<Void> processPayment(@RequestBody PaymentRequest paymentRequest) {
 		log.info("impUid: {}, paymentRequest: {}", paymentRequest.getImpUid(), paymentRequest);
 		fundingPaymentService.completeFundingContribution(paymentRequest.getImpUid(), paymentRequest);
@@ -66,41 +66,7 @@ public class FundingPaymentController {
 		return ResponseEntity.ok("환불 요청이 처리되었습니다.");
 	}
 
-	// @PostMapping("/payment/prepare")
-	// public ResponseEntity<String> preparePayment(@RequestBody PaymentRequest paymentRequest) {
-	// 	boolean success = portOneService.preparePayment(paymentRequest.getMerchantUid(), paymentRequest.getAmount());
-	//
-	// 	if (!success) {
-	// 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("결제 준비 실패");
-	// 	}
-	// 	fundingPaymentService.prepareFundingOrder(paymentRequest);
-	//
-	// 	return ResponseEntity.ok("결제 준비 완료");
-	// }
 
-	//
-	// @PostMapping("/payment")
-	// public ResponseEntity<Void> processPayment(@RequestBody PaymentRequest paymentRequest) {
-	// 	log.info("impUid: {}, paymentRequest: {}", paymentRequest.getImpUid(), paymentRequest);
-	// 	try {
-	// 		fundingPaymentService.processFundingContribution(paymentRequest.getImpUid(), paymentRequest);
-	// 		return ResponseEntity.ok().build();
-	// 	} catch (RuntimeException e) {
-	// 		log.error("결제 처리 중 오류 발생: {}", e.getMessage(), e);
-	// 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-	// 	}
-	// }
-
-	// //단순 변심
-	// @PostMapping("/refund/individual/{fundingOrderId}")
-	// public ResponseEntity<String> refundIndividualFunding(@PathVariable Long fundingOrderId) {
-	// 	try {
-	// 		fundingRefundService.refundIndividualFunding(fundingOrderId);
-	// 		return ResponseEntity.ok("환불 요청이 처리되었습니다.");
-	// 	} catch (Exception e) {
-	// 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-	// 	}
-	// }
 
 }
 
