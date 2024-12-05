@@ -1,11 +1,11 @@
 package com.moa.admin.repository;
 
+import com.moa.entity.QOrderItem;
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
 import com.moa.entity.OrderItem;
-import com.moa.entity.QOrderItem;
 import com.moa.entity.OrderItem.ShippingStatus;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 

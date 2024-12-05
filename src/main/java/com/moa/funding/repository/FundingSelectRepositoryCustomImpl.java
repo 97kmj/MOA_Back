@@ -1,17 +1,14 @@
 package com.moa.funding.repository;
 
-import javax.persistence.EntityManager;
-
+import com.moa.entity.QFunding;
+import com.moa.entity.QFundingContribution;
+import com.moa.entity.QFundingOrder;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.moa.entity.Funding;
 import com.moa.entity.FundingContribution;
 import com.moa.entity.FundingOrder;
-import com.moa.entity.QFunding;
-import com.moa.entity.QFundingContribution;
-import com.moa.entity.QFundingOrder;
 import com.moa.funding.dto.funding.FundingDetailDTO;
 import com.moa.funding.dto.funding.FundingDetailDTO.ImageDTO;
 import com.moa.funding.dto.funding.FundingDetailDTO.RewardDTO;
@@ -30,8 +27,6 @@ import static com.moa.entity.QFundingImage.fundingImage;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
