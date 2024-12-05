@@ -1,19 +1,21 @@
 package com.moa.config.jwt;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moa.config.auth.PrincipalDetails;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moa.config.auth.PrincipalDetails;
+import com.moa.entity.User;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -23,26 +25,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         this.jwtToken = jwtToken;
         // 수동으로 AuthenticationManager 설정
         setAuthenticationManager(authenticationManager);
-//        setFilterProcessesUrl("/api/user/login");
 
     }
-//    @Override
-//    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
-//        try {
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            Map<String, String> loginRequest = objectMapper.readValue(request.getInputStream(), Map.class);
-//
-//            String username = loginRequest.get("username");
-//            String password = loginRequest.get("password");
-//
-//            UsernamePasswordAuthenticationToken authenticationToken =
-//                new UsernamePasswordAuthenticationToken(username, password);
-//
-//            return getAuthenticationManager().authenticate(authenticationToken);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
+
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
         FilterChain chain, Authentication authResult)
@@ -60,11 +45,24 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         tokenMap.put("refresh_token", JwtProperties.TOKEN_PREFIX + refreshToken);
 
         // JSON 직렬화 및 응답
-        ObjectMapper objectMapper = new ObjectMapper();
-        String tokenJson = objectMapper.writeValueAsString(tokenMap);
+        ObjectMapper tokenMapper = new ObjectMapper();
+        String tokenJson = tokenMapper.writeValueAsString(tokenMap);
 
         response.addHeader(JwtProperties.HEADER_STRING, tokenJson);
         response.setContentType("application/json; charset=utf-8");
-        response.getWriter().write(tokenJson);
+        User user = principalDetails.getUser();
+        Map<String, String> userMap = new HashMap<>();
+        userMap.put("username", user.getUsername());
+        userMap.put("nickname", user.getNickname());
+        userMap.put("name", user.getName());
+        userMap.put("email", user.getEmail());
+        userMap.put("address", user.getAddress());
+        userMap.put("role", user.getRole().toString());
+        userMap.put("phone", user.getPhone());
+        userMap.put("artistApprovalStatus", user.getArtistApprovalStatus().toString());
+        ObjectMapper userMapper = new ObjectMapper();
+        String userJson = userMapper.writeValueAsString(userMap);
+        response.getWriter().write (userJson);
     }
 }
+

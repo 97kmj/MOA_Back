@@ -9,16 +9,12 @@ import com.moa.entity.User;
 import com.moa.entity.User.ApprovalStatus;
 
 public interface UserRepository extends JpaRepository<User, String> {
-
-    Optional<User> findByProviderAndProviderId(String provider, String providerId);
-
-    Optional<User> findByUsername(String username);
-
-    
-    //승인 여부로 유저리스트 
-    List<User> findByArtistApprovalStatus(ApprovalStatus status);
-
-	User findByEmail(String buyer_email);
-    
+	   Optional<User> findByProviderAndProviderId(String provider, String providerId);
+	   Optional<User> findByUsername(String username);
+	   Optional<User> findByEmail(String email);
+	   Optional<User> findByPhone(String phone);
+	    
+	   //승인 여부로 유저리스트 
+	   List<User> findByArtistApprovalStatus(ApprovalStatus status);
 
 }
