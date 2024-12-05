@@ -52,7 +52,7 @@ public class ArtistDetailController {
 	@GetMapping("/artistArtworks")
 	public ResponseEntity<List<ArtistArtworkDto>> getArtworksByType(@RequestParam("artistId") String artistId, 
 			@RequestParam("artworkType") String artworkType,
-			@RequestParam("username") String username) {
+			@RequestParam(required=false) String username) {
 		try {
 			List<ArtistArtworkDto> artworks = artistDetailService.getArtworks(artistId, artworkType,username);
 			return new ResponseEntity<List<ArtistArtworkDto>>(artworks,HttpStatus.OK);
