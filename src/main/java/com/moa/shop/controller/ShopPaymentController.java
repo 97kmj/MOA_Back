@@ -21,7 +21,7 @@ import com.moa.shop.service.OrderPaymentService;
 
 
 @RestController
-@RequestMapping("/shop")
+@RequestMapping("/shopOrder")
 public class ShopPaymentController {
 
     @Autowired
@@ -32,9 +32,10 @@ public class ShopPaymentController {
     		@RequestBody PaymentRequest  request) {
         try {
             // 결제 처리 및 DB 저장
-        	OrderPaymentRequest paymentData =request.getPaymentData();
+        	OrderPaymentRequest paymentData =request.getRequestData();
         	String username = request.getUsername();
-        	List<OrderItemDto> saleData = request.getSaleData();
+        	List<OrderItemDto> saleData = request.getSaleDatas();
+        	
         	
         	orderPaymentService.processPayment(paymentData,username,saleData);
             return new ResponseEntity<String>(String.valueOf(true),HttpStatus.OK);
@@ -43,4 +44,19 @@ public class ShopPaymentController {
             return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
         }
     }
+    @PostMapping("/checkStock")
+    public ResponseEntity<String> checkStock(@RequestBody List<OrderItemDto> saleDatas){
+    	try {
+    		
+    		orderPaymentService.checkStock(saleDatas);
+    		
+    		System.out.println("9999999999999999999999999999");
+    		System.out.println(saleDatas);
+    		return new ResponseEntity<String>(String.valueOf(true),HttpStatus.OK);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+    	}
+    }
+    
 }
