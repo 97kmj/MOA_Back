@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 public class MessageDto {
     private Long messageId;
     private String senderId;
+    private String senderName;
     private String title;
     private String content;
     private Timestamp createAt;
@@ -29,6 +30,7 @@ public class MessageDto {
     	return MessageDto.builder()
     			.messageId(message.getMessageId())
     			.senderId(message.getSender().getUsername())
+    			.senderName(message.getSender().getName())
     			.title(message.getTitle())
     			.content(message.getContent())
     			.createAt(message.getCreateAt())

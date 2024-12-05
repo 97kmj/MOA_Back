@@ -48,10 +48,11 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             path.equals("/api/user/register") ||
             path.equals("/api/user/login") ||
             path.equals("/main") ||
-			path.equals("/api/artworks") || path.startsWith("/api/artworks/") ||
+			path.equals("/api/artworks") || 
+			path.startsWith("/api/artworks/") ||
             path.startsWith("/oauth2/") ||
             path.startsWith("/shop/") ||
-            path.equals("/artistDetail") ||
+            path.startsWith("/artistDetail/") ||
             path.equals("/artistArtworks") || 
             path.equals("/notice") ||
             (path.equals("/api/funding") && "GET".equalsIgnoreCase(method)) ||
@@ -146,7 +147,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 				response.addHeader(JwtProperties.HEADER_STRING, reToken);
 				response.setContentType("application/json; charset=utf-8");
 				//response.getWriter().print("token");				
-
+				chain.doFilter(request, response);  // 헤더에 토큰 갱신 후 다시 컨트롤러에 요청
 			} catch (Exception e2) {
 				e2.printStackTrace();
 				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그인 필요");

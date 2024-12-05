@@ -1,9 +1,10 @@
 package com.moa.mypage.message.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 import com.moa.mypage.message.dto.MessageDto;
 
 public interface MessageService {
-	List<MessageDto> getMessageList(String username) throws Exception;
+	Page<MessageDto> getMessageList(String username,String messageType, int page, int size) throws Exception;
+	void sendReply(MessageDto message) throws Exception;
 }

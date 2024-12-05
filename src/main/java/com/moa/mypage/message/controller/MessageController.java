@@ -1,10 +1,11 @@
 package com.moa.mypage.message.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -19,13 +20,27 @@ public class MessageController {
 	private final MessageService messageService;
 	
 	@GetMapping("/message")
-	public ResponseEntity<List<MessageDto>> getMessage(@RequestParam String username) {
+	public ResponseEntity<Page<MessageDto>> getMessage(@RequestParam String username,
+			@RequestParam String messageType,
+			@RequestParam int page,
+			@RequestParam int size) {
 		try {
-			List<MessageDto> messageList = messageService.getMessageList(username);
-			return new ResponseEntity<List<MessageDto>>(messageList,HttpStatus.OK);
+			Page<MessageDto> messageList = messageService.getMessageList(username, messageType, page, size);
+			return new ResponseEntity<Page<MessageDto>>(messageList, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<List<MessageDto>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Page<MessageDto>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@PostMapping("/replyMessage")
+	public ResponseEntity<String> getMessage(@RequestBody MessageDto message) {
+		try {
+			messageService.sendReply(message);
+			return new ResponseEntity<String>(String.valueOf(true),HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(String.valueOf(false),HttpStatus.BAD_REQUEST);
 		}
 	}
 	
