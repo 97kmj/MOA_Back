@@ -57,7 +57,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         AuthenticationManager authenticationManager = authenticationManager(http.getSharedObject(AuthenticationConfiguration.class));
-        System.out.println("@@@@@@@@@@@@@@@@@@@@@");
+        
         http.cors().and();
 
         //추가
@@ -80,10 +80,7 @@ public class SecurityConfig {
                 UsernamePasswordAuthenticationFilter.class)
             .addFilter(new JwtAuthorizationFilter(authenticationManager, userRepository, jwtToken))
             .authorizeRequests()
-
-
             // 인증이 필요하지 않은 경로 설정
-
             // main 이나 / 넣어야할수도
             .antMatchers("/api/user/check-username","/api/user/register", "/api/user/login", "/api/user/refresh-token", "/oauth2/**","/api/user/**","/api/artworks/**").permitAll()
             .antMatchers("/user/**").authenticated() // 로그인 필요
