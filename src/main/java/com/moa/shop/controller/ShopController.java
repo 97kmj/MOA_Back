@@ -106,22 +106,7 @@ public class ShopController {
         } 
     }
 	
-	// 작품등록
-	@PostMapping("/artworkAdd")
-	public ResponseEntity<Long> artworkAdd(@RequestPart("artworkDto") ArtworkDto artworkDto,
-			@RequestPart("artworkImage")MultipartFile artworkImage){
-			try {
-				
-				System.out.println("artwork :" + artworkDto);
-				System.out.println("artworkImage :" + artworkImage);
-				
-				Long artworkNum = shopService.artworkAdd(artworkDto,artworkImage);
-				return new ResponseEntity<Long>(artworkNum,HttpStatus.OK);
-			}catch (Exception e) {
-				e.printStackTrace();
-				return new ResponseEntity<Long>(HttpStatus.BAD_REQUEST);
-			}
-		}
+
 
 	@GetMapping("/saleList") 
 	public ResponseEntity<List<ArtworkDto>>saleList(
@@ -200,7 +185,8 @@ public class ShopController {
 	            List<FrameDto> frameList = shopService.frameList(frameId);
 	            System.out.println(frameList);
 	            orderInfo.put("frameList", frameList);
-	            
+	        } else {
+	        	orderInfo.put("frameList", null);
 	        }
 				
 			return new ResponseEntity<Map<String,Object>>(orderInfo, HttpStatus.OK);
