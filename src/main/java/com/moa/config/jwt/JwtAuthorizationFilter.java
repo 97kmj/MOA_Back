@@ -24,42 +24,44 @@ import com.moa.repository.UserRepository;
 
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
-	private final UserRepository userRepository;
-	private final JwtToken jwtToken;
+    private final UserRepository userRepository;
+    private final JwtToken jwtToken;
 
-	public JwtAuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository,
-		JwtToken jwtToken) {
-		super(authenticationManager);
-		this.userRepository = userRepository;
-		this.jwtToken = jwtToken;
-	}
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository, JwtToken jwtToken) {
+        super(authenticationManager);
+        this.userRepository = userRepository;
+        this.jwtToken = jwtToken;
+    }
 
-	@Override
-	protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-		String path = request.getServletPath();
-		// 등록 및 로그인 관련 경로는 필터를 적용하지 않음
-		String method = request.getMethod();
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        // 등록 및 로그인 관련 경로는 필터를 적용하지 않음
+        String method = request.getMethod();
 
-		// OPTIONS 요청 제외
-		if ("OPTIONS".equalsIgnoreCase(method)) {
-			return true;
-		}
-		return
-			path.equals("/api/user/check-username") ||
-				path.equals("/api/user/register") ||
-				path.equals("/api/user/login") ||
-				path.equals("/main") ||
-				path.startsWith("/oauth2/") ||
+        // OPTIONS 요청 제외
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            return true;
+        }
+        return
+            path.equals("/api/user/check-username") ||
+            path.equals("/api/user/register") ||
+            path.equals("/api/user/login") ||
+            path.equals("/main") || 
+            path.equals("/artistDetail") ||
+            path.equals("/artistArtworks") || 
+            path.equals("/notice") ||
+            path.startsWith("/oauth2/") ||
+            (path.equals("/api/funding") && "GET".equalsIgnoreCase(method)) ||
+				    (path.matches("^/api/funding/\\d+$") && "GET".equalsIgnoreCase(method));;
+    }
 
-				(path.equals("/api/funding") && "GET".equalsIgnoreCase(method)) ||
-				(path.matches("^/api/funding/\\d+$") && "GET".equalsIgnoreCase(method));
-	}
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+        throws IOException, ServletException {
+        String uri = request.getRequestURI();
+        System.out.println("Request URI: " + uri);
 
-	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-		throws IOException, ServletException {
-		String uri = request.getRequestURI();
-		System.out.println("Request URI: " + uri);
 
 		String authentication = request.getHeader(JwtProperties.HEADER_STRING);
 		if (authentication == null) {
