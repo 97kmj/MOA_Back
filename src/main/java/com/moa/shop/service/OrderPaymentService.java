@@ -7,4 +7,5 @@ import com.moa.shop.dto.OrderPaymentRequest;
 
 public interface OrderPaymentService {
 	void processPayment(OrderPaymentRequest orderPaymentRequest, String username, List<OrderItemDto> saleData ) throws Exception;
+	void checkStock(List<OrderItemDto> saleData ) throws Exception;
 }

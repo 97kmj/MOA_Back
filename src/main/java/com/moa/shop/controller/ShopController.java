@@ -22,6 +22,7 @@ import com.moa.entity.Artwork;
 import com.moa.shop.dto.ArtworkDto;
 import com.moa.shop.dto.CanvasDto;
 import com.moa.shop.dto.CategoryDto;
+import com.moa.shop.dto.OrderRequest;
 import com.moa.shop.dto.SubjectDto;
 import com.moa.shop.dto.TypeDto;
 import com.moa.shop.service.ShopService;
@@ -59,7 +60,7 @@ public class ShopController {
 		try {
 			
 
-			List<FrameDto> frameList = shopService.frameListByCanvasId(canvasId);
+		List<FrameDto> frameList = shopService.frameListByCanvasId(canvasId);
 
 			return new ResponseEntity<List<FrameDto>>(frameList, HttpStatus.OK);
 		}catch (Exception e) {
@@ -164,15 +165,11 @@ public class ShopController {
 	}
 	
 	@PostMapping("/orderData")
-	public ResponseEntity<Map<String,Object>> OrderArtwork(@RequestBody Map<String,String> param){
+	public ResponseEntity<Map<String,Object>> OrderArtwork(@RequestBody OrderRequest orderRequest){
 		try {
-			Long artworkId = Long.parseLong(param.get("artworkId"));
-			String username = param.get("username");
-			System.out.println("-----------------------------------------------");
-			System.out.println("artworkId : " + artworkId);
-			System.out.println("username : " + username);
-			
-			
+		    Long artworkId = orderRequest.getArtworkId();
+		    String username = orderRequest.getUsername();
+		    Long frameId = orderRequest.getFrameId();
 			ArtworkDto artworkList= shopService.artworkDetail(artworkId);
 			OrderUserInfoDto UserList = shopService.orderUserInfo(username);
 			
@@ -180,10 +177,9 @@ public class ShopController {
 			orderInfo.put("artworkList", artworkList);
 			orderInfo.put("userList", UserList);
 
-			if (param.get("frameId") != null && !param.get("frameId").isEmpty()) {
-				Long frameId = Long.valueOf(param.get("frameId"));
+			if (frameId != null) {
+
 	            List<FrameDto> frameList = shopService.frameList(frameId);
-	            System.out.println(frameList);
 	            orderInfo.put("frameList", frameList);
 	        } else {
 	        	orderInfo.put("frameList", null);
