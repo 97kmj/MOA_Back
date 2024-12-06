@@ -42,7 +42,7 @@ public class FundingServiceImpl implements FundingService {
 	private  final FundingManagementRepositoryCustom fundingManagementRepositoryCustom;
 
 
-	@Scheduled(cron = "0 */10 * * * *") // 매 1분마다 실행
+	@Scheduled(cron = "0 */10 * * * *") // 매 10분마다 실행
 	@Transactional
 	public void scheduleValidateFundingStatuses() {
 		log.info("펀딩 상태 검증 스케줄링 시작");
