@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.moa.entity.OrderItem;
 import com.moa.shop.dto.OrderItemDto;
@@ -35,8 +37,6 @@ public class ShopPaymentController {
         	OrderPaymentRequest paymentData =request.getRequestData();
         	String username = request.getUsername();
         	List<OrderItemDto> saleData = request.getSaleDatas();
-        	
-        	
         	orderPaymentService.processPayment(paymentData,username,saleData);
             return new ResponseEntity<String>(String.valueOf(true),HttpStatus.OK);
         } catch (Exception e) {
@@ -49,9 +49,6 @@ public class ShopPaymentController {
     	try {
     		
     		orderPaymentService.checkStock(saleDatas);
-    		
-    		System.out.println("9999999999999999999999999999");
-    		System.out.println(saleDatas);
     		return new ResponseEntity<String>(String.valueOf(true),HttpStatus.OK);
     	}catch(Exception e) {
     		e.printStackTrace();

@@ -65,7 +65,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
         throws IOException, ServletException {
         String uri = request.getRequestURI();
-        System.out.println("Request URI: " + uri);
+//        System.out.println("Request URI: " + uri);
 
 
 		String authentication = request.getHeader(JwtProperties.HEADER_STRING);
