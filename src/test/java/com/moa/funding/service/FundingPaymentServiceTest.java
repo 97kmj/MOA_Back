@@ -24,7 +24,7 @@ import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.dto.payment.RewardRequest;
 import com.moa.funding.repository.FundingManagementRepositoryCustom;
 import com.moa.funding.repository.FundingSelectRepositoryCustom;
-import com.moa.funding.service.fundingImplements.FundingPaymentServiceImpl;
+import com.moa.funding.service.implement.FundingPaymentServiceImpl;
 import com.moa.funding.service.portone.PortOneService;
 import com.moa.funding.util.MockHelper;
 import com.moa.repository.FundingContributionRepository;
