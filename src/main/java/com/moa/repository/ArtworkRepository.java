@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import com.moa.entity.Artwork;
 import com.moa.entity.Artwork.SaleStatus;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -59,6 +60,20 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 		Pageable pageable
 	);
 	
+	// 내작품 가져오기
+	 @Query("SELECT a FROM Artwork a " +
+	           "WHERE (:saleStatus IS NULL OR a.saleStatus = :status) " +
+	           "AND (:username IS NULL OR a.artist.username = :username) " +
+	           "AND (:startDate IS NULL OR a.createAt >= :startDate) " +
+	           "AND (:endDate IS NULL OR a.createAt <= :endDate) " +
+	           "ORDER BY a.createAt DESC")
+	    Page<Artwork> findByUsernameAndSaleStatusAndDate(
+	            @Param("username") String username,
+	            @Param("status") SaleStatus status,
+	            @Param("startDate") Date startDate,
+	            @Param("endDate") Date endDate,
+	            Pageable pageable);
+			
 	
 	//의심작품 가져오기
 	List<Artwork> findByAdminCheck(Boolean isChecked);
