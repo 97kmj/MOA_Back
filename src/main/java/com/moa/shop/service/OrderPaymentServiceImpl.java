@@ -47,7 +47,7 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 	
 		Artwork artwork = artworkRepository.findById(saleData.get(0).getArtworkId()).orElseThrow(()->new Exception("artworkID 오류"));
 
-
+		System.out.println("서비스에서 에러남?");
 		//3.order 저장
 		Order order = Order.builder()
 				.user(User.builder().username(username).build())
@@ -85,10 +85,17 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 	        frameOptionRepository.save(frame);
 			}
 		}
-        
+		
 		
 		//5.그림 프레임수량 감소
-		artwork.setStock(artwork.getStock()-saleData.size());
+		int updatedStock = artwork.getStock() - saleData.size();
+		
+		// 재고가 부족한 경우 예외 처리
+		if (updatedStock < 0) {
+		    throw new IllegalStateException("판매 수량이 재고를 초과했습니다.");
+		}
+		artwork.setStock(updatedStock);
+		artwork.setSaleStatus(updatedStock == 0 ? artwork.getSaleStatus().SOLD_OUT : artwork.getSaleStatus().AVAILABLE);
 		artworkRepository.save(artwork);
 
     }
@@ -98,8 +105,8 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 		//2. 그림 재고 확인
 		Artwork artwork = artworkRepository.findById(saleData.get(0).getArtworkId()).orElseThrow(()->new Exception("artworkID 오류"));
 		if (artwork.getStock() < saleData.size()) {
-			System.out.println("판매수량보다 주문수량이 많습니다.");
-			return;
+			throw new Exception("판매수량보다 주문수량이 많습니다.");
+			
 		}
 		for (int i = 0; i < saleData.size(); i++) {
 			OrderItemDto item = saleData.get(i);
@@ -107,8 +114,7 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 			FrameOption frame = item.getFrameOptionId() != null ? frameOptionRepository.findById(item.getFrameOptionId())
 	                .orElseThrow(() -> new Exception("Frame ID not found for item ")) : null;
 			if (frame != null && frame.getStock() < saleFrameStock) {
-	            System.out.println("판매프레임보다 주문수량이 더 많습니다.");
-	            return;
+				throw new Exception("판매프레임보다 주문수량이 더 많습니다.");
 	        }
 		}
 		

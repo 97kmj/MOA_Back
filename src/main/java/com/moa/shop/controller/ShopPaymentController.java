@@ -37,7 +37,12 @@ public class ShopPaymentController {
         	OrderPaymentRequest paymentData =request.getRequestData();
         	String username = request.getUsername();
         	List<OrderItemDto> saleData = request.getSaleDatas();
+        	System.out.println("컨트롤시작--------------------------------");
+        	System.out.println(paymentData);
+        	System.out.println(username);
+        	System.out.println(saleData);
         	orderPaymentService.processPayment(paymentData,username,saleData);
+        	
             return new ResponseEntity<String>(String.valueOf(true),HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
