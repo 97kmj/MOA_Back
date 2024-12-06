@@ -71,13 +71,35 @@ public class CartServiceImpl implements CartService {
 		return cartDtoList;
 	}
 	
+	@Transactional
 	@Override
 	public void deleteCartItem(Long cartItemId) throws Exception {
-		cartItemRepository.deleteById(cartItemId);
+		CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(()->new RuntimeException("CartItem not fount"));
+		
+		Cart cart = cartItem.getCart(); 
+		
+		// 연관된 cartItems 컬렉션에서 먼저 삭제
+	    cart.getCartItems().remove(cartItem);
+
+	    // CartItem 삭제
+	    cartItemRepository.delete(cartItem);
+		
+		//카트 아이템 삭제후 해당 카트에 해당하는 item이 없으면 카트를 삭제
+		if(cart.getCartItems().isEmpty()) {
+			cartRepository.delete(cart);
+		}
 	}
 	
+	@Transactional
 	@Override
 	public void deleteCartList(List<Long> cartIdList) throws Exception {
+		if (cartIdList == null || cartIdList.isEmpty()) {
+	        throw new IllegalArgumentException("Cart ID list cannot be null or empty.");
+	    }
+		
+		// 자식 엔티티인 CartItem 먼저 삭제
+	    cartItemRepository.deleteAllByCartIds(cartIdList);
+	    
 		cartRepository.deleteAllByIdInBatch(cartIdList);
 	}
 }
