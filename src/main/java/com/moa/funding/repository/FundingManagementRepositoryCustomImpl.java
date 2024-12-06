@@ -115,7 +115,9 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 			.where (funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)
 				.and(funding.fundingStatus.eq(Funding.FundingStatus.ONGOING)
 					.and(funding.currentAmount.goe(funding.goalAmount)))
-				.and(funding.endDate.goe(today)) //endDate 날짜 >= 오늘  오늘보다 크거나 같은 경우
+				// .and(funding.endDate.goe(today)) //endDate 날짜 >= 오늘  오늘보다 크거나 같은 경우
+					.and(funding.endDate.lt(today)) // endDate의 일수가 오늘보다 작을때
+
 			)
 			.execute();
 
@@ -174,7 +176,8 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 			.where(
 				funding.fundingStatus.eq(Funding.FundingStatus.ONGOING)
 					.and(funding.currentAmount.goe(funding.goalAmount))
-					.and(funding.endDate.goe(now))
+					// .and(funding.endDate.goe(now))
+					.and(funding.endDate.lt(now))// endDate가 현재 시간(now)보다 이전일 때 상태 변경 (endDate(1) < now(2))
 			)
 			.execute();
 		log.info("ONGOING → SUCCESSFUL 변경된 펀딩 수: {}", ongoingToSuccessful);
@@ -185,8 +188,10 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 			.set(funding.fundingStatus, Funding.FundingStatus.ONGOING)
 			.where(
 				funding.fundingStatus.eq(Funding.FundingStatus.SUCCESSFUL)
-					.and(funding.currentAmount.lt(funding.goalAmount))
-					.and(funding.endDate.goe(now))
+					// .and(funding.currentAmount.lt(funding.goalAmount))
+					.and(funding.currentAmount.goe(funding.goalAmount))
+					.and(funding.endDate.goe(now))// endDate가 현재 시간(now)과 같거나 이후일 때 상태 변경 (endDate(1) >= now(1))
+
 			)
 			.execute();
 		log.info("SUCCESSFUL → ONGOING 변경된 펀딩 수: {}", successfulToOngoing);
