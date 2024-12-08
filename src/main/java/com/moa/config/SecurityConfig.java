@@ -10,6 +10,7 @@ import com.moa.repository.UserRepository;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -82,8 +83,9 @@ public class SecurityConfig {
             .authorizeRequests()
             // 인증이 필요하지 않은 경로 설정
             // main 이나 / 넣어야할수도
-            .antMatchers("/api/user/check-username","/api/user/register", "/api/user/login", "/api/user/refresh-token", "/oauth2/**","/api/user/**","/api/artworks/**").permitAll()
+            .antMatchers("/api/user/check-username","/api/user/register", "/api/user/login", "/api/user/refresh-token", "/oauth2/**","/api/user/**","/api/artworks/**","/api/sse/subscribe/**").permitAll()
             .antMatchers("/user/**").authenticated() // 로그인 필요
+            .antMatchers(HttpMethod.GET, "/api/sse/subscribe/**").authenticated()
             .antMatchers("/mypage/**").authenticated()
             .antMatchers("/api/like/**").authenticated()
             .antMatchers("/admin/**").hasRole("ADMIN")

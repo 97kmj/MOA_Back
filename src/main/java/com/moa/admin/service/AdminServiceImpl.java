@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,8 @@ import com.moa.entity.Question;
 import com.moa.entity.User;
 import com.moa.entity.User.ApprovalStatus;
 import com.moa.entity.User.Role;
+import com.moa.notification.service.notificationEvent.implement.ArtistApprovalEvent;
+import com.moa.notification.service.notificationEvent.implement.FundingApprovalEvent;
 import com.moa.repository.ArtworkRepository;
 import com.moa.repository.CanvasRepository;
 import com.moa.repository.FrameOptionRepository;
@@ -66,7 +69,10 @@ public class AdminServiceImpl implements AdminService {
 	private final ArtworkRepository artworkRepository;
 	private final AdminItemRepository adminItemRepository;
 	private final OrderRepository orderRepository;
-	private final OrderItemRepository orderItemRepository; 
+	private final OrderItemRepository orderItemRepository;
+
+	private final ApplicationEventPublisher eventPublisher; //알림
+
 	//admin notice 
 	@Override
 	public List<NoticeDto> allNoticeList() throws Exception {
@@ -133,6 +139,8 @@ public class AdminServiceImpl implements AdminService {
 		user.setArtistApprovalStatus(ApprovalStatus.APPROVED);
 		user.setRole(Role.ARTIST);
 		userRepository.save(user);
+
+		eventPublisher.publishEvent(new ArtistApprovalEvent(username));
 		
 	}
 	
@@ -166,6 +174,11 @@ public class AdminServiceImpl implements AdminService {
 		Funding funding = fundingRepository.findById(fundingId).orElseThrow(()->new Exception("fundingId 오류"));
 		funding.setApprovalStatus(Funding.ApprovalStatus.APPROVED);
 		fundingRepository.save(funding);
+
+		eventPublisher.publishEvent(new FundingApprovalEvent(
+			funding.getUser().getUsername(),
+			funding.getTitle()
+		));
 	}
 	//펀딩 반려
 	@Override
