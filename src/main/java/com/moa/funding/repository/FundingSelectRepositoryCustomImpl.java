@@ -21,6 +21,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
+import static com.moa.entity.QUser.user;
 import static com.moa.entity.QFunding.funding;
 import static com.moa.entity.QReward.reward;
 import static com.moa.entity.QFundingImage.fundingImage;
@@ -60,10 +61,24 @@ public class FundingSelectRepositoryCustomImpl implements FundingSelectRepositor
 		return FundingDetailMapper.toFundingDetailDTO(funding, rewardDTOList, imageDTOList);
 	}
 
+	// @NotNull
+	// private Funding getFunding(Long fundingId) {
+	// 	Funding fundingEntity = queryFactory
+	// 		.selectFrom(funding)
+	// 		.where(funding.fundingId.eq(fundingId))
+	// 		.fetchOne();
+	//
+	// 	if (fundingEntity == null) {
+	// 		throw new IllegalStateException("존재하지 않는 펀딩입니다.");
+	// 	}
+	// 	return fundingEntity;
+	// }
+
 	@NotNull
 	private Funding getFunding(Long fundingId) {
 		Funding fundingEntity = queryFactory
 			.selectFrom(funding)
+			.join(funding.user,user).fetchJoin()
 			.where(funding.fundingId.eq(fundingId))
 			.fetchOne();
 
@@ -72,6 +87,7 @@ public class FundingSelectRepositoryCustomImpl implements FundingSelectRepositor
 		}
 		return fundingEntity;
 	}
+
 
 	@NotNull
 	private List<RewardDTO> getRewardDTOs(Long fundingId) {
