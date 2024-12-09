@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,6 +48,27 @@ public class CartController {
 		}
 	}
 	
+	@PatchMapping("/deleteCartItem/{cartItemId}")
+	public ResponseEntity<Void> deleteCartItem(@PathVariable Long cartItemId) {
+		try {
+			cartService.deleteCartItem(cartItemId);
+			return new ResponseEntity<Void>(HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	@PatchMapping("/deleteCart")
+	public ResponseEntity<Void> deleteCartItem(@RequestBody List<Long> cartIdList) {
+		try {
+			cartService.deleteCartList(cartIdList);
+			return new ResponseEntity<Void>(HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Void>(HttpStatus.BAD_REQUEST);
+		}
+	}
 	
 	
 }

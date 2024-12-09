@@ -31,6 +31,8 @@ public class AdminQnAController {
 			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 	        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 		try {
+			System.out.println(startDate);
+			System.out.println(endDate);
 			Map<String,Object> param = new HashMap<>();
 			List<QuestionDto> notAnswerQuestions = adminService.notAnswerQuestionList();
 			List<QuestionDto> answeredQuestions = adminService.answeredQuestionList(Date.valueOf(startDate),Date.valueOf(endDate));
