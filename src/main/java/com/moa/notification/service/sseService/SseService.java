@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import com.moa.notification.exception.SseHeartbeatException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,23 +21,33 @@ public class SseService {
 	// sse 연결을 위한 메소드
 	public SseEmitter subscribe(String username) {
 
-		SseEmitter oldEmitter = clients.remove(username);
-		if (oldEmitter != null) {
-			oldEmitter.complete();
-		}
-
 		// 10분 연결
-		SseEmitter emitter = new SseEmitter(600_000L);
+		log.info("SSE clients.toString(): {}", clients.toString());
+
+		SseEmitter emitter = new SseEmitter(0L);
+
+		clients.put(username, emitter);
 
 		emitter.onCompletion(() -> clients.remove(username));// 연결 종료시 클라이언트 맵에서 제거
 		emitter.onTimeout(() -> clients.remove(username)); // 타임아웃시 클라이언트 맵에서 제거
 		emitter.onError((e) -> {
-			log.error("SSE connection error for user {}: {}", username, e.getMessage(), e);
+			log.warn("SSE connection error for user {}: {}", username, e.getMessage(), e);
 			clients.remove(username); // 에러시 클라이언트 맵에서 제거
 		});
 
+		// 연결 직후 더미 데이터 전송
+		try {
+			emitter.send(SseEmitter.event()
+				.name("init") // 이벤트 이름
+				.data("Hello " + username + "! This is a test notification.") // 데이터
+				.id(String.valueOf(System.currentTimeMillis())) // 이벤트 ID (선택)
+			);
+			log.info("Initial test message sent to user: {}", username);
+		} catch (IOException e) {
+			log.error("Error sending initial test message to user {}: {}", username, e.getMessage());
+			clients.remove(username);
+		}
 
-		clients.put(username, emitter);
 		return emitter;
 	}
 
@@ -42,11 +55,55 @@ public class SseService {
 		SseEmitter emitter = clients.get(username);
 		if (emitter != null) {
 			try {
-				emitter.send(SseEmitter.event().data(message));
+				emitter.send(SseEmitter.event()
+					.name("notification")
+					.data(message));
 			} catch (Exception e) {
 				clients.remove(username);
 			}
 		}
 	}
+
+	public void sendUnreadCount(String username,long unreadCount) {
+		SseEmitter emitter = clients.get(username);
+		if (emitter != null) {
+		try {
+			emitter.send(SseEmitter.event()
+				.name("unreadCount")
+				.data(unreadCount));
+			log.info("sendUnreadCount UserName: {}", username);
+			log.info("sendUnreadCount: {}", unreadCount);
+		}catch (Exception e) {
+			clients.remove(username);
+		}
+		}
+	}
+
+	public void unsubscribe(String username) {
+		SseEmitter emitter = clients.remove(username);
+		if (emitter != null) {
+			emitter.complete(); // 연결 종료
+			log.info("SSE connection for user {} removed on logout.", username);
+		}
+	}
+
+
+	@Scheduled(fixedRate = 30000) // 30초마다 실행
+	public void sendHeartbeat() {
+		clients.forEach((username, emitter) -> {
+			try {
+				emitter.send(SseEmitter.event()
+					.name("heartbeat")
+					.data("heartbeat")
+				);
+				log.info("Heartbeat sent to: {}", username);
+			} catch (IOException e) {
+				clients.remove(username);
+				throw new SseHeartbeatException("SSE heartbeat failed for user: " + username, e);
+
+			}
+		});
+	}
+
 
 }

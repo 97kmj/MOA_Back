@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Repository
+@Slf4j
 public class FundingSelectRepositoryCustomImpl implements FundingSelectRepositoryCustom {
 	private final JPAQueryFactory queryFactory;
 

@@ -13,11 +13,14 @@ import lombok.RequiredArgsConstructor;
 public class NotificationEventListener {
 	private final NotificationService notificationService;
 
-
 	@EventListener
 	public void processEvent(NotificationEvent event) {
 		String message = event.createMessage();
-		notificationService.saveAndSendNotification(event.getUsername(), message, event.getNotificationType());
+		notificationService.saveAndSendNotification(
+					event.getUsername(),
+					message,
+					event.getNotificationType()
+		);
 
 	}
 

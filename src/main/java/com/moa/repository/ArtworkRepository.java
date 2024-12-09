@@ -5,6 +5,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.Query;
 import com.moa.entity.Artwork;
 import com.moa.entity.Artwork.SaleStatus;
+import com.moa.entity.Order;
+import com.moa.mypage.shop.dto.SaleArtworkDto;
 
 import java.util.Date;
 import java.util.List;
@@ -53,32 +55,41 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 			Pageable pageable
 	);
 	
+	
+	
+	
 	@Query("SELECT a FROM Artwork a " +
 		   "WHERE  a.saleStatus in ('AVAILABLE','SOLD_OUT')"+
 		   "ORDER BY a.createAt DESC")	
-		Page<Artwork> findBySaleStatus(
-		Pageable pageable
-	);
-	
-	// 내작품 가져오기
-	 @Query("SELECT a FROM Artwork a " +
-	           "WHERE (:saleStatus IS NULL OR a.saleStatus = :status) " +
-	           "AND (:username IS NULL OR a.artist.username = :username) " +
-	           "AND (:startDate IS NULL OR a.createAt >= :startDate) " +
-	           "AND (:endDate IS NULL OR a.createAt <= :endDate) " +
-	           "ORDER BY a.createAt DESC")
-	    Page<Artwork> findByUsernameAndSaleStatusAndDate(
-	            @Param("username") String username,
-	            @Param("status") SaleStatus status,
-	            @Param("startDate") Date startDate,
-	            @Param("endDate") Date endDate,
-	            Pageable pageable);
+	Page<Artwork>findBySaleStatus(Pageable pageable
 			
+			
+			);
+	
+		
+	
+	// 내작품 가져오기 - 판매상태별
+	 @Query("SELECT a FROM Artwork a " +
+	           "WHERE (a.saleStatus = :saleStatus) " +
+	           "AND (a.artist.username = :username) " +
+	           "ORDER BY a.createAt DESC")
+	    Page<Artwork> searchByUsernameAndSaleStatus(
+	            @Param("username") String username,
+	            @Param("saleStatus") SaleStatus saleStatus,
+	            Pageable pageable);
+	 
+	// 내작품 가져오기 - 전체보기
+	 @Query("SELECT a FROM Artwork a " +
+	           "WHERE (:username IS NULL OR a.artist.username = :username) " +
+	           "AND a.saleStatus in ('AVAILABLE','SOLD_OUT') " +
+	           "ORDER BY a.createAt DESC")
+	    Page<Artwork> findByUsername(
+	            @Param("username") String username,
+	            Pageable pageable);
+					
 	
 	//의심작품 가져오기
 	List<Artwork> findByAdminCheck(Boolean isChecked);
-	
-
 	
 }
 

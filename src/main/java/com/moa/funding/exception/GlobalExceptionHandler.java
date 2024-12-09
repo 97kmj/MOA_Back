@@ -3,10 +3,13 @@ package com.moa.funding.exception;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.catalina.connector.ClientAbortException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.moa.notification.exception.SseHeartbeatException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,6 +53,18 @@ public class GlobalExceptionHandler {
 		response.put("error", error);
 		response.put("message", message);
 		return ResponseEntity.status(status).body(response);
+	}
+
+
+	@ExceptionHandler(ClientAbortException.class)
+	public void handleClientAbortException(ClientAbortException ex) {
+		log.info("Client aborted connection: {}", ex.getMessage());
+	}
+
+	@ExceptionHandler(SseHeartbeatException.class)
+	public ResponseEntity<String> handleSseConnectionException(SseHeartbeatException ex) {
+		log.warn("SSE connection issue: {}", ex.getMessage());
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("SSE connection error occurred.");
 	}
 
 	private void logException(Exception ex) {
