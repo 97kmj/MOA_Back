@@ -39,20 +39,20 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 	@Scheduled(cron = "0 0/5 * * * *") // 매 1분마다 실행
 	@Transactional
 	public void scheduleUpdateToFailedAndRefund() {
-		log.info("펀딩 실패 자동 환불 스케줄링 시작");
+		log.debug("펀딩 실패 자동 환불 스케줄링 시작");
 
 		//실패한 펀딩 ID 가져오기
 		List<Long> failedFundingIds = fundingManagementRepositoryCustom.updateFundingToFailedAndGetIds(Instant.now());
 
 		if (failedFundingIds.isEmpty()) {
-			log.info("환불 대상 펀딩이 없습니다.");
+			log.debug("환불 대상 펀딩이 없습니다.");
 			return;
 		}
 
 		for (Long fundingId : failedFundingIds) {
 			try {
 				refundFailedFunding(fundingId);
-				log.info("펀딩 ID={} 환불 성공", fundingId);
+				log.debug("펀딩 ID={} 환불 성공", fundingId);
 			} catch (Exception e) {
 				log.error("펀딩 ID={} 환불 실패: {}", fundingId, e.getMessage());
 			}
