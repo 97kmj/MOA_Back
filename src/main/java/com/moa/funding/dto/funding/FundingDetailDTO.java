@@ -20,6 +20,7 @@ public class FundingDetailDTO {
 	private Long fundingId;
 	private String title;
 	private String fundingMainImageUrl;
+	private String username;
 	private String fundingUserName;
 	private BigDecimal totalAmount;
 	private BigDecimal goalAmount;
