@@ -1,8 +1,7 @@
 package com.moa.mypage.shop.dto;
 
-import java.util.Date;
-
-import com.moa.entity.Artwork.SaleStatus;
+import java.sql.Date;
+import java.sql.Timestamp;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,8 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class OrderArtworkInfo {
 	private String userName;
-	private Date startDate;
-	private Date endDate;
+	private Timestamp startDate;
+	private Timestamp endDate;
 	private Integer page;
 	private Integer size;
   

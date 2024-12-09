@@ -39,11 +39,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 	 */
 
 	
-//	@Query("SELECT *" +
-//			"FROM Order order" +
-//			"left join orderItem Items on Items.orderId = order.orderId " +
-//			"left join artwork art on art.artworkId=Items.artworkId" +
-//			"WHERE order.username = :username " +
+//	@Query("SELECT o.orderId as orderId,o.paymentDate as paynentDate,i.artwork.title as title,u.username as artistName,o.artwork.imageUrl as imageUrl,i.quantity as quantity " +
+//			"FROM Order o" +
+//			"LEFT JOIN OrderItem i ON i.order.orderId = o.orderId " +
+//			"LEFT JOIN User u ON u.username = i.artwork.artistId " +
+//			"WHERE o.user.username = :username " +
 //			"AND (:startDate IS NULL OR order.paymentDate >= :startDate) " +
 //			"AND (:endDate IS NULL OR o.paymentDate <= :endDate) " +
 //			"ORDER BY o.paymentDate DESC")
@@ -54,7 +54,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 //		        Pageable pageable					
 //					
 //			);
-	
+
+
 
 }
 

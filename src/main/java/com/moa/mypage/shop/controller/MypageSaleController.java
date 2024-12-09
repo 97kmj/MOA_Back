@@ -1,9 +1,9 @@
 package com.moa.mypage.shop.controller;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,12 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.moa.entity.Artwork.SaleStatus;
+import com.moa.mypage.shop.dto.OrderArtworkDto;
 import com.moa.mypage.shop.dto.OrderArtworkInfo;
 import com.moa.mypage.shop.dto.SaleArtworkDto;
 import com.moa.mypage.shop.dto.SaleArtworkInfo;
 import com.moa.mypage.shop.service.MypageArtworkService;
-import com.moa.shop.dto.ArtworkDto;
-import org.springframework.data.domain.Page;
 @RequestMapping("/mypage")
 @RestController
 public class MypageSaleController {
@@ -44,16 +43,19 @@ public class MypageSaleController {
 		}
 	}
 	
-	public ResponseEntity<Page<SaleArtworkDto>> orderList(
+	@PostMapping("/MyOrderList")
+	public ResponseEntity<Page<OrderArtworkDto>> orderList(
 			@RequestBody OrderArtworkInfo orderArtworkInfo
 			){
 		try {
-	
-			
-			return new ResponseEntity<Page<SaleArtworkDto> >(HttpStatus.OK);
+			System.out.println("=============");
+			System.out.println("MyOrdrerList start" + orderArtworkInfo.getStartDate());
+			System.out.println("MyOrdrerList end" +orderArtworkInfo.getEndDate());
+			Page<OrderArtworkDto> orderList =  mypageArtworkService.getMyOrderList(orderArtworkInfo);
+			return new ResponseEntity<>(orderList,HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Page<SaleArtworkDto>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
 	

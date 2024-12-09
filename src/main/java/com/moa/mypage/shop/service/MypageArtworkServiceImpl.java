@@ -1,7 +1,6 @@
 package com.moa.mypage.shop.service;
 
-import java.util.Date;
-import java.util.List;
+import java.sql.Timestamp;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -9,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.moa.entity.Artwork.SaleStatus;
-import com.moa.entity.Order;
+import com.moa.entity.OrderItem;
 import com.moa.mypage.shop.dto.OrderArtworkDto;
 import com.moa.mypage.shop.dto.OrderArtworkInfo;
 import com.moa.mypage.shop.dto.SaleArtworkDto;
@@ -18,7 +17,6 @@ import com.moa.repository.ArtworkRepository;
 import com.moa.repository.OrderItemRepository;
 import com.moa.repository.OrderRepository;
 
-import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Private;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,6 +25,7 @@ public class MypageArtworkServiceImpl implements MypageArtworkService {
 	private final ArtworkRepository artworkRepository;
 	private final OrderRepository orderRepository;
 	private final MyOrderRepository myOrderRepository;
+	private final OrderItemRepository orderItemRepository; 
 
 	@Override
 	public Page<SaleArtworkDto>  saleListByUser(String username, SaleStatus saleStatus, 
@@ -49,8 +48,8 @@ public class MypageArtworkServiceImpl implements MypageArtworkService {
 	public Page<OrderArtworkDto> getMyOrderList(OrderArtworkInfo orderArtworkInfo) throws Exception {
 
 		String userName = orderArtworkInfo.getUserName();
-		Date startDate = orderArtworkInfo.getStartDate();
-		Date endDate= orderArtworkInfo.getEndDate();
+		Timestamp startDate = orderArtworkInfo.getStartDate();
+		Timestamp endDate= orderArtworkInfo.getEndDate();
 		Integer page= orderArtworkInfo.getPage();
 		Integer size= orderArtworkInfo.getSize();
 		Pageable pageable = PageRequest.of(page, size);
@@ -59,8 +58,17 @@ public class MypageArtworkServiceImpl implements MypageArtworkService {
 		System.out.println(endDate);
 		System.out.println(pageable);
 		
-		return null;
-//		
-//		return orderRepository.findOrdersWithArtworkAndPaymentDate(userName, startDate, endDate, pageable);
+		Page<OrderItem> orderItemList = orderItemRepository.findByOrder_User_UsernameAndOrder_PaymentDateBetween(userName, startDate, endDate, pageable);
+		System.out.println(orderItemList);
+		
+		return orderItemList.map(or->OrderArtworkDto.builder()
+				.orderId(or.getOrder().getOrderId())
+				.paymentDate(or.getOrder().getPaymentDate())
+				.quantity(or.getQuantity())
+				.artworkId(or.getArtwork().getArtworkId())
+				.price(or.getPrice())
+				.title(or.getArtwork().getTitle())
+				.artistName(or.getArtwork().getArtist().getName())
+				.imageUrl(or.getArtwork().getImageUrl()).build());
 	}
 }
