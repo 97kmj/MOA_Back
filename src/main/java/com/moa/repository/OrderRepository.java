@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.moa.entity.Order;
-import com.moa.mypage.shop.dto.OrderArtworkDto;
+// import com.moa.mypage.shop.dto.OrderArtworkDto;
 
 
 public interface OrderRepository extends JpaRepository<Order, Long> {

@@ -45,35 +45,35 @@ public class FundingServiceImpl implements FundingService {
 	@Scheduled(cron = "0 */5 * * * *")
 	@Transactional
 	public void scheduleValidateFundingStatuses() {
-		log.info("펀딩 상태 검증 스케줄링 시작");
+		log.debug("펀딩 상태 검증 스케줄링 시작");
 		fundingManagementRepositoryCustom.validateAndUpdateFundingStatuses();
-		log.info("펀딩 상태 검증 스케줄링 시작");
+		log.debug("펀딩 상태 검증 스케줄링 시작");
 	}
 
 
 	@Scheduled(cron = "0 */5 * * * *") //
 	@Transactional
 	public void scheduleUpdateToOngoing() {
-		log.info("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 시작 " );
+		log.debug("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 시작 " );
 		fundingManagementRepositoryCustom.updateFundingToOnGoing();
-		log.info("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 완료 " );
+		log.debug("scheduleUpdateToOngoing 스케줄링 실행- ONGOING 상태 변경 완료 " );
 	}
 
 
 	@Scheduled(cron = "0 */5 * * * *")
 	@Transactional
 	public void scheduleUpdateToSuccessful() {
-		log.info("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 시작 " );
+		log.debug("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 시작 " );
 		fundingManagementRepositoryCustom.updateFundingToSuccessful();
-		log.info("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 완료 " );
+		log.debug("scheduleUpdateToSuccessful 스케줄링 실행 - SUCCESSFUL 상태 변경 완료 " );
 	}
 
 	@Scheduled(cron = "0 */5 * * * *") //
 	@Transactional
 	public void scheduleUpdateRefundedToOngoing() {
-		log.info("scheduleUpdateRefundedToOngoing 스케줄링 실행 - REFUNDED 상태 변경 시작 " );
+		log.debug("scheduleUpdateRefundedToOngoing 스케줄링 실행 - REFUNDED 상태 변경 시작 " );
 		fundingManagementRepositoryCustom.updateFundingToOngoingIfRefund();
-		log.info("scheduleUpdateRefundedToOngoing 스케줄링 실행 - REFUNDED 상태 변경 완료 " );
+		log.debug("scheduleUpdateRefundedToOngoing 스케줄링 실행 - REFUNDED 상태 변경 완료 " );
 	}
 
 

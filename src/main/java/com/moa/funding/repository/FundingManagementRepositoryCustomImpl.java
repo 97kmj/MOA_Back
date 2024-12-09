@@ -101,7 +101,7 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 			.execute();
 		// 이미 업데이트해야 할 조건을 명확히 알고 있기 때문에, 개별적으로 데이터를 조회한 뒤 수정할 필요 없이 바로 업데이트 쿼리를 실행
 
-		log.info("updateFundingToOnGoing 메서드 updatedCount: {}", updatedCount);
+		log.debug("updateFundingToOnGoing 메서드 updatedCount: {}", updatedCount);
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 			)
 			.execute();
 
-		log.info("updateFundingToSuccessful 메서드 updateCount: {}", updateCount);
+		log.debug("updateFundingToSuccessful 메서드 updateCount: {}", updateCount);
 	}
 
 
@@ -161,7 +161,7 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 			)
 			.execute();
 
-		log.info("updateFundingToOngoingIfRefund 메서드 updateCount: {}", updateCount);
+		log.debug("updateFundingToOngoingIfRefund 메서드 updateCount: {}", updateCount);
 	}
 
 
@@ -180,7 +180,7 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 					.and(funding.endDate.lt(now))// endDate가 현재 시간(now)보다 이전일 때 상태 변경 (endDate(1) < now(2))
 			)
 			.execute();
-		log.info("ONGOING → SUCCESSFUL 변경된 펀딩 수: {}", ongoingToSuccessful);
+		log.debug("ONGOING → SUCCESSFUL 변경된 펀딩 수: {}", ongoingToSuccessful);
 
 		// SUCCESSFUL → ONGOING
 
@@ -194,7 +194,7 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 
 			)
 			.execute();
-		log.info("SUCCESSFUL → ONGOING 변경된 펀딩 수: {}", successfulToOngoing);
+		log.debug("SUCCESSFUL → ONGOING 변경된 펀딩 수: {}", successfulToOngoing);
 
 		// ONGOING → FAILED
 		long ongoingToFailed = queryFactory.update(funding)
@@ -205,7 +205,7 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 				.and(funding.endDate.lt(now))
 		)
 			.execute();
-		log.info("ONGOING → FAILED 변경된 펀딩 수: {}", ongoingToFailed);
+		log.debug("ONGOING → FAILED 변경된 펀딩 수: {}", ongoingToFailed);
 
 	}
 

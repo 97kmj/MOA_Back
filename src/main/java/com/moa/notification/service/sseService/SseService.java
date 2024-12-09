@@ -42,7 +42,7 @@ public class SseService {
 				.data("Hello " + username + "! This is a test notification.") // 데이터
 				.id(String.valueOf(System.currentTimeMillis())) // 이벤트 ID (선택)
 			);
-			log.info("Initial test message sent to user: {}", username);
+			log.debug("Initial test message sent to user: {}", username);
 		} catch (IOException e) {
 			log.error("Error sending initial test message to user {}: {}", username, e.getMessage());
 			clients.remove(username);
@@ -71,8 +71,8 @@ public class SseService {
 			emitter.send(SseEmitter.event()
 				.name("unreadCount")
 				.data(unreadCount));
-			log.info("sendUnreadCount UserName: {}", username);
-			log.info("sendUnreadCount: {}", unreadCount);
+			log.debug("sendUnreadCount UserName: {}", username);
+			log.debug("sendUnreadCount: {}", unreadCount);
 		}catch (Exception e) {
 			clients.remove(username);
 		}
@@ -83,12 +83,12 @@ public class SseService {
 		SseEmitter emitter = clients.remove(username);
 		if (emitter != null) {
 			emitter.complete(); // 연결 종료
-			log.info("SSE connection for user {} removed on logout.", username);
+			log.debug("SSE connection for user {} removed on logout.", username);
 		}
 	}
 
 
-	@Scheduled(fixedRate = 30000) // 30초마다 실행
+	@Scheduled(fixedRate = 60000) //
 	public void sendHeartbeat() {
 		clients.forEach((username, emitter) -> {
 			try {
@@ -96,7 +96,7 @@ public class SseService {
 					.name("heartbeat")
 					.data("heartbeat")
 				);
-				log.info("Heartbeat sent to: {}", username);
+				log.debug("Heartbeat sent to: {}", username);
 			} catch (IOException e) {
 				clients.remove(username);
 				throw new SseHeartbeatException("SSE heartbeat failed for user: " + username, e);
