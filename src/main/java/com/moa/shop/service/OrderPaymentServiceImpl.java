@@ -2,6 +2,8 @@ package com.moa.shop.service;
 
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -106,17 +108,17 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 		Artwork artwork = artworkRepository.findById(saleData.get(0).getArtworkId()).orElseThrow(()->new Exception("artworkID 오류"));
 		if (artwork.getStock() < saleData.size()) {
 			throw new Exception("판매수량보다 주문수량이 많습니다.");
-			
 		}
 		for (int i = 0; i < saleData.size(); i++) {
 			OrderItemDto item = saleData.get(i);
 			Integer saleFrameStock = item.getFrameOptionId() != null ? 1 : 0; 
 			FrameOption frame = item.getFrameOptionId() != null ? frameOptionRepository.findById(item.getFrameOptionId())
-	                .orElseThrow(() -> new Exception("Frame ID not found for item ")) : null;
+					.orElseThrow(() -> new Exception("Frame ID not found for item ")) : null;
 			if (frame != null && frame.getStock() < saleFrameStock) {
 				throw new Exception("판매프레임보다 주문수량이 더 많습니다.");
-	        }
+			}
 		}
+	
 		
 	}
         
