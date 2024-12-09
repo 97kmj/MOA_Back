@@ -1,6 +1,7 @@
 package com.moa.entity;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
@@ -52,6 +54,10 @@ public class Order {
     private String address;
     private String phoneNumber;
     private String name;
+    
+    @OneToMany(mappedBy = "order")
+    private List<OrderItem> orderItems;
+    
     
     @PrePersist
 	protected void onCreate() {
