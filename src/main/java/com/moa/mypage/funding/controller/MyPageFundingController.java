@@ -63,6 +63,7 @@ public class MyPageFundingController {
 	) {
 		Pageable pageable = PageRequest.of(page, size);
 		Page<FundingContributionWithFundingDTO> contributions = fundingMyPageService.getContributionsForMyFunding(fundingId, pageable);
+
 		return ResponseEntity.ok(contributions);
 
 	}

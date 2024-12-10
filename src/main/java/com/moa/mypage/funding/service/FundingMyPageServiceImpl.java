@@ -70,6 +70,7 @@ public class FundingMyPageServiceImpl implements FundingMyPageService {
 
 		Page<FundingOrder> fundingOrderPage = fundingMyPageRepository.findFundingOrdersForFunding(fundingId, pageable);
 
+
 		List<FundingContributionWithFundingDTO> result = fundingOrderPage.getContent().stream()
 			.map(fundingOrder -> {
 				List<FundingContribution> contributions = fundingMyPageRepository.findFundingContributions(fundingOrder.getFundingOrderId());
@@ -172,7 +173,7 @@ public class FundingMyPageServiceImpl implements FundingMyPageService {
 			.totalAmount(fundingOrder.getTotalAmount())
 			.paymentDate(fundingOrder.getPaymentDate())
 			.paymentType(fundingOrder.getPaymentType())
-			.address(fundingOrder.getUser().getAddress())
+			.address(fundingOrder.getAddress())
 			.phoneNumber(fundingOrder.getPhoneNumber())
 			.name(fundingOrder.getName())
 			.rewards(rewards)
