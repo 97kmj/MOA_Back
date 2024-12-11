@@ -77,6 +77,7 @@ public class OrderPaymentServiceImpl implements OrderPaymentService {
 				.frameOption(frame)
 				.quantity(1)
 				.price(artwork.getPrice())
+				.shippingStatus(OrderItem.ShippingStatus.WAITING)
 				.framePrice(frame != null ? frame.getFramePrice() : 0)
 				.totalPrice((artwork.getPrice())+(frame != null ? frame.getFramePrice() : 0))
 				.build();
