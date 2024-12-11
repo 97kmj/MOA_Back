@@ -42,6 +42,7 @@ public class User {
 	private String portfolioUrl;
 	@Lob
 	private String artistNote;
+	@Lob
 	private String artistCareer;
 	private String profileImage;
 	
