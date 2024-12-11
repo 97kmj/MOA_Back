@@ -98,7 +98,7 @@ public class ShopServiceImpl implements ShopService {
 	@Override
 	public List<CanvasDto> canvasList(String canvasType) throws Exception {
 		
-		Canvas.CanvasType type = Canvas.CanvasType.valueOf(canvasType);;
+		Canvas.CanvasType type = Canvas.CanvasType.valueOf(canvasType);
 		return canvasRepository.findByCanvasType(type) 
 	            .stream()
 	            .map(CanvasDto::fromEntity)

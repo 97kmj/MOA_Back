@@ -169,6 +169,7 @@ public class CartOrderServiceImpl implements CartOrderService {
 	                .orElseThrow(() -> new Exception("Artwork ID " + item.getArtworkId() + " not found.")))
 	            .frameOption(frameOption)
 	            .quantity(1)
+	            .shippingStatus(OrderItem.ShippingStatus.WAITING)
 	            .price(item.getPrice())
 	            .framePrice(item.getFrameprice())
 	            .totalPrice(item.getPrice() + item.getFrameprice())
