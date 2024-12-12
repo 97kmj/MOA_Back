@@ -270,7 +270,7 @@ public class FundingSelectRepositoryCustomImpl implements FundingSelectRepositor
 		QFunding funding = QFunding.funding;
 		switch (filterType) {
 			case "공개 예정 펀딩":
-				if ("가까운순".equals(sortOption)) {
+				if ("공개 예정 순".equals(sortOption)) {
 					return funding.startDate.asc();
 				} else if ("멀리있는순".equals(sortOption)) {
 					return funding.startDate.desc();
@@ -280,17 +280,17 @@ public class FundingSelectRepositoryCustomImpl implements FundingSelectRepositor
 			case "진행중 펀딩":
 				if ("최신순".equals(sortOption)) {
 					return funding.applicationDate.desc(); // 최신순: 생성일 기준 내림차순
-				} else if ("마감 임박순".equals(sortOption)) {
+				} else if ("마감 임박 순".equals(sortOption)) {
 					return funding.endDate.asc(); // 마감 임박순
-				} else if ("오래된순".equals(sortOption)) {
+				} else if ("오래된 순".equals(sortOption)) {
 					return funding.applicationDate.asc(); // 오래된순: 생성일 기준 오름차순
-				} else if ("달성률 높은순".equals(sortOption)) {
+				} else if ("달성률 높은 순".equals(sortOption)) {
 					return funding.currentAmount.divide(funding.goalAmount).desc(); // 달성률 높은순
-				} else if ("달성률 낮은순".equals(sortOption)) {
+				} else if ("달성률 낮은 순".equals(sortOption)) {
 					return funding.currentAmount.divide(funding.goalAmount).asc(); // 달성률 낮은순
-				} else if ("목표금액 높은순".equals(sortOption)) {
+				} else if ("목표금액 높은 순".equals(sortOption)) {
 					return funding.goalAmount.desc(); // 목표금액 높은순
-				} else if ("목표금액 낮은순".equals(sortOption)) {
+				} else if ("목표금액 낮은 순".equals(sortOption)) {
 					return funding.goalAmount.asc(); // 목표금액 낮은순
 				}
 
@@ -299,7 +299,7 @@ public class FundingSelectRepositoryCustomImpl implements FundingSelectRepositor
 			case "마감된 펀딩":
 				if ("최신순".equals(sortOption)) {
 					return funding.applicationDate.desc();
-				} else if ("오래된순".equals(sortOption)) {
+				} else if ("오래된 순".equals(sortOption)) {
 					return funding.applicationDate.asc();
 				}
 				break;

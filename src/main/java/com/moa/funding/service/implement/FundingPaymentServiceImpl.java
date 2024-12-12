@@ -254,10 +254,15 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	}
 
 
-	private  boolean isRewardPriceMismatched(RewardRequest rewardRequest, Reward reward) {
-		return !reward.getRewardPrice().equals(rewardRequest.getRewardPrice());
-	}
+	// private  boolean isRewardPriceMismatched(RewardRequest rewardRequest, Reward reward) {
+	// 	return !reward.getRewardPrice().equals(rewardRequest.getRewardPrice());
+	// }
 
+	private boolean isRewardPriceMismatched(RewardRequest rewardRequest, Reward reward) {
+		return rewardRequest.getRewardPrice() == null ||
+			reward.getRewardPrice() == null ||
+			rewardRequest.getRewardPrice().compareTo(reward.getRewardPrice()) != 0;
+	}
 
 
 
