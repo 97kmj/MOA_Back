@@ -70,9 +70,6 @@ public class ShopController {
 		
 	}
 	
-	
-	
-	
 	@GetMapping("/artworkAdd/canvas/{canvasType}")
 	public ResponseEntity<List<CanvasDto>> CanvasList(@PathVariable("canvasType") String canvasType){
 		try {
@@ -106,27 +103,23 @@ public class ShopController {
 			return new ResponseEntity<List<SubjectDto>>(HttpStatus.BAD_REQUEST);
         } 
     }
-	
-
 
 	@GetMapping("/saleList") 
-	public ResponseEntity<List<ArtworkDto>>saleList(
-			@RequestParam(value = "categoryName", required = false)String category,
-			@RequestParam(value = "typeId", required = false)String type,
-			@RequestParam(value = "subjectId", required = false)String subject,
+	public ResponseEntity<Map<String,Object>>saleList(
+			@RequestParam(value = "categoryId", required = false) Integer category,
+			@RequestParam(value = "typeId", required = false) Integer type,
+			@RequestParam(value = "subjectId", required = false) Integer subject,
 			@RequestParam(value = "searchKeyword", required = false)String keyword,
 			@RequestParam(value = "saleStatus", required = false) Artwork.SaleStatus saleStatus,
-			@RequestParam(value="page", required = false, defaultValue = "1")Integer page,
-			@RequestParam(value ="size", required = false, defaultValue = "0") int size){
+			@RequestParam(value="page", required = false, defaultValue = "0")Integer page,
+			@RequestParam(value ="size", required = false, defaultValue = "8") int size){
 		try {
-
-			List<ArtworkDto> artworkList = shopService.artworkList(page, category, keyword, type, subject, saleStatus,size);
-			return new ResponseEntity<List<ArtworkDto>>(artworkList, HttpStatus.OK);
+			Map<String,Object> artworks = shopService.artworkList(page, category, keyword, type, subject, saleStatus,size);
+			return new ResponseEntity<>(artworks, HttpStatus.OK);
 		}catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<List<ArtworkDto>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
-		
 	}
 
 	// detail 가가져오기

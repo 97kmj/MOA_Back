@@ -40,16 +40,16 @@ public interface ArtworkRepository extends JpaRepository<Artwork, Long> {
 	
 	
 	@Query("SELECT a FROM Artwork a " +
-			"WHERE (:subject IS NULL OR a.subject.subjectName = :subject) " +
-			"AND (:type IS NULL OR a.type.typeName = :type) " +
-			"AND (:category IS NULL OR a.category.categoryName = :category) " +
+			"WHERE (:subject IS NULL OR a.subject.subjectId = :subject) " +
+			"AND (:type IS NULL OR a.type.typeId = :type) " +
+			"AND (:category IS NULL OR a.category.categoryId = :category) " +
 			"AND (:status IS NULL AND a.saleStatus in ('AVAILABLE','SOLD_OUT') OR a.saleStatus = :status) " +
 			"AND (:search IS NULL OR LOWER(a.artist.name) LIKE LOWER(CONCAT('%', :search, '%')))" +
 			"ORDER BY a.createAt DESC")	
 			Page<Artwork> findBySearches(
-			@Param("subject") String subject,
-			@Param("type") String type,
-			@Param("category") String category,
+			@Param("subject") Integer subject,
+			@Param("type") Integer type,
+			@Param("category") Integer category,
 			@Param("search") String search,
 			@Param("status") SaleStatus status,
 			Pageable pageable
