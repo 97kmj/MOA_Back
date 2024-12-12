@@ -56,7 +56,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	public void cancelExpiredFundingOrders() {
 		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 10); // 10분 전
 		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60); // 1분 전 테스트용 코드
-		log.debug("만료된 펀딩 주문 처리 중...");
+		log.info("만료된 펀딩 주문 처리 중...");
 		Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 5); // 5분 전
 
 		List<FundingOrder> expiredOrders = fundingSelectRepositoryCustom.findPendingOrdersOlderThan(cutoffTime);
@@ -65,13 +65,13 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 			cancelFundingContribution(order);
 			fundingOrderRepository.delete(order);
 		}
-		log.debug("만료된 펀딩 주문 처리 완료 - 총 {}개 주문 삭제", expiredOrders.size());
+		log.info("만료된 펀딩 주문 처리 완료 - 총 {}개 주문 삭제", expiredOrders.size());
 	}
 
 	@Override
 	@Transactional
 	public void prepareFundingOrder(PaymentRequest paymentRequest,String userName) {
-		log.debug("결제 준비 중 - PaymentRequest: {}", paymentRequest);
+		log.info("결제 준비 중 - PaymentRequest: {}", paymentRequest);
 
 		// Step 1: 사용자 정보 확인
 		User user = getUserAndSetUserName(paymentRequest, userName);
@@ -89,13 +89,13 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 		// Step 5: 리워드 감소 정보 캐시에 저장
 		rewardStockCache.addRewardChanges(fundingOrder.getFundingOrderId(), paymentRequest.getRewardList());
-		log.debug("결제 준비 완료 - FundingOrder: {}", fundingOrder);
+		log.info("결제 준비 완료 - FundingOrder: {}", fundingOrder);
 	}
 
 	@Override
 	@Transactional
 	public void completeFundingContribution(String impUid, PaymentRequest paymentRequest) {
-		log.debug("결제된 펀딩 후원 처리   - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
+		log.info("결제된 펀딩 후원 처리   - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
 		// Step 1: 검증 및 중복 결제 리워드 정보 확인
 		validatePayment(impUid, paymentRequest);
 
@@ -113,7 +113,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 		fundingManagementRepositoryCustom.validateAndUpdateFundingStatuses();
 
-		log.debug("결제된 펀딩 후원 처리 완료 - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
+		log.info("결제된 펀딩 후원 처리 완료 - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
 	}
 
 
@@ -209,10 +209,12 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	@Override
 	public void updateFundingCurrentAmount(PaymentRequest paymentRequest) {
 		Funding funding = getFunding(paymentRequest);
-		// Step 1: 펀딩의 currentAmount 업데이트
+		log.info("펀딩의 currentAmount 업데이트 - FundingId: {}, PaymentRequest: {}", funding.getFundingId(), paymentRequest);
+
 		funding.setCurrentAmount(
 			funding.getCurrentAmount().add(BigDecimal.valueOf(paymentRequest.getTotalAmount()))
 		);
+		log.info("펀딩의 currentAmount 업데이트 완료 - FundingId: {}, CurrentAmount: {}", funding.getFundingId(), funding.getCurrentAmount());
 		fundingRepository.save(funding);
 	}
 

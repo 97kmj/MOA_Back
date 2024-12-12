@@ -57,7 +57,7 @@ public class FundingController {
 
 	@GetMapping("/{fundingId}")
 	public ResponseEntity<FundingDetailDTO> getFundingDetail(@PathVariable Long fundingId) {
-		log.info("fundingId: {}", fundingId);
+		log.debug("fundingId: {}", fundingId);
 		FundingDetailDTO fundingDetail = fundingService.getFundingDetail(fundingId);
 		return ResponseEntity.ok(fundingDetail);
 	}

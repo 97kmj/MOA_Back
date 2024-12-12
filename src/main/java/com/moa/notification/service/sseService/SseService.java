@@ -22,7 +22,7 @@ public class SseService {
 	public SseEmitter subscribe(String username) {
 
 		// 10분 연결
-		log.info("SSE clients.toString(): {}", clients.toString());
+		log.debug("SSE clients.toString(): {}", clients.toString());
 
 		SseEmitter emitter = new SseEmitter(0L);
 
