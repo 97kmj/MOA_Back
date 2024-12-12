@@ -112,8 +112,8 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 		BigDecimal refundAmount = BigDecimal.valueOf(fundingOrder.getTotalAmount());
 		BigDecimal newAmount = funding.getCurrentAmount().subtract(refundAmount);
 
-		log.info("CurrentAmount: {}", funding.getCurrentAmount());
-		log.info("RefundAmount: {}", refundAmount);
+		log.info("펀딩 환불 신청들어왔을 당시의  현재 금액  CurrentAmount: {}", funding.getCurrentAmount());
+		log.info("펀딩 환불의 금액 RefundAmount: {}", refundAmount);
 		if (newAmount.compareTo(BigDecimal.ZERO) < 0) {
 			throw new IllegalStateException("펀딩의 총 금액이 음수가 될 수 없습니다.");
 		}
@@ -124,6 +124,7 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 		// 영속성 컨텍스트에서 관리되는 엔티티이므로 save 호출하지 않아도 업데이트 되지만 가독성 위해 추가
 		fundingRepository.save(funding);
 
+		log.info("펀딩 환불 후의 현재 금액 CurrentAmount: {}", funding.getCurrentAmount());
 	}
 
 	@Override
@@ -158,6 +159,10 @@ public class FundingRefundServiceImpl implements FundingRefundService {
 
 		if (fundingOrder.getRefundStatus() == FundingOrder.RefundStatus.REFUNDED) {
 			throw new IllegalStateException("환불이 불가능한 주문입니다.");
+		}
+
+		if(FundingOrder.PaymentStatus.PENDING == fundingOrder.getPaymentStatus()) {
+			throw new IllegalStateException("결제가 완료되지 않은 주문은 환불할 수 없습니다.");
 		}
 	}
 
