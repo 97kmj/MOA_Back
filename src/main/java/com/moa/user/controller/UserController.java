@@ -1,26 +1,25 @@
 package com.moa.user.controller;
 
-import ch.qos.logback.core.net.SyslogOutputStream;
-import com.moa.config.auth.PrincipalDetails;
-import com.moa.config.jwt.JwtToken;
-import com.moa.entity.User;
-import com.moa.entity.User.ApprovalStatus;
-import com.moa.user.dto.RegisterRequest;
-import com.moa.repository.UserRepository;
-import java.util.HashMap;
-import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-
-import lombok.extern.slf4j.Slf4j;
+import com.moa.config.auth.PrincipalDetails;
+import com.moa.config.jwt.JwtToken;
+import com.moa.entity.User;
+import com.moa.repository.UserRepository;
+import com.moa.user.dto.RegisterRequest;
 
 @RestController
 @RequestMapping("/api/user")
@@ -31,7 +30,6 @@ public class UserController {
     private final JwtToken jwtToken;
     private final AuthenticationManager authenticationManager;
 
-    @Autowired
     public UserController(UserRepository userRepository,
         BCryptPasswordEncoder bCryptPasswordEncoder,
         JwtToken jwtToken,
@@ -45,9 +43,8 @@ public class UserController {
     // 아이디 중복 확인
     @GetMapping("/check-username")
     public ResponseEntity<Boolean> checkUsername(@RequestParam String username) {
-        boolean exists = userRepository.findByUsername(username).isPresent();
-        System.out.println("Username check: " + username + " exists: " + exists); // 디버깅용 로그
-        return ResponseEntity.ok(!exists); // true = 사용 가능, false = 중복
+        Boolean check = userRepository.findByUsername(username.trim()).isEmpty();
+        return ResponseEntity.ok(check); // true = 사용 가능, false = 중복
     }
 
 

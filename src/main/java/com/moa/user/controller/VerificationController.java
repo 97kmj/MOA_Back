@@ -44,7 +44,10 @@ public class VerificationController {
 			boolean isVerified = mailVerificationService.verifyCode(param.get("email"),param.get("verificationCode"));
 			VerifyResponseDto responseDto = new VerifyResponseDto();
 			responseDto.setVerified(isVerified);
-			responseDto.setUsername(userService.usernameByEmail(param.get("email")));			
+			responseDto.setType(param.get("type"));
+			if(responseDto.getType().equals("search")) {
+				responseDto.setUsername(userService.usernameByEmail(param.get("email")));
+			}
 			responseDto
 					.setMessage(isVerified ? "Email verified successfully." : "Invalid or expired verification code.");
 	        return new ResponseEntity<>(responseDto, HttpStatus.OK);
@@ -94,7 +97,10 @@ public class VerificationController {
 			boolean isVerified = smsVerificationService.verifyCode(param.get("sms"),param.get("verificationCode"));
 			VerifyResponseDto responseDto = new VerifyResponseDto();
 			responseDto.setVerified(isVerified);
-			if(isVerified) responseDto.setUsername(userService.usernameByPhone(param.get("sms")));			
+			responseDto.setType(param.get("type"));
+			if(isVerified && responseDto.getType().equals("search")) {
+				responseDto.setUsername(userService.usernameByPhone(param.get("sms")));
+			}
 			responseDto
 					.setMessage(isVerified ? "Sms verified successfully." : "Invalid or expired verification code.");
 	        return new ResponseEntity<>(responseDto, HttpStatus.OK);
