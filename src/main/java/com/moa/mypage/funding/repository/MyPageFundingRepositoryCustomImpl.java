@@ -44,6 +44,7 @@ public class MyPageFundingRepositoryCustomImpl implements MyPageFundingRepositor
 			.join(fundingOrder.funding, funding).fetchJoin()
 			.where(
 				fundingOrder.user.username.eq(username)
+					.and(fundingOrder.paymentStatus.eq(FundingOrder.PaymentStatus.PAID))
 					.and(filterCondition)
 			)
 			.offset(pageable.getOffset())// 페이지 시작 위치
