@@ -1,4 +1,4 @@
-package com.moa.oauth;
+package com.moa.config.oauth;
 
 import java.util.Map;
 
@@ -13,7 +13,7 @@ public class NaverUserInfo implements OAuth2UserInfo {
 
     @Override
     public String getProviderId() {
-        return attributes != null ? (String) attributes.get("id") : null;
+        return (String)attributes.get("id");
     }
 
     @Override
@@ -23,11 +23,26 @@ public class NaverUserInfo implements OAuth2UserInfo {
 
     @Override
     public String getEmail() {
-        return attributes != null ? (String) attributes.get("email") : null;
+        return (String)attributes.get("email");
     }
 
     @Override
     public String getName() {
-        return attributes != null ? (String) attributes.get("name") : null;
+        return (String)attributes.get("name");
     }
+
+	@Override
+	public String getProfileImage() {
+        return (String)attributes.get("profile_image");
+	}
+
+	@Override
+	public String getNickname() {
+        return (String)attributes.get("nickname");
+	}
+	
+	@Override
+	public String getMobile() {
+		return (String)attributes.get("mobile");
+	}	
 }

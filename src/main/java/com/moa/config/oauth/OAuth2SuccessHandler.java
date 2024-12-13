@@ -1,4 +1,4 @@
-package com.moa.oauth;
+package com.moa.config.oauth;
 
 import com.moa.config.auth.PrincipalDetails;
 import com.moa.config.jwt.JwtToken;
