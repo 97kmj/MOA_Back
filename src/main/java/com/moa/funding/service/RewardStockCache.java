@@ -10,4 +10,9 @@ public interface RewardStockCache {
 
 	// 리워드 감소 정보 조회 후 제거
 	List<RewardRequest> getAndRemoveRewardChanges(Long fundingOrderId);
+
+	// 리워드 선점 제한 관리
+	boolean incrementAndCheckLimit(String userName, Long rewardId);
+
+	// 리워드 선점 제한 관리
 }

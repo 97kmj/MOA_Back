@@ -52,7 +52,7 @@ public class FundingOrder {
 	private String merchantUid;
 
 	@Enumerated(EnumType.STRING)
-	private PaymentStatus paymentStatus; // 결제 상태 (PENDING, PAI
+	private PaymentStatus paymentStatus;
 
 	
 	public enum RefundStatus { NOT_REFUNDED, REFUNDED }

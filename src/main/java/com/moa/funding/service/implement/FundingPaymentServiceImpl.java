@@ -49,7 +49,6 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	private final RewardStockCache rewardStockCache;
 	private final FundingManagementRepositoryCustom fundingManagementRepositoryCustom;
 
-
 	@Transactional
 	@Scheduled(cron = "0 0/5 * * * *")//5분마다 실행
 	// @Scheduled(cron = "0 * * * * *") //1분마다 실행 태스트 용
@@ -70,22 +69,23 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 	@Override
 	@Transactional
-	public void prepareFundingOrder(PaymentRequest paymentRequest,String userName) {
+	public void prepareFundingOrder(PaymentRequest paymentRequest, String userName) {
 		log.info("결제 준비 중 - PaymentRequest: {}", paymentRequest);
 
 		// Step 1: 사용자 정보 확인
 		User user = getUserAndSetUserName(paymentRequest, userName);
+
 		// Step 2: 펀딩 정보 확인
 		Funding funding = getFunding(paymentRequest);
-		//검증 및 리워드 펀딩기간 확인
-		validateFundingAndRewards(funding, paymentRequest.getRewardList());
 
-		// Step 3: 리워드 재고 감소
-		for (RewardRequest rewardRequest : paymentRequest.getRewardList()) {
-			rewardService.reduceRewardStock(rewardRequest);
-		}
-		// Step 4: 펀딩 주문 생성 및 저장
+		//검증 및 리워드 펀딩기간 확인
+		validateFundingAndRewards(funding, paymentRequest.getRewardList(), userName);
+
+		// Step 3: 펀딩 주문 생성 및 저장
 		FundingOrder fundingOrder = createAndSaveFundingOrder(paymentRequest, user);
+
+		// Step 4: 리워드 재고 감소
+		reduceRewardStocks(paymentRequest);
 
 		// Step 5: 리워드 감소 정보 캐시에 저장
 		rewardStockCache.addRewardChanges(fundingOrder.getFundingOrderId(), paymentRequest.getRewardList());
@@ -116,22 +116,32 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		log.info("결제된 펀딩 후원 처리 완료 - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
 	}
 
-
 	private void cancelFundingContribution(FundingOrder order) {
 		// 캐시에서 리워드 감소 정보를 조회
 		List<RewardRequest> rewardRequests = rewardStockCache.getAndRemoveRewardChanges(order.getFundingOrderId());
 
-		if (rewardRequests != null) {
-			for (RewardRequest rewardRequest : rewardRequests) {
-				rewardService.restoreRewardStock(rewardRequest);
-				log.info("복구된 리워드: {}", rewardRequest);
-			}
+		// 리워드 재고 복구 null 처리 안한이유는  rewardRequests Collections.emptyList();로 처리했기 때문에
+		for (RewardRequest rewardRequest : rewardRequests) {
+			rewardService.restoreRewardStock(rewardRequest);
+			log.info("복구된 리워드: {}", rewardRequest);
 		}
-		// 주문 삭제
-		fundingOrderRepository.delete(order);
 		log.info("만료된 펀딩 주문 취소 - FundingOrderId: {}", order.getFundingOrderId());
 	}
 
+	// private void cancelFundingContribution(FundingOrder order) {
+	// 	// 캐시에서 리워드 감소 정보를 조회
+	// 	List<RewardRequest> rewardRequests = rewardStockCache.getAndRemoveRewardChanges(order.getFundingOrderId());
+	//
+	// 	if (rewardRequests != null) {
+	// 		for (RewardRequest rewardRequest : rewardRequests) {
+	// 			rewardService.restoreRewardStock(rewardRequest);
+	// 			log.info("복구된 리워드: {}", rewardRequest);
+	// 		}
+	// 	}
+	// 	// // 주문 삭제
+	// 	// fundingOrderRepository.delete(order);
+	// 	log.info("만료된 펀딩 주문 취소 - FundingOrderId: {}", order.getFundingOrderId());
+	// }
 
 	private void validatePayment(String impUid, PaymentRequest paymentRequest) {
 		// Step 1: 중복 결제 확인
@@ -149,7 +159,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		}
 	}
 
-	private void validateFundingAndRewards(Funding funding, List<RewardRequest> rewardRequests) {
+	private void validateFundingAndRewards(Funding funding, List<RewardRequest> rewardRequests, String userName) {
 		// 현재 UTC 시간
 		Instant now = Instant.now();
 
@@ -157,18 +167,16 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		if (now.isBefore(funding.getStartDate()) || now.isAfter(funding.getEndDate())) {
 			throw new FundingPeriodException("펀딩 기간이 아닙니다.");
 		}
-
 		// 리워드 검증
-		Reward reward = null;
 		for (RewardRequest rewardRequest : rewardRequests) {
-			reward = rewardService.getReward(rewardRequest);
+			Reward reward = rewardService.getReward(rewardRequest);
 
 			// (1) 가격 검증
 			if (isRewardPriceMismatched(rewardRequest, reward)) {
 				throw new IllegalStateException("리워드 가격이 서버 데이터와 일치하지 않습니다. - RewardId: " + reward.getRewardId());
 			}
 
-			// (3) 구매 제한 검증
+			// (2) 구매 제한 검증
 			if (reward.getIsLimit() != null && reward.getIsLimit()
 				&& rewardRequest.getRewardQuantity() > reward.getLimitQuantity()) {
 				throw new RewardLimitException(
@@ -177,11 +185,24 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 						", 요청 수량: " + rewardRequest.getRewardQuantity());
 			}
 
+			// (3) 선점 제한 검증
+			boolean canReserve = rewardStockCache.incrementAndCheckLimit(userName, rewardRequest.getRewardId());
+			if (!canReserve) {
+				throw new RuntimeException(
+					"너무 많은 요청을 하였습니다 잠시 후 다시 이용해주세요 - userName: " + userName);
+			}
+
 		}
 		log.info("펀딩 및 리워드 검증 완료 - FundingId: {}, RewardRequests: {}", funding.getFundingId(), rewardRequests);
 
 	}
 
+	//성능 이유가 있을시 검증과 통합해야함  포문이 두번 돌음 근데 데이터가 작아서 가독성을
+	private void reduceRewardStocks(PaymentRequest paymentRequest) {
+		for (RewardRequest rewardRequest : paymentRequest.getRewardList()) {
+			rewardService.reduceRewardStock(rewardRequest);
+		}
+	}
 
 	private FundingOrder createAndSaveFundingOrder(PaymentRequest paymentRequest, User user) {
 		Funding funding = getFunding(paymentRequest);
@@ -214,7 +235,8 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		funding.setCurrentAmount(
 			funding.getCurrentAmount().add(BigDecimal.valueOf(paymentRequest.getTotalAmount()))
 		);
-		log.info("펀딩의 currentAmount 업데이트 완료 - FundingId: {}, CurrentAmount: {}", funding.getFundingId(), funding.getCurrentAmount());
+		log.info("펀딩의 currentAmount 업데이트 완료 - FundingId: {}, CurrentAmount: {}", funding.getFundingId(),
+			funding.getCurrentAmount());
 		fundingRepository.save(funding);
 	}
 
@@ -229,7 +251,6 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		fundingOrderRepository.save(fundingOrder);
 
 	}
-
 
 	private Funding getFunding(PaymentRequest paymentRequest) {
 		return fundingRepository.findById(paymentRequest.getFundingId())
@@ -248,21 +269,16 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 			.orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
 	}
 
-
-
 	private FundingOrder getFundingOrder(PaymentRequest paymentRequest) {
 		return fundingOrderRepository.findByMerchantUid(paymentRequest.getMerchantUid())
 			.orElseThrow(() -> new IllegalArgumentException("주문 정보를 찾을 수 없습니다."));
 	}
-
 
 	private boolean isRewardPriceMismatched(RewardRequest rewardRequest, Reward reward) {
 		return rewardRequest.getRewardPrice() == null ||
 			reward.getRewardPrice() == null ||
 			rewardRequest.getRewardPrice().compareTo(reward.getRewardPrice()) != 0;
 	}
-
-
 
 }
 

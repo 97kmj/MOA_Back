@@ -153,7 +153,7 @@ class FundingPaymentServiceTest {
 			.currentAmount(BigDecimal.ZERO)
 			.goalAmount(BigDecimal.valueOf(100000))
 			.startDate(Timestamp.valueOf("2024-12-01 00:00:00").toInstant())
-			.endDate(Timestamp.valueOf("2024-12-31 23:59:59").toInstant())
+			.endDate(Timestamp.valueOf("2025-12-31 23:59:59").toInstant())
 			.build();
 
 		User user = User.builder()
@@ -184,15 +184,18 @@ class FundingPaymentServiceTest {
 		when(fundingOrderRepository.save(any())).thenReturn(fundingOrder);
 		when(rewardService.getReward(rewardRequests.get(0))).thenReturn(reward1);
 		when(rewardService.getReward(rewardRequests.get(1))).thenReturn(reward2);
+		when(rewardStockCache.incrementAndCheckLimit("user1", 1L)).thenReturn(true); // 첫 번째 리워드
+		when(rewardStockCache.incrementAndCheckLimit("user1", 2L)).thenReturn(true); // 두 번째 리워드
 
 		// When
-		paymentService.prepareFundingOrder(paymentRequest,"user1");
+		paymentService.prepareFundingOrder(paymentRequest, "user1");
 
 		// Then
 		verify(rewardService, times(2)).reduceRewardStock(any(RewardRequest.class));
 		verify(fundingOrderRepository).save(any(FundingOrder.class));
 		verify(rewardStockCache).addRewardChanges(eq(1L), eq(rewardRequests));
 	}
+
 
 	@Test
 	@DisplayName("결제 후 펀딩 후원 처리 테스트 - 정상 흐름")
