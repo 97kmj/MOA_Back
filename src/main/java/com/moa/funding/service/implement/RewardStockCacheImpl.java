@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -14,21 +15,25 @@ import com.moa.funding.service.RewardStockCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Component
+// @Component
+// @RequiredArgsConstructor
 @Slf4j
-@RequiredArgsConstructor
 public class RewardStockCacheImpl implements RewardStockCache {
 
 	private final RedisTemplate<String, List<RewardRequest>> rewardStockRedisTemplate;
 	private final RedisTemplate<String, Integer> userLimitRedisTemplate; // 제한 관리용 RedisTemplate
 
+	public RewardStockCacheImpl(RedisTemplate<String, List<RewardRequest>> rewardStockRedisTemplate,
+		RedisTemplate<String, Integer> userLimitRedisTemplate) {
+		this.rewardStockRedisTemplate = rewardStockRedisTemplate;
+		this.userLimitRedisTemplate = userLimitRedisTemplate;
+	}
+
 
 	private static final String STOCK_PREFIX = "reward_stock:order:";// Redis : 리워드 감소 정보 네임스페이스
-
 	private static final String LIMIT_PREFIX = "reward_limit:user:"; // 리워드 선점 제한 정보 네임스페이스
 	private static final int MAX_ATTEMPTS = 3; // 최대 선점 횟수
 	private static final Duration LOCK_DURATION = Duration.ofMinutes(10); // 제한 시간
-
 
 
 	// 리워드 감소 정보 추가
@@ -118,19 +123,3 @@ public class RewardStockCacheImpl implements RewardStockCache {
 
 
 
-// private final Map<Long, List<RewardRequest>> rewardChangeCache = new ConcurrentHashMap<>();
-//
-// // 리워드 감소 정보 추가
-// @Override
-// public void addRewardChanges(Long fundingOrderId, List<RewardRequest> rewardRequests) {
-// 	log.info("리워드 감소 정보 추가: fundingOrderId={}, rewardRequests={}", fundingOrderId, rewardRequests);
-// 	rewardChangeCache.put(fundingOrderId, rewardRequests);
-//
-// }
-//
-// // 리워드 감소 정보 조회 후 제거
-// @Override
-// public List<RewardRequest> getAndRemoveRewardChanges(Long fundingOrderId) {
-// 	log.info("리워드 감소 정보 조회 후 제거: fundingOrderId={}", fundingOrderId);
-// 	return rewardChangeCache.remove(fundingOrderId);
-// }

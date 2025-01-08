@@ -72,7 +72,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	public void prepareFundingOrder(PaymentRequest paymentRequest, String userName) {
 		log.info("결제 준비 중 - PaymentRequest: {}", paymentRequest);
 
-		// Step 1: 사용자 정보 확인
+		// Step 1: 사용자 정보 확인및 paymentRequest  userName 설정
 		User user = getUserAndSetUserName(paymentRequest, userName);
 
 		// Step 2: 펀딩 정보 확인
@@ -111,6 +111,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		// Step 5: 펀딩의 currentAmount 업데이트
 		updateFundingCurrentAmount(paymentRequest);
 
+		// Step 6: 사용자가 해당 펀딩을 결제하고 결제한 펀딩의 상태를 업데이트
 		fundingManagementRepositoryCustom.validateAndUpdateFundingStatuses();
 
 		log.info("결제된 펀딩 후원 처리 완료 - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
@@ -127,21 +128,6 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		}
 		log.info("만료된 펀딩 주문 취소 - FundingOrderId: {}", order.getFundingOrderId());
 	}
-
-	// private void cancelFundingContribution(FundingOrder order) {
-	// 	// 캐시에서 리워드 감소 정보를 조회
-	// 	List<RewardRequest> rewardRequests = rewardStockCache.getAndRemoveRewardChanges(order.getFundingOrderId());
-	//
-	// 	if (rewardRequests != null) {
-	// 		for (RewardRequest rewardRequest : rewardRequests) {
-	// 			rewardService.restoreRewardStock(rewardRequest);
-	// 			log.info("복구된 리워드: {}", rewardRequest);
-	// 		}
-	// 	}
-	// 	// // 주문 삭제
-	// 	// fundingOrderRepository.delete(order);
-	// 	log.info("만료된 펀딩 주문 취소 - FundingOrderId: {}", order.getFundingOrderId());
-	// }
 
 	private void validatePayment(String impUid, PaymentRequest paymentRequest) {
 		// Step 1: 중복 결제 확인
@@ -282,3 +268,18 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 }
 
+
+// private void cancelFundingContribution(FundingOrder order) {
+// 	// 캐시에서 리워드 감소 정보를 조회
+// 	List<RewardRequest> rewardRequests = rewardStockCache.getAndRemoveRewardChanges(order.getFundingOrderId());
+//
+// 	if (rewardRequests != null) {
+// 		for (RewardRequest rewardRequest : rewardRequests) {
+// 			rewardService.restoreRewardStock(rewardRequest);
+// 			log.info("복구된 리워드: {}", rewardRequest);
+// 		}
+// 	}
+// 	// // 주문 삭제
+// 	// fundingOrderRepository.delete(order);
+// 	log.info("만료된 펀딩 주문 취소 - FundingOrderId: {}", order.getFundingOrderId());
+// }

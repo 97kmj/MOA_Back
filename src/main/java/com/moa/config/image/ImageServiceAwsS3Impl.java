@@ -13,33 +13,40 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-
-@Service
-@Primary
+//
+// @Service
+// @Primary
 public class ImageServiceAwsS3Impl implements ImageService {
 
 	private final S3Client s3Client;
 	private final String bucketName;
 	private final String region; // region 필드 추가
 
-	// 생성자
-	public ImageServiceAwsS3Impl(
-		@Value("${aws.s3.bucket-name}") String bucketName,
-		@Value("${aws.s3.access-key}") String accessKey,
-		@Value("${aws.s3.secret-key}") String secretKey,
-		@Value("${aws.s3.region}") String region
-	) {
+	public ImageServiceAwsS3Impl(S3Client s3Client, String bucketName, String region) {
+		this.s3Client = s3Client;
 		this.bucketName = bucketName;
-		this.region = region; // region 초기화
-
-		// S3Client 초기화
-		this.s3Client = S3Client.builder()
-			.region(Region.of(region))
-			.credentialsProvider(StaticCredentialsProvider.create(
-				AwsBasicCredentials.create(accessKey, secretKey)
-			))
-			.build();
+		this.region = region;
 	}
+
+
+	// // 생성자
+	// public ImageServiceAwsS3Impl(
+	// 	@Value("${aws.s3.bucket-name}") String bucketName,
+	// 	@Value("${aws.s3.access-key}") String accessKey,
+	// 	@Value("${aws.s3.secret-key}") String secretKey,
+	// 	@Value("${aws.s3.region}") String region
+	// ) {
+	// 	this.bucketName = bucketName;
+	// 	this.region = region; // region 초기화
+	//
+	// 	// S3Client 초기화
+	// 	this.s3Client = S3Client.builder()
+	// 		.region(Region.of(region))
+	// 		.credentialsProvider(StaticCredentialsProvider.create(
+	// 			AwsBasicCredentials.create(accessKey, secretKey)
+	// 		))
+	// 		.build();
+	// }
 
 	@Override
 	public String saveImage(String folderName, String fileType, MultipartFile file) {
