@@ -46,7 +46,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	private final RewardRepository rewardRepository;
 	private final RewardService rewardService;
 	private final FundingSelectRepositoryCustom fundingSelectRepositoryCustom;
-	private final RewardStockCache rewardStockCache;
+	private final RewardStockCache rewardStockCacheFromRedis;
 	private final FundingManagementRepositoryCustom fundingManagementRepositoryCustom;
 
 	@Transactional
@@ -88,7 +88,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		reduceRewardStocks(paymentRequest);
 
 		// Step 5: 리워드 감소 정보 캐시에 저장
-		rewardStockCache.addRewardChanges(fundingOrder.getFundingOrderId(), paymentRequest.getRewardList());
+		rewardStockCacheFromRedis.addRewardInfo(fundingOrder.getMerchantUid(), paymentRequest.getRewardList());
 		log.info("결제 준비 완료 - FundingOrder: {}", fundingOrder);
 	}
 
@@ -119,7 +119,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 	private void cancelFundingContribution(FundingOrder order) {
 		// 캐시에서 리워드 감소 정보를 조회
-		List<RewardRequest> rewardRequests = rewardStockCache.getAndRemoveRewardChanges(order.getFundingOrderId());
+		List<RewardRequest> rewardRequests = rewardStockCacheFromRedis.getAndRemoveRewardInfo(order.getMerchantUid());
 
 		// 리워드 재고 복구 null 처리 안한이유는  rewardRequests Collections.emptyList();로 처리했기 때문에
 		for (RewardRequest rewardRequest : rewardRequests) {
@@ -172,10 +172,9 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 			}
 
 			// (3) 선점 제한 검증
-			boolean canReserve = rewardStockCache.incrementAndCheckLimit(userName, rewardRequest.getRewardId());
+			boolean canReserve = rewardStockCacheFromRedis.incrementAndCheckLimit(userName, rewardRequest.getRewardId());
 			if (!canReserve) {
-				throw new RuntimeException(
-					"너무 많은 요청을 하였습니다 잠시 후 다시 이용해주세요 - userName: " + userName);
+				throw new RuntimeException("너무 많은 요청을 하였습니다 잠시 후 다시 이용해주세요 - userName: " + userName);
 			}
 
 		}
@@ -265,6 +264,13 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 			reward.getRewardPrice() == null ||
 			rewardRequest.getRewardPrice().compareTo(reward.getRewardPrice()) != 0;
 	}
+
+
+
+
+
+
+
 
 }
 

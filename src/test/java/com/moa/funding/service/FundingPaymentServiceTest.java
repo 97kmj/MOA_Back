@@ -193,7 +193,7 @@ class FundingPaymentServiceTest {
 		// Then
 		verify(rewardService, times(2)).reduceRewardStock(any(RewardRequest.class));
 		verify(fundingOrderRepository).save(any(FundingOrder.class));
-		verify(rewardStockCache).addRewardChanges(eq(1L), eq(rewardRequests));
+		verify(rewardStockCache).addRewardInfo(eq("merchantUid"), eq(rewardRequests));
 	}
 
 

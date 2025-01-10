@@ -5,14 +5,15 @@ import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Component;
 
+import com.moa.entity.FundingOrder;
+import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.dto.payment.RewardRequest;
 import com.moa.funding.service.RewardStockCache;
+import com.moa.repository.FundingOrderRepository;
+import com.moa.repository.FundingRepository;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 // @Component
@@ -22,11 +23,13 @@ public class RewardStockCacheImpl implements RewardStockCache {
 
 	private final RedisTemplate<String, List<RewardRequest>> rewardStockRedisTemplate;
 	private final RedisTemplate<String, Integer> userLimitRedisTemplate; // 제한 관리용 RedisTemplate
+	private final FundingOrderRepository fundingOrderRepository;
 
 	public RewardStockCacheImpl(RedisTemplate<String, List<RewardRequest>> rewardStockRedisTemplate,
-		RedisTemplate<String, Integer> userLimitRedisTemplate) {
+		RedisTemplate<String, Integer> userLimitRedisTemplate , FundingOrderRepository fundingOrderRepository) {
 		this.rewardStockRedisTemplate = rewardStockRedisTemplate;
 		this.userLimitRedisTemplate = userLimitRedisTemplate;
+		this.fundingOrderRepository = fundingOrderRepository;
 	}
 
 
@@ -38,13 +41,13 @@ public class RewardStockCacheImpl implements RewardStockCache {
 
 	// 리워드 감소 정보 추가
 	@Override
-	public void addRewardChanges(Long fundingOrderId, List<RewardRequest> rewardRequests) {
-		String key = generateKey(fundingOrderId);
+	public void addRewardInfo(String merchantUid, List<RewardRequest> rewardRequests) {
+		String key = generateKey(merchantUid);
 		try {
-			log.info("리워드 감소 정보 추가: fundingOrderId={}, rewardRequests={}", fundingOrderId, rewardRequests);
-			rewardStockRedisTemplate.opsForValue().set(key, rewardRequests, Duration.ofMinutes(10));
+			log.info("리워드 감소 정보 추가: fundingOrderId={}, rewardRequests={}", merchantUid, rewardRequests);
+			rewardStockRedisTemplate.opsForValue().set(key, rewardRequests, Duration.ofMinutes(100));
 		} catch (Exception e) {
-			log.error("리워드 감소 정보 추가 실패: fundingOrderId={}, rewardRequests={}", fundingOrderId, rewardRequests, e);
+			log.error("리워드 감소 정보 추가 실패: fundingOrderId={}, rewardRequests={}", merchantUid, rewardRequests, e);
 			throw new RuntimeException("리워드 감소 정보 추가 중 오류 발생", e);
 		}
 
@@ -52,21 +55,23 @@ public class RewardStockCacheImpl implements RewardStockCache {
 
 	// 리워드 감소 정보 조회 후 제거
 	@Override
-	public List<RewardRequest> getAndRemoveRewardChanges(Long fundingOrderId) {
-		String key = generateKey(fundingOrderId);
+	public List<RewardRequest> getAndRemoveRewardInfo(String merchantUid) {
+		String key = generateKey(merchantUid);
 		try {
-			log.info("리워드 감소 정보 조회 후 제거: fundingOrderId={}", fundingOrderId);
+			log.info("리워드 감소 정보 조회 후 제거: fundingOrderId={}", merchantUid);
 			List<RewardRequest> rewardRequests = rewardStockRedisTemplate.opsForValue().get(key);
 
+			log.info("리워드 정보 조회 getAndRemoveRewardInfo : fundingOrderId={}, rewardRequests={}", merchantUid, rewardRequests);
+
 			if (rewardRequests == null) {
-				log.info("리워드 감소 정보 없음: fundingOrderId={}", fundingOrderId);
+				log.info("리워드 감소 정보 없음: fundingOrderId={}", merchantUid);
 				return Collections.emptyList();// null 대신 빈 리스트 반환
 			}
-			rewardStockRedisTemplate.delete(key);
+			// rewardStockRedisTemplate.delete(key);
 			return rewardRequests;
 
 		} catch (Exception e) {
-			log.error("리워드 감소 정보 조회 후 제거 실패: fundingOrderId={}", fundingOrderId, e);
+			log.error("리워드 감소 정보 조회 후 제거 실패: fundingOrderId={}", merchantUid, e);
 			throw new RuntimeException("리워드 감소 정보 조회 후 제거 중 오류 발생", e);
 		}
 	}
@@ -103,6 +108,32 @@ public class RewardStockCacheImpl implements RewardStockCache {
 		}
 	}
 
+	@Override
+	public PaymentRequest createPaymentRequestFromRedis(String merchantUid){
+		FundingOrder fundingOrder = fundingOrderRepository.findByMerchantUid(merchantUid)
+			.orElseThrow(() -> new IllegalArgumentException("주문 정보가 존재하지 않습니다."));
+
+		if (fundingOrder.getPaymentStatus() == FundingOrder.PaymentStatus.PAID) {
+			throw new IllegalArgumentException("이미 결제 완료된 주문입니다.");
+		}
+		List<RewardRequest> rewardRequests = getAndRemoveRewardInfo(merchantUid);
+
+		log.info("리워드 정보 조회 createPaymentRequestFromRedis : fundingOrderId={}, rewardRequests={}", merchantUid, rewardRequests);
+
+		if (rewardRequests == null ||rewardRequests.isEmpty()) {
+			throw new IllegalArgumentException("리워드 정보가 존재하지 않습니다.");
+		}
+
+		return PaymentRequest.builder()
+			.fundingId(fundingOrder.getFunding().getFundingId())
+			.totalAmount(fundingOrder.getTotalAmount())
+			.merchantUid(merchantUid)
+			.rewardList(rewardRequests)
+			.build();
+	}
+
+
+
 
 	@NotNull
 	private String generateLimitKey(String userName, Long rewardId) {
@@ -111,8 +142,8 @@ public class RewardStockCacheImpl implements RewardStockCache {
 
 
 	@NotNull
-	private String generateKey(Long fundingOrderId) {
-		return STOCK_PREFIX + fundingOrderId;
+	private String generateKey(String merchantUid) {
+		return STOCK_PREFIX + merchantUid;
 	}
 
 }

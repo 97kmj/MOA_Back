@@ -11,6 +11,8 @@ import com.moa.funding.dto.payment.RewardRequest;
 import com.moa.funding.service.RewardStockCache;
 import com.moa.funding.service.implement.InMemoryRewardStockCacheImpl;
 import com.moa.funding.service.implement.RewardStockCacheImpl;
+import com.moa.repository.FundingOrderRepository;
+import com.moa.repository.FundingRepository;
 
 @Configuration
 public class RewardStockCacheConfig {
@@ -18,8 +20,8 @@ public class RewardStockCacheConfig {
 	@Bean
 	@Primary
 	public RewardStockCache rewardStockCache(RedisTemplate<String, List<RewardRequest>> rewardStockRedisTemplate,
-		RedisTemplate<String, Integer> userLimitRedisTemplate) {
-		return new RewardStockCacheImpl(rewardStockRedisTemplate, userLimitRedisTemplate);
+		RedisTemplate<String, Integer> userLimitRedisTemplate, FundingOrderRepository fundingOrderRepository) {
+		return new RewardStockCacheImpl(rewardStockRedisTemplate, userLimitRedisTemplate , fundingOrderRepository);
 	}
 
 

@@ -55,19 +55,38 @@ public class PortOneServiceImpl implements PortOneService {
 		}
 	}
 
+	// @Override
+	// public boolean verifyPayment(Long amount, String impUid) {
+	// 	try {
+	// 		// 공통 로직 호출
+	// 		Payment payment = getPaymentInfoFromPortOne(impUid);
+	//
+	// 		// 결제 금액 검증
+	// 		return payment.getAmount().compareTo(BigDecimal.valueOf(amount)) == 0;
+	// 	} catch (Exception e) {
+	// 		log.error("아임포트 결제 검증 중 오류 발생: {}", e.getMessage(), e);
+	// 		return false;
+	// 	}
+	// }
+
 	@Override
 	public boolean verifyPayment(Long amount, String impUid) {
 		try {
-			// 공통 로직 호출
 			Payment payment = getPaymentInfoFromPortOne(impUid);
 
 			// 결제 금액 검증
-			return payment.getAmount().compareTo(BigDecimal.valueOf(amount)) == 0;
+			if (payment.getAmount().compareTo(BigDecimal.valueOf(amount)) != 0) {
+				log.warn("결제 금액 불일치 - impUid: {}, 요청 금액: {}, 실제 결제 금액: {}", impUid, amount, payment.getAmount());
+				return false;
+			}
+			log.info("결제 금액 일치 - impUid: {}, 금액: {}", impUid, amount);
+			return true;
 		} catch (Exception e) {
-			log.error("아임포트 결제 검증 중 오류 발생: {}", e.getMessage(), e);
+			log.error("결제 검증 중 예외 발생 - impUid: {}, 메시지: {}", impUid, e.getMessage());
 			return false;
 		}
 	}
+
 
 	@Override
 	public Payment getPaymentDetails(String impUid) {
@@ -115,47 +134,6 @@ public class PortOneServiceImpl implements PortOneService {
 			throw new RuntimeException("결제 사전 등록 중 오류 발생: " + e.getMessage(), e);
 		}
 	}
-
-	// @Override
-	// public String preparePayment(String merchantUid, BigDecimal amount) {
-	// 	try {
-	// 		// Step 1: 유효한 Bearer 토큰 가져오기
-	// 		String bearerToken = portOneAuthService.getAccessToken();
-	//
-	// 		// Step 2: HTTP 헤더 설정
-	// 		HttpHeaders headers = new HttpHeaders();
-	// 		headers.setContentType(MediaType.APPLICATION_JSON);
-	// 		headers.setBearerAuth(bearerToken);
-	//
-	// 		// Step 3: 요청 바디 설정
-	// 		Map<String, Object> body = new HashMap<>();
-	// 		body.put("merchant_uid", merchantUid);
-	// 		body.put("amount", amount);
-	//
-	// 		HttpEntity<Map<String, Object>> httpEntity = new HttpEntity<>(body, headers);
-	// 		RestTemplate restTemplate = new RestTemplate();
-	//
-	// 		// Step 4: 아임포트 API 호출
-	// 		ResponseEntity<String> response = restTemplate.exchange(
-	// 			"https://api.iamport.kr/payments/prepare",
-	// 			HttpMethod.POST,
-	// 			httpEntity,
-	// 			String.class
-	// 		);
-	//
-	// 		if (response.getStatusCode() == HttpStatus.OK) {
-	// 			log.info("결제 사전 등록 성공: {}", response.getBody());
-	// 			return merchantUid; // 성공 시 merchantUid 반환
-	// 		} else {
-	// 			log.error("결제 사전 등록 실패: {}", response.getBody());
-	// 			throw new RuntimeException("결제 사전 등록 실패: " + response.getBody());
-	// 		}
-	// 	} catch (Exception e) {
-	// 		log.error("결제 사전 등록 중 오류 발생: {}", e.getMessage(), e);
-	// 		throw new RuntimeException("결제 사전 등록 중 오류 발생: " + e.getMessage(), e);
-	// 	}
-	// }
-	//
 
 
 
