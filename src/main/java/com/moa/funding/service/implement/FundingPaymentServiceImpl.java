@@ -30,6 +30,7 @@ import com.moa.repository.FundingOrderRepository;
 import com.moa.repository.FundingRepository;
 import com.moa.repository.RewardRepository;
 import com.moa.repository.UserRepository;
+import com.siot.IamportRestClient.response.Payment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,14 +54,14 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 	@Scheduled(cron = "0 0/5 * * * *")//5분마다 실행
 	// @Scheduled(cron = "0 * * * * *") //1분마다 실행 태스트 용
 	public void cancelExpiredFundingOrders() {
-		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 10); // 10분 전
-		// Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60); // 1분 전 테스트용 코드
 		log.info("만료된 펀딩 주문 처리 중...");
 		Timestamp cutoffTime = new Timestamp(System.currentTimeMillis() - 1000 * 60 * 5); // 5분 전
 
 		List<FundingOrder> expiredOrders = fundingSelectRepositoryCustom.findPendingOrdersOlderThan(cutoffTime);
 
 		for (FundingOrder order : expiredOrders) {
+			if (isOrderPaid(order))
+				continue;
 			cancelFundingContribution(order);
 			fundingOrderRepository.delete(order);
 		}
@@ -117,6 +118,20 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		log.info("결제된 펀딩 후원 처리 완료 - impUid: {}, PaymentRequest: {}", impUid, paymentRequest);
 	}
 
+	// Mid-level methods
+	private boolean isOrderPaid(FundingOrder order) {
+		Payment payment = iamportOneService.getPaymentByMerchantUid(order.getMerchantUid());
+
+		if (isOrderPaid(payment)) {
+			log.info("만료된 펀딩 주문이 이미 결제됨 - FundingOrderId: {}", order.getFundingOrderId());
+			order.setPaymentStatus(FundingOrder.PaymentStatus.PAID);
+			fundingOrderRepository.save(order);
+			log.info("결제가 완료된 주문 발견 - 상태를 업데이트: merchantUid={}", order.getMerchantUid());
+			return true;
+		}
+		return false;
+	}
+
 	private void cancelFundingContribution(FundingOrder order) {
 		// 캐시에서 리워드 감소 정보를 조회
 		List<RewardRequest> rewardRequests = rewardStockCacheFromRedis.getAndRemoveRewardInfo(order.getMerchantUid());
@@ -127,6 +142,18 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 			log.info("복구된 리워드: {}", rewardRequest);
 		}
 		log.info("만료된 펀딩 주문 취소 - FundingOrderId: {}", order.getFundingOrderId());
+	}
+
+	private void updateFundingOrderAfterSuccess(FundingOrder fundingOrder, String impUid, String paymentType) {
+		//빌더와 다른점은 빌더는 새로운 객체를 생성하지만 set은 기존 객체를 업데이트
+		fundingOrder.setImpUid(impUid); // impUid 업데이트
+		fundingOrder.setPaymentDate(new Timestamp(System.currentTimeMillis())); // 결제 시간 업데이트
+		fundingOrder.setPaymentStatus(FundingOrder.PaymentStatus.PAID); // 결제 상태 업데이트
+		fundingOrder.setPaymentType(paymentType); // 결제 수단 업데이트
+
+		//위에는 영속성 상태이지만 가독성을 위해 추가
+		fundingOrderRepository.save(fundingOrder);
+
 	}
 
 	private void validatePayment(String impUid, PaymentRequest paymentRequest) {
@@ -153,6 +180,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		if (now.isBefore(funding.getStartDate()) || now.isAfter(funding.getEndDate())) {
 			throw new FundingPeriodException("펀딩 기간이 아닙니다.");
 		}
+
 		// 리워드 검증
 		for (RewardRequest rewardRequest : rewardRequests) {
 			Reward reward = rewardService.getReward(rewardRequest);
@@ -172,7 +200,8 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 			}
 
 			// (3) 선점 제한 검증
-			boolean canReserve = rewardStockCacheFromRedis.incrementAndCheckLimit(userName, rewardRequest.getRewardId());
+			boolean canReserve = rewardStockCacheFromRedis.incrementAndCheckLimit(userName,
+				rewardRequest.getRewardId());
 			if (!canReserve) {
 				throw new RuntimeException("너무 많은 요청을 하였습니다 잠시 후 다시 이용해주세요 - userName: " + userName);
 			}
@@ -182,7 +211,7 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 
 	}
 
-	//성능 이유가 있을시 검증과 통합해야함  포문이 두번 돌음 근데 데이터가 작아서 가독성을
+	//성능 이유가 있을시 검증과 통합(같은 포문이 두번 돌음)  근데 데이터가 작아서 가독성을 선택 했음
 	private void reduceRewardStocks(PaymentRequest paymentRequest) {
 		for (RewardRequest rewardRequest : paymentRequest.getRewardList()) {
 			rewardService.reduceRewardStock(rewardRequest);
@@ -225,16 +254,9 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 		fundingRepository.save(funding);
 	}
 
-	private void updateFundingOrderAfterSuccess(FundingOrder fundingOrder, String impUid, String paymentType) {
-		//빌더와 다른점은 빌더는 새로운 객체를 생성하지만 set은 기존 객체를 업데이트
-		fundingOrder.setImpUid(impUid); // impUid 업데이트
-		fundingOrder.setPaymentDate(new Timestamp(System.currentTimeMillis())); // 결제 시간 업데이트
-		fundingOrder.setPaymentStatus(FundingOrder.PaymentStatus.PAID); // 결제 상태 업데이트
-		fundingOrder.setPaymentType(paymentType); // 결제 수단 업데이트
-
-		//위에는 영속성 상태이지만 가독성을 위해 추가
-		fundingOrderRepository.save(fundingOrder);
-
+	// Low-level methods
+	private static boolean isOrderPaid(Payment payment) {
+		return payment != null && payment.getStatus().equals("paid");
 	}
 
 	private Funding getFunding(PaymentRequest paymentRequest) {
@@ -265,27 +287,5 @@ public class FundingPaymentServiceImpl implements FundingPaymentService {
 			rewardRequest.getRewardPrice().compareTo(reward.getRewardPrice()) != 0;
 	}
 
-
-
-
-
-
-
-
 }
 
-
-// private void cancelFundingContribution(FundingOrder order) {
-// 	// 캐시에서 리워드 감소 정보를 조회
-// 	List<RewardRequest> rewardRequests = rewardStockCache.getAndRemoveRewardChanges(order.getFundingOrderId());
-//
-// 	if (rewardRequests != null) {
-// 		for (RewardRequest rewardRequest : rewardRequests) {
-// 			rewardService.restoreRewardStock(rewardRequest);
-// 			log.info("복구된 리워드: {}", rewardRequest);
-// 		}
-// 	}
-// 	// // 주문 삭제
-// 	// fundingOrderRepository.delete(order);
-// 	log.info("만료된 펀딩 주문 취소 - FundingOrderId: {}", order.getFundingOrderId());
-// }

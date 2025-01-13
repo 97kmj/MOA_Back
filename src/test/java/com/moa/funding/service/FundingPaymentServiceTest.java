@@ -179,9 +179,17 @@ class FundingPaymentServiceTest {
 			.build();
 
 		// Mock 설정
+		String merchantUid = "merchant_111111";
 		when(fundingRepository.findById(1L)).thenReturn(Optional.of(funding));
 		when(userRepository.findByUsername("user1")).thenReturn(Optional.of(user));
-		when(fundingOrderRepository.save(any())).thenReturn(fundingOrder);
+		when(fundingOrderRepository.save(any())).thenAnswer(invocation -> {
+			//메서드 호출 시 전달된 첫 번째 인자(여기서는 FundingOrder 객체)를 가져온다
+			FundingOrder order = invocation.getArgument(0);
+			order.setMerchantUid(merchantUid); // Mock 생성된 merchantUid 설정
+			return order;
+		});
+
+
 		when(rewardService.getReward(rewardRequests.get(0))).thenReturn(reward1);
 		when(rewardService.getReward(rewardRequests.get(1))).thenReturn(reward2);
 		when(rewardStockCache.incrementAndCheckLimit("user1", 1L)).thenReturn(true); // 첫 번째 리워드
@@ -193,7 +201,7 @@ class FundingPaymentServiceTest {
 		// Then
 		verify(rewardService, times(2)).reduceRewardStock(any(RewardRequest.class));
 		verify(fundingOrderRepository).save(any(FundingOrder.class));
-		verify(rewardStockCache).addRewardInfo(eq("merchantUid"), eq(rewardRequests));
+		verify(rewardStockCache).addRewardInfo(eq(merchantUid), eq(rewardRequests));
 	}
 
 

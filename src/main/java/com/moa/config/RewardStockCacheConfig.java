@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.moa.funding.dto.payment.RewardRequest;
+import com.moa.funding.repository.FundingSelectRepositoryCustom;
 import com.moa.funding.service.RewardStockCache;
 import com.moa.funding.service.implement.InMemoryRewardStockCacheImpl;
 import com.moa.funding.service.implement.RewardStockCacheImpl;
@@ -20,8 +21,9 @@ public class RewardStockCacheConfig {
 	@Bean
 	@Primary
 	public RewardStockCache rewardStockCache(RedisTemplate<String, List<RewardRequest>> rewardStockRedisTemplate,
-		RedisTemplate<String, Integer> userLimitRedisTemplate, FundingOrderRepository fundingOrderRepository) {
-		return new RewardStockCacheImpl(rewardStockRedisTemplate, userLimitRedisTemplate , fundingOrderRepository);
+		RedisTemplate<String, Integer> userLimitRedisTemplate, FundingOrderRepository fundingOrderRepository,
+		FundingSelectRepositoryCustom fundingSelectRepositoryCustom) {
+		return new RewardStockCacheImpl(rewardStockRedisTemplate, userLimitRedisTemplate , fundingOrderRepository, fundingSelectRepositoryCustom);
 	}
 
 

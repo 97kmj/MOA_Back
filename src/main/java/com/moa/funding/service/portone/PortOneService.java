@@ -11,5 +11,7 @@ public interface PortOneService {
 
 	boolean preparePayment(String merchantUid, BigDecimal amount);
 
+	Payment getPaymentByMerchantUid(String merchantUid);
+
 	void refundOrder(FundingOrder order);
 }

@@ -2,6 +2,10 @@ package com.moa.funding.service.portone;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +19,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.moa.entity.FundingOrder;
 import com.siot.IamportRestClient.IamportClient;
 import com.siot.IamportRestClient.exception.IamportResponseException;
@@ -55,19 +65,6 @@ public class PortOneServiceImpl implements PortOneService {
 		}
 	}
 
-	// @Override
-	// public boolean verifyPayment(Long amount, String impUid) {
-	// 	try {
-	// 		// 공통 로직 호출
-	// 		Payment payment = getPaymentInfoFromPortOne(impUid);
-	//
-	// 		// 결제 금액 검증
-	// 		return payment.getAmount().compareTo(BigDecimal.valueOf(amount)) == 0;
-	// 	} catch (Exception e) {
-	// 		log.error("아임포트 결제 검증 중 오류 발생: {}", e.getMessage(), e);
-	// 		return false;
-	// 	}
-	// }
 
 	@Override
 	public boolean verifyPayment(Long amount, String impUid) {
@@ -93,6 +90,7 @@ public class PortOneServiceImpl implements PortOneService {
 		// 공통 로직 호출
 		return getPaymentInfoFromPortOne(impUid);
 	}
+
 
 
 	@Override
@@ -134,6 +132,42 @@ public class PortOneServiceImpl implements PortOneService {
 			throw new RuntimeException("결제 사전 등록 중 오류 발생: " + e.getMessage(), e);
 		}
 	}
+
+
+	@Override
+	public Payment getPaymentByMerchantUid(String merchantUid) {
+		try {
+			// Bearer 토큰 및 요청 생성
+			String bearerToken = portOneAuthService.getAccessToken();
+			String url = "https://api.iamport.kr/payments/find/" + merchantUid;
+
+			HttpRequest request = HttpRequest.newBuilder()
+				.uri(new URI(url))
+				.header("Authorization", "Bearer " + bearerToken)
+				.GET()
+				.build();
+
+			HttpClient client = HttpClient.newHttpClient();
+			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+			// Gson을 사용하여 응답 파싱
+			Gson gson = new Gson();
+			JsonObject rootNode = JsonParser.parseString(response.body()).getAsJsonObject();
+			JsonObject responseNode = rootNode.getAsJsonObject("response");
+
+			if (responseNode == null) {
+				throw new IllegalArgumentException("결제 정보를 찾을 수 없습니다: " + merchantUid);
+			}
+
+			// Payment 객체로 변환하여 반환
+			return gson.fromJson(responseNode, Payment.class);
+
+		} catch (Exception e) {
+			log.error("merchantUid로 결제 정보 조회 중 오류 발생: {}", e.getMessage(), e);
+			throw new RuntimeException("merchantUid로 결제 정보 조회 중 오류 발생: " + e.getMessage(), e);
+		}
+	}
+
 
 
 

@@ -10,6 +10,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import com.moa.entity.FundingOrder;
 import com.moa.funding.dto.payment.PaymentRequest;
 import com.moa.funding.dto.payment.RewardRequest;
+import com.moa.funding.repository.FundingSelectRepositoryCustom;
 import com.moa.funding.service.RewardStockCache;
 import com.moa.repository.FundingOrderRepository;
 import com.moa.repository.FundingRepository;
@@ -24,12 +25,14 @@ public class RewardStockCacheImpl implements RewardStockCache {
 	private final RedisTemplate<String, List<RewardRequest>> rewardStockRedisTemplate;
 	private final RedisTemplate<String, Integer> userLimitRedisTemplate; // 제한 관리용 RedisTemplate
 	private final FundingOrderRepository fundingOrderRepository;
+	private final FundingSelectRepositoryCustom fundingSelectRepositoryCustom;
 
 	public RewardStockCacheImpl(RedisTemplate<String, List<RewardRequest>> rewardStockRedisTemplate,
-		RedisTemplate<String, Integer> userLimitRedisTemplate , FundingOrderRepository fundingOrderRepository) {
+		RedisTemplate<String, Integer> userLimitRedisTemplate , FundingOrderRepository fundingOrderRepository , FundingSelectRepositoryCustom fundingSelectRepositoryCustom) {
 		this.rewardStockRedisTemplate = rewardStockRedisTemplate;
 		this.userLimitRedisTemplate = userLimitRedisTemplate;
 		this.fundingOrderRepository = fundingOrderRepository;
+		this.fundingSelectRepositoryCustom = fundingSelectRepositoryCustom;
 	}
 
 
@@ -67,7 +70,7 @@ public class RewardStockCacheImpl implements RewardStockCache {
 				log.info("리워드 감소 정보 없음: fundingOrderId={}", merchantUid);
 				return Collections.emptyList();// null 대신 빈 리스트 반환
 			}
-			// rewardStockRedisTemplate.delete(key);
+			rewardStockRedisTemplate.delete(key);
 			return rewardRequests;
 
 		} catch (Exception e) {
@@ -110,7 +113,10 @@ public class RewardStockCacheImpl implements RewardStockCache {
 
 	@Override
 	public PaymentRequest createPaymentRequestFromRedis(String merchantUid){
-		FundingOrder fundingOrder = fundingOrderRepository.findByMerchantUid(merchantUid)
+		// FundingOrder fundingOrder = fundingOrderRepository.findByMerchantUid(merchantUid)
+		// 	.orElseThrow(() -> new IllegalArgumentException("주문 정보가 존재하지 않습니다."));
+
+		FundingOrder fundingOrder = fundingSelectRepositoryCustom.findFundingOrderByMerchantUid(merchantUid)
 			.orElseThrow(() -> new IllegalArgumentException("주문 정보가 존재하지 않습니다."));
 
 		if (fundingOrder.getPaymentStatus() == FundingOrder.PaymentStatus.PAID) {

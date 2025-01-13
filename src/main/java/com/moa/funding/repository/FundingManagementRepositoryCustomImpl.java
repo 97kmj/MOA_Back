@@ -45,6 +45,7 @@ public class FundingManagementRepositoryCustomImpl implements FundingManagementR
 				fundingOrder.fundingOrderId.eq(fundingOrderId)
 					.and(funding.approvalStatus.eq(Funding.ApprovalStatus.APPROVED)) // 승인된 펀딩
 					.and(funding.fundingStatus.in(Funding.FundingStatus.ONGOING, Funding.FundingStatus.SUCCESSFUL)) // 진행 중 또는 성공
+					.and(fundingOrder.paymentStatus.eq(FundingOrder.PaymentStatus.PAID)) // 결제 완료
 					// .and(funding.endDate.after(Instant.now())) // 종료일이 오늘이후
 					.and(funding.endDate.goe(Instant.now().truncatedTo(ChronoUnit.DAYS)))
 					.and(fundingOrder.refundStatus.eq(FundingOrder.RefundStatus.NOT_REFUNDED)) // 환불되지 않은 상태

@@ -20,7 +20,10 @@ public class RewardServiceImpl implements RewardService {
 	@Override
 	public void reduceRewardStock(RewardRequest rewardRequest) {
 		// Reward 조회
-		Reward reward = getReward(rewardRequest);
+		// Reward reward = getReward(rewardRequest);
+
+		Reward reward = rewardRepository.findByIdWithLock(rewardRequest.getRewardId())
+			.orElseThrow(() -> new IllegalArgumentException("리워드가 존재하지 않습니다."));
 
 		// BASIC 리워드 처리 여부 확인
 		if (isBasicReward(reward)) {
@@ -37,12 +40,6 @@ public class RewardServiceImpl implements RewardService {
 		// 재고 감소
 		reward.setStock(reward.getStock() - rewardRequest.getRewardQuantity().intValue());
 		rewardRepository.save(reward);
-	}
-
-	@Override
-	public Reward getReward(RewardRequest rewardRequest) {
-		return rewardRepository.findById(rewardRequest.getRewardId())
-			.orElseThrow(() -> new IllegalArgumentException("리워드가 존재하지 않습니다."));
 	}
 
 	@Override
@@ -63,6 +60,12 @@ public class RewardServiceImpl implements RewardService {
 		log.info("리워드 '{}'의 재고 복구: {}", reward.getRewardName(), rewardRequest.getRewardQuantity());
 
 		rewardRepository.save(reward);
+	}
+
+	@Override
+	public Reward getReward(RewardRequest rewardRequest) {
+		return rewardRepository.findById(rewardRequest.getRewardId())
+			.orElseThrow(() -> new IllegalArgumentException("리워드가 존재하지 않습니다."));
 	}
 
 	@Override
@@ -93,7 +96,7 @@ public class RewardServiceImpl implements RewardService {
 		return false;
 	}
 
-	private  boolean stockIsLimitless(Reward reward) {
+	private boolean stockIsLimitless(Reward reward) {
 		return reward.getStock() == null;
 	}
 

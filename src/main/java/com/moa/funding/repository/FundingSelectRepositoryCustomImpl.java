@@ -61,18 +61,19 @@ public class FundingSelectRepositoryCustomImpl implements FundingSelectRepositor
 		return FundingDetailMapper.toFundingDetailDTO(funding, rewardDTOList, imageDTOList);
 	}
 
-	// @NotNull
-	// private Funding getFunding(Long fundingId) {
-	// 	Funding fundingEntity = queryFactory
-	// 		.selectFrom(funding)
-	// 		.where(funding.fundingId.eq(fundingId))
-	// 		.fetchOne();
-	//
-	// 	if (fundingEntity == null) {
-	// 		throw new IllegalStateException("존재하지 않는 펀딩입니다.");
-	// 	}
-	// 	return fundingEntity;
-	// }
+	@Override
+	public Optional<FundingOrder> findFundingOrderByMerchantUid(String merchantUid) {
+		QFundingOrder fundingOrder = QFundingOrder.fundingOrder;
+	    QFunding funding = QFunding.funding;
+
+		FundingOrder result = queryFactory.selectFrom(fundingOrder)
+			.join(fundingOrder.funding,funding).fetchJoin()
+			.where(fundingOrder.merchantUid.eq(merchantUid))
+			.fetchOne();
+
+		return Optional.ofNullable(result);
+
+	}
 
 	@NotNull
 	private Funding getFunding(Long fundingId) {
